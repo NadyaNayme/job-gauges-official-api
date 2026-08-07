@@ -319,6 +319,7 @@ local function updateOverlays()
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
         conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
+        conjureDurationText:SetSize(22, 15)
         if events.playerData.necromancy.conjures.skeletonWarrior.active == 1
         or events.playerData.necromancy.conjures.putridZombie.active == 1
         or events.playerData.necromancy.conjures.vengefulGhost.active == 1
@@ -333,6 +334,7 @@ local function updateOverlays()
         end
     else 
         conjureUndeadArmy:SetSize(0, 0)
+        conjureDurationText:SetSize(0, 0)
     end
 
     if settings.Get("necroVisibleGaugeComponents")["show-living-death"] then 
