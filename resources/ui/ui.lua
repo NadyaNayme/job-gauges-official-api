@@ -5,7 +5,7 @@ local overlay = require("resources/ui/overlay")
 local M = {}
 
 -- Globals
-local SCALE = 1.15
+local SCALE = 1
 local OFFSET_POSITION_X = settings.Get("necroUISettings")["necromancy_gauge_offset_x"]
 local OFFSET_POSITION_Y = settings.Get("necroUISettings")["necromancy_gauge_offset_y"]
 
@@ -41,7 +41,7 @@ local CreateUI = function()
 
     local conjureDurationText = ui.Text.new(conjureUndeadArmyLayer)
         conjureDurationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        conjureDurationText:SetSize(28, 20)
+        conjureDurationText:SetSize(22, 15)
         conjureDurationText:MoveToFront()
         conjureDurationText.content = ""
         conjureDurationText.font = id.Font.MUSEO_SANS_15PT_REGULAR
@@ -51,31 +51,31 @@ local CreateUI = function()
         conjureDurationText.alignVertical = ui.AlignMode.CENTRE
 
     local   livingDeath = ui.Sprite.new(necromancyGaugeLayer)
-            livingDeath:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
+            livingDeath:SetPos(math.floor(40 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             livingDeath:SetSize(scaleToFactor(40), scaleToFactor(40))
 
     local   residualSoulsStacks = ui.Sprite.new(necromancyGaugeLayer)
-            residualSoulsStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(50 + OFFSET_POSITION_Y))
+            residualSoulsStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(44 + OFFSET_POSITION_Y))
             residualSoulsStacks:SetSize(scaleToFactor(132), scaleToFactor(24))
 
     local   necrosisStacks = ui.Sprite.new(necromancyGaugeLayer)
-            necrosisStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(82 + OFFSET_POSITION_Y))
+            necrosisStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(67 + OFFSET_POSITION_Y))
             necrosisStacks:SetSize(scaleToFactor(132), scaleToFactor(20))
 
     local   invokeDeath = ui.Sprite.new(necromancyGaugeLayer)
-            invokeDeath:SetPos(math.floor(95 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
+            invokeDeath:SetPos(math.floor(84 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             invokeDeath:SetSize(scaleToFactor(24), scaleToFactor(21))
 
     local   threadsOfFate = ui.Sprite.new(necromancyGaugeLayer)
-            threadsOfFate:SetPos(math.floor(125 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
+            threadsOfFate:SetPos(math.floor(108 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             threadsOfFate:SetSize(scaleToFactor(24), scaleToFactor(21))
 
     local   darkness = ui.Sprite.new(necromancyGaugeLayer)
-            darkness:SetPos(math.floor(95 + OFFSET_POSITION_X), math.floor(26 + OFFSET_POSITION_Y))
+            darkness:SetPos(math.floor(84 + OFFSET_POSITION_X), math.floor(22 + OFFSET_POSITION_Y))
             darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
 
     local   splitSoul = ui.Sprite.new(necromancyGaugeLayer)
-            splitSoul:SetPos(math.floor(125 + OFFSET_POSITION_X), math.floor(26 + OFFSET_POSITION_Y))
+            splitSoul:SetPos(math.floor(108 + OFFSET_POSITION_X), math.floor(22 + OFFSET_POSITION_Y))
             splitSoul:SetSize(scaleToFactor(24), scaleToFactor(21))
 
     local function updateOverlayPositions()
