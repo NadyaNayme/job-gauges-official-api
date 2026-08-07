@@ -36,6 +36,15 @@ local CreateUI = function()
             conjureUndeadArmy:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
 
+    local durationText = ui.Text.new(necromancyGaugeLayer)
+        durationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
+        durationText:SetSize(200, 100, 1.0, 1.0)
+        durationText:MoveToFront()
+        durationText.content = ""
+        durationText.font = id.Font.MUSEO_SANS_15PT_REGULAR
+        durationText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        durationText.isShadowed = true
+
     local   livingDeath = ui.Sprite.new(necromancyGaugeLayer)
             livingDeath:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             livingDeath:SetSize(scaleToFactor(40), scaleToFactor(40))
@@ -296,10 +305,10 @@ local function updateOverlays()
 
     if overlaySprites == nil then return end
 
-    -- if events.combatStyle == 'necromancy' then 
-    --     necromancyGaugeLayer.hidden = false
-    -- else necromancyGaugeLayer.hidden = true
-    -- end
+    if events.combatStyle == 'necromancy' or events.combatStyle == nil then 
+        necromancyGaugeLayer.hidden = false
+    else necromancyGaugeLayer.hidden = true
+    end
 
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
@@ -310,9 +319,11 @@ local function updateOverlays()
             then
                 conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.active
+                durationText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
             else 
                 conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.inactive
+                durationText.content = ""
         end
     else 
         conjureUndeadArmy:SetSize(0, 0)
