@@ -1,0 +1,8 @@
+{
+  "name": "Job Gauges",
+  "version": "0.0.1",
+  "requiredDependencies": [
+    "prettyui"
+  ],
+  "optionalDependencies": []
+}
