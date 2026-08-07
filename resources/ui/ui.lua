@@ -27,23 +27,28 @@ local CreateUI = function()
   end
 
   local necromancyGaugeLayer = ui.Layer.new(gameArea)
-  necromancyGaugeLayer:SetSize(200, 100, 1.0, 1.0)
+  necromancyGaugeLayer:SetSize(600, 600, 1.0, 1.0)
+
+  local conjureUndeadArmyLayer = ui.Layer.new(necromancyGaugeLayer)
+  conjureUndeadArmyLayer:SetSize(40, 40, 1.0, 1.0)
 
   local overlaySprites = overlay.CreateSprites(necromancyGaugeLayer)
 
     -- Overlay Sprites
-    local   conjureUndeadArmy = ui.Sprite.new(necromancyGaugeLayer)
+    local   conjureUndeadArmy = ui.Sprite.new(conjureUndeadArmyLayer)
             conjureUndeadArmy:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
 
-    local durationText = ui.Text.new(necromancyGaugeLayer)
-        durationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        durationText:SetSize(200, 100, 1.0, 1.0)
-        durationText:MoveToFront()
-        durationText.content = ""
-        durationText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        durationText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
-        durationText.isShadowed = true
+    local conjureDurationText = ui.Text.new(conjureUndeadArmyLayer)
+        conjureDurationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
+        conjureDurationText:SetSize(28, 20)
+        conjureDurationText:MoveToFront()
+        conjureDurationText.content = ""
+        conjureDurationText.font = id.Font.MUSEO_SANS_15PT_REGULAR
+        conjureDurationText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        conjureDurationText.isShadowed = true
+        conjureDurationText.alignHorizontal = ui.AlignMode.CENTRE
+        conjureDurationText.alignVertical = ui.AlignMode.CENTRE
 
     local   livingDeath = ui.Sprite.new(necromancyGaugeLayer)
             livingDeath:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
@@ -75,6 +80,7 @@ local CreateUI = function()
 
     local function updateOverlayPositions()
         conjureUndeadArmy:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
+        conjureDurationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
         livingDeath:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
         residualSoulsStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(50 + OFFSET_POSITION_Y))
         necrosisStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(82 + OFFSET_POSITION_Y))
@@ -312,78 +318,114 @@ local function updateOverlays()
 
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
+        conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
         if events.playerData.necromancy.conjures.skeletonWarrior.active == 1
         or events.playerData.necromancy.conjures.putridZombie.active == 1
         or events.playerData.necromancy.conjures.vengefulGhost.active == 1
         or events.playerData.necromancy.conjures.phantomGuardian.active == 1
             then
-                conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.active
-                durationText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
+                if ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration) == 0.0 then return end
+                conjureDurationText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
             else 
-                conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.inactive
-                durationText.content = ""
+                conjureDurationText.content = ""
         end
     else 
         conjureUndeadArmy:SetSize(0, 0)
     end
 
-    if events.playerData.necromancy.livingDeath.active == 1
-        then 
-            livingDeath.sprite = overlaySprites.necromancy.living_death.active
-            events.combatStyle = 'necromancy'
-        else livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
+    if settings.Get("necroVisibleGaugeComponents")["show-living-death"] then 
+        livingDeath:SetSize(scaleToFactor(40), scaleToFactor(40)) 
+        if events.playerData.necromancy.livingDeath.active == 1
+            then 
+                livingDeath.sprite = overlaySprites.necromancy.living_death.active
+                events.combatStyle = 'necromancy'
+            else
+                livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
+        end
+    else 
+        livingDeath:SetSize(0, 0)
     end
     
     -- Residual Soul Stacks
-    if events.playerData.necromancy.residualSoulStacks == 0 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.zero
-    elseif events.playerData.necromancy.residualSoulStacks == 1 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.one
-    elseif events.playerData.necromancy.residualSoulStacks == 2 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.two
-    elseif events.playerData.necromancy.residualSoulStacks == 3 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.three
-    elseif events.playerData.necromancy.residualSoulStacks == 4 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.four
-    elseif events.playerData.necromancy.residualSoulStacks == 5 then
-            residualSoulsStacks.sprite = overlaySprites.necromancy.souls.five
+    if settings.Get("necroVisibleGaugeComponents")["show-residual-souls"] then 
+        residualSoulsStacks:SetSize(scaleToFactor(132), scaleToFactor(24))
+        if events.playerData.necromancy.residualSoulStacks == 0 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.zero
+        elseif events.playerData.necromancy.residualSoulStacks == 1 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.one
+        elseif events.playerData.necromancy.residualSoulStacks == 2 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.two
+        elseif events.playerData.necromancy.residualSoulStacks == 3 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.three
+        elseif events.playerData.necromancy.residualSoulStacks == 4 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.four
+        elseif events.playerData.necromancy.residualSoulStacks == 5 then
+                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.five
+        end
+    else 
+        residualSoulsStacks:SetSize(0, 0)
     end
 
     -- Necrosis Stacks
-    if events.playerData.necromancy.necrosisStacks == 0 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.zero
-    elseif events.playerData.necromancy.necrosisStacks == 2 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.two
-    elseif events.playerData.necromancy.necrosisStacks == 4 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.four
-    elseif events.playerData.necromancy.necrosisStacks == 6 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.six
-    elseif events.playerData.necromancy.necrosisStacks == 8 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.eight
-    elseif events.playerData.necromancy.necrosisStacks == 10 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.ten
-    elseif events.playerData.necromancy.necrosisStacks == 12 then
-            necrosisStacks.sprite = overlaySprites.necromancy.necrosis.twelve
+    if settings.Get("necroVisibleGaugeComponents")["show-necrosis-stacks"] then 
+        necrosisStacks:SetSize(scaleToFactor(132), scaleToFactor(20))
+        if events.playerData.necromancy.necrosisStacks == 0 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.zero
+        elseif events.playerData.necromancy.necrosisStacks == 2 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.two
+        elseif events.playerData.necromancy.necrosisStacks == 4 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.four
+        elseif events.playerData.necromancy.necrosisStacks == 6 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.six
+        elseif events.playerData.necromancy.necrosisStacks == 8 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.eight
+        elseif events.playerData.necromancy.necrosisStacks == 10 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.ten
+        elseif events.playerData.necromancy.necrosisStacks == 12 then
+                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.twelve
+        end
+    else 
+        necrosisStacks:SetSize(0, 0)
     end
 
     -- Incantations
-    if events.playerData.necromancy.incantations.darkness.active == 1 then
-        darkness.sprite = overlaySprites.necromancy.incantations.darkness.active
-        else darkness.sprite = overlaySprites.necromancy.incantations.darkness.inactive
+    if settings.Get("necroVisibleGaugeComponents")["show-darkness"] then 
+        darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
+        if events.playerData.necromancy.incantations.darkness.active == 1 then
+            darkness.sprite = overlaySprites.necromancy.incantations.darkness.active
+            else darkness.sprite = overlaySprites.necromancy.incantations.darkness.inactive
+        end
+    else
+        darkness:SetSize(0, 0)
     end
+    if settings.Get("necroVisibleGaugeComponents")["show-threads-of-fate"] then 
+        threadsOfFate:SetSize(scaleToFactor(24), scaleToFactor(21))
     if events.playerData.necromancy.incantations.threadsOfFate.active == 1 then
         threadsOfFate.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
         else threadsOfFate.sprite = overlaySprites.necromancy.incantations.threadsOfFate.inactive
+        end
+    else
+        threadsOfFate:SetSize(0, 0)
     end
+    if settings.Get("necroVisibleGaugeComponents")["show-split-soul"] then 
+        splitSoul:SetSize(scaleToFactor(24), scaleToFactor(21))
     if events.playerData.necromancy.incantations.splitSoul.active == 1 then
         splitSoul.sprite = overlaySprites.necromancy.incantations.splitSoul.active
         else splitSoul.sprite = overlaySprites.necromancy.incantations.splitSoul.inactive
+        end
+    else
+        splitSoul:SetSize(0, 0)
     end
+    if settings.Get("necroVisibleGaugeComponents")["show-invoke-death"] then 
+        invokeDeath:SetSize(scaleToFactor(24), scaleToFactor(21))
     if events.playerData.necromancy.incantations.invokeDeath.active == 1 then
         invokeDeath.sprite = overlaySprites.necromancy.incantations.invokeDeath.active
         else invokeDeath.sprite = overlaySprites.necromancy.incantations.invokeDeath.inactive
+        end
+    else
+        invokeDeath:SetSize(0, 0)
     end
 
 end
