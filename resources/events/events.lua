@@ -8,7 +8,11 @@ local events = {
             residualSoulStacks = '0',
             livingDeath = {
                 active = 0,
-                remainingDuration = 0
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
             },
             deathSparkStacks = '0',
 
@@ -16,19 +20,27 @@ local events = {
                 skeletonWarrior = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     stacks = 0
                 },
                 putridZombie = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                 },
                 vengefulGhost = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                 },
                 phantomGuardian = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     stacks = 0
                 }
             },
@@ -37,22 +49,34 @@ local events = {
                 threadsOfFate = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     cooldown = 0,
+                    onCooldown = 0
                 },
                 invokeDeath = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     cooldown = 0,
+                    onCooldown = 0
                 },
                 splitSoul = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     cooldown = 0,
+                    onCooldown = 0
                 },
                 darkness = {
                     active = 0,
                     remainingDuration = 0,
+                    activeStart = 0,
+                    activeEnd = 0,
                     cooldown = 0,
+                    onCooldown = 0
                 }
             }
         }
@@ -67,14 +91,36 @@ Event.VarTransmit.Subscribe("livingDeath", function(event)
     if event.var.configName == "COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT" then
         if event.oldValue == -1 then 
             events.playerData.necromancy.livingDeath.active = 1
-        else events.playerData.necromancy.livingDeath.active = 0
+            events.playerData.necromancy.livingDeath.remainingDuration = 50
+        else 
+            events.playerData.necromancy.livingDeath.active = 0
+            events.playerData.necromancy.livingDeath.remainingDuration = 0
+            events.playerData.necromancy.livingDeath.cooldown = 100
         end
     end
+
+    if event.var.configName == "COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END" then
+        if event.newValue == 0 then
+            events.playerData.necromancy.livingDeath.cooldown = 0
+            events.playerData.necromancy.livingDeath.onCooldown = 0
+        end
+    end
+
 end)
 
 Event.Logic.Subscribe("cdTick", function(e) events.currentTick = e.logicTick end)
 
 Event.ServerLogic.Subscribe("decrementCooldowns", function()
+
+    -- Living Death
+    if events.playerData.necromancy.livingDeath.remainingDuration > 0 then 
+        events.playerData.necromancy.livingDeath.remainingDuration = events.playerData.necromancy.livingDeath.remainingDuration - 1
+    end
+
+    if events.playerData.necromancy.livingDeath.cooldown > 0 then 
+        events.playerData.necromancy.livingDeath.cooldown = events.playerData.necromancy.livingDeath.cooldown - 1
+    end
+
     -- Skeleton Warrior
     if events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration > 0 then 
         events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration = events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration - 1

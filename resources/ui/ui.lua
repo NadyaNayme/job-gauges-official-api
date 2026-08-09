@@ -11,7 +11,12 @@ local OFFSET_POSITION_Y = settings.Get("necroUISettings")["necromancy_gauge_offs
 
 -- Helpers
 local function ticksToSeconds(ticks)
-    return ticks * 0.6
+    local precise = settings.Get("showPreciseDurations")
+    if precise == "precise-ticks" then 
+        return ticks * 0.6
+    else 
+        return math.ceil(ticks * 0.6)
+    end
 end
 
 local function scaleToFactor(number)
@@ -29,30 +34,46 @@ local CreateUI = function()
   local necromancyGaugeLayer = ui.Layer.new(gameArea)
   necromancyGaugeLayer:SetSize(600, 600, 1.0, 1.0)
 
+  local overlaySprites = overlay.CreateSprites(necromancyGaugeLayer)
+
   local conjureUndeadArmyLayer = ui.Layer.new(necromancyGaugeLayer)
   conjureUndeadArmyLayer:SetSize(40, 40, 1.0, 1.0)
 
-  local overlaySprites = overlay.CreateSprites(necromancyGaugeLayer)
+local livingDeathLayer = ui.Layer.new(necromancyGaugeLayer)
+  livingDeathLayer:SetSize(40, 40, 1.0, 1.0)
+
+
 
     -- Overlay Sprites
     local   conjureUndeadArmy = ui.Sprite.new(conjureUndeadArmyLayer)
             conjureUndeadArmy:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
 
-    local conjureDurationText = ui.Text.new(conjureUndeadArmyLayer)
-        conjureDurationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        conjureDurationText:SetSize(22, 15)
-        conjureDurationText:MoveToFront()
-        conjureDurationText.content = ""
-        conjureDurationText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        conjureDurationText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
-        conjureDurationText.isShadowed = true
-        conjureDurationText.alignHorizontal = ui.AlignMode.CENTRE
-        conjureDurationText.alignVertical = ui.AlignMode.CENTRE
+    local conjureText = ui.Text.new(conjureUndeadArmyLayer)
+        conjureText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
+        conjureText:SetSize(22, 15)
+        conjureText:MoveToFront()
+        conjureText.content = ""
+        conjureText.font = id.Font.MUSEO_SANS_15PT_REGULAR
+        conjureText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        conjureText.isShadowed = true
+        conjureText.alignHorizontal = ui.AlignMode.CENTRE
+        conjureText.alignVertical = ui.AlignMode.CENTRE
 
-    local   livingDeath = ui.Sprite.new(necromancyGaugeLayer)
+    local   livingDeath = ui.Sprite.new(livingDeathLayer)
             livingDeath:SetPos(math.floor(40 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
             livingDeath:SetSize(scaleToFactor(40), scaleToFactor(40))
+
+    local livingDeathText = ui.Text.new(livingDeathLayer)
+        livingDeathText:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
+        livingDeathText:SetSize(22, 15)
+        livingDeathText:MoveToFront()
+        livingDeathText.content = ""
+        livingDeathText.font = id.Font.MUSEO_SANS_15PT_REGULAR
+        livingDeathText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        livingDeathText.isShadowed = true
+        livingDeathText.alignHorizontal = ui.AlignMode.CENTRE
+        livingDeathText.alignVertical = ui.AlignMode.CENTRE
 
     local   residualSoulsStacks = ui.Sprite.new(necromancyGaugeLayer)
             residualSoulsStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(44 + OFFSET_POSITION_Y))
@@ -80,8 +101,9 @@ local CreateUI = function()
 
     local function updateOverlayPositions()
         conjureUndeadArmy:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        conjureDurationText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
+        conjureText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
         livingDeath:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
+        livingDeathText:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
         residualSoulsStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(50 + OFFSET_POSITION_Y))
         necrosisStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(82 + OFFSET_POSITION_Y))
         invokeDeath:SetPos(math.floor(95 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
@@ -139,6 +161,18 @@ local CreateUI = function()
 
         onChange = function(group, value)
             settings.Set("hideGaugeOutOfCombat", value)
+        end,
+    })
+
+    generalPage:AddText("Show precise ticks or round to nearest second?")
+    local showPreciseDurations = generalPage:AddRadioButton({
+        { text = "Precise Ticks", value = "precise-ticks" },
+        { text = "Nearest Second", value = "nearest-second" },
+    }, {
+        selectedValue = settings.Get("showPreciseDurations"),
+
+        onChange = function(group, value)
+            settings.Set("showPreciseDurations", value)
         end,
     })
     
@@ -246,6 +280,7 @@ local CreateUI = function()
 
   -- Living Death
   local livingDeathDebugLabel = debugPage:AddText("Living Death: Inactive")
+  local livingDeathDurationDebugLabel = debugPage:AddText("Living Death Duration: 0")
   local deathSparkStacksDebugLabel = debugPage:AddText("Death Spark Stacks: 0")
 
   -- Necromancy Conjures
@@ -287,6 +322,7 @@ playerInCombatDebugLabel.content = "In Combat: " .. tostring(events.playerData.i
 necrosisStacksDebugLabel.content = "Necrosis Stacks: " .. tostring(events.playerData.necromancy.necrosisStacks)
 residualSoulsDebugLabel.content = "Residual Soul Stacks: " .. tostring(events.playerData.necromancy.residualSoulStacks)
 livingDeathDebugLabel.content = "Living Death: " .. (events.playerData.necromancy.livingDeath.active == -1 and "Inactive" or "Active")
+livingDeathDebugLabel.content = "Living Death: " .. tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
 deathSparkStacksDebugLabel.content = "Death Spark Stacks: " .. tostring(events.playerData.necromancy.deathSparkStacks)
 -- Conjures
 skeletonWarriorDebugLabel.content = "Skeleton Warrior: " .. (events.playerData.necromancy.conjures.skeletonWarrior.active == 1 and "Active" or "Inactive")
@@ -318,8 +354,7 @@ local function updateOverlays()
 
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
-        conjureUndeadArmy:SetSize(scaleToFactor(40), scaleToFactor(40))
-        conjureDurationText:SetSize(22, 15)
+        conjureUndeadArmyLayer.hidden = false
         if events.playerData.necromancy.conjures.skeletonWarrior.active == 1
         or events.playerData.necromancy.conjures.putridZombie.active == 1
         or events.playerData.necromancy.conjures.vengefulGhost.active == 1
@@ -327,27 +362,37 @@ local function updateOverlays()
             then
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.active
                 if ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration) == 0.0 then return end
-                conjureDurationText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
+                conjureText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
             else 
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.inactive
-                conjureDurationText.content = ""
+                conjureText.content = ""
         end
     else 
-        conjureUndeadArmy:SetSize(0, 0)
-        conjureDurationText:SetSize(0, 0)
+        conjureUndeadArmyLayer.hidden = true
     end
 
     if settings.Get("necroVisibleGaugeComponents")["show-living-death"] then 
-        livingDeath:SetSize(scaleToFactor(40), scaleToFactor(40)) 
+        livingDeathLayer.hidden = false
         if events.playerData.necromancy.livingDeath.active == 1
             then 
                 livingDeath.sprite = overlaySprites.necromancy.living_death.active
                 events.combatStyle = 'necromancy'
+                if ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration) == 0.0 then return end
+                livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
+            elseif events.playerData.necromancy.livingDeath.cooldown >= 1 then 
+                livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
+                if ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown) == 0.0 then return end
+                livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown))
             else
                 livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
+                livingDeathText.content = ""
+                if ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown) == 0.0 then
+                    livingDeath.sprite = overlaySprites.necromancy.living_death.active
+                    livingDeathText.content = "RDY"
+                end
         end
     else 
-        livingDeath:SetSize(0, 0)
+        livingDeathLayer.hidden = true
     end
     
     -- Residual Soul Stacks
