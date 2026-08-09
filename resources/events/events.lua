@@ -106,6 +106,11 @@ Event.VarTransmit.Subscribe("livingDeath", function(event)
         end
     end
 
+    -- Treat the player as Out of Combat if they can manage to bank so the gauges don't block the bank UI
+    if event.var.configName == "BANK_TEMP" then
+        events.playerData.inCombat = false
+    end
+
 end)
 
 Event.Logic.Subscribe("cdTick", function(e) events.currentTick = e.logicTick end)

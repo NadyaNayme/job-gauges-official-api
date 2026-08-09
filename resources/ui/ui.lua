@@ -351,6 +351,10 @@ local function updateOverlays()
         necromancyGaugeLayer.hidden = false
     else necromancyGaugeLayer.hidden = true
     end
+    
+    if events.playerData.inCombat ~= true and settings.Get("hideGaugeOutOfCombat") == "combat-visible" then
+        necromancyGaugeLayer.hidden = true
+     end
 
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
