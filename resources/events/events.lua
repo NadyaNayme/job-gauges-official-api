@@ -99,6 +99,8 @@ Event.VarTransmit.Subscribe("livingDeath", function(event)
         end
     end
 
+    -- The user can reset their cooldowns at the Altar of War. The altar does this
+    -- by setting all _END values to 0, forcing them to be off cooldown.
     if event.var.configName == "COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END" then
         if event.newValue == 0 then
             events.playerData.necromancy.livingDeath.cooldown = 0
@@ -115,33 +117,23 @@ end)
 
 Event.Logic.Subscribe("cdTick", function(e) events.currentTick = e.logicTick end)
 
+
+local function decrementTimers(tbl)
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            decrementTimers(value)
+
+        elseif (key == "remainingDuration" or key == "cooldown")
+            and type(value) == "number"
+            and value > 0 then
+
+            tbl[key] = value - 1
+        end
+    end
+end
+
 Event.ServerLogic.Subscribe("decrementCooldowns", function()
-
-    -- Living Death
-    if events.playerData.necromancy.livingDeath.remainingDuration > 0 then 
-        events.playerData.necromancy.livingDeath.remainingDuration = events.playerData.necromancy.livingDeath.remainingDuration - 1
-    end
-
-    if events.playerData.necromancy.livingDeath.cooldown > 0 then 
-        events.playerData.necromancy.livingDeath.cooldown = events.playerData.necromancy.livingDeath.cooldown - 1
-    end
-
-    -- Skeleton Warrior
-    if events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration > 0 then 
-        events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration = events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration - 1
-    end
-    -- Putrid Zombie
-    if events.playerData.necromancy.conjures.putridZombie.remainingDuration > 0 then 
-        events.playerData.necromancy.conjures.putridZombie.remainingDuration = events.playerData.necromancy.conjures.putridZombie.remainingDuration - 1
-    end
-    -- Vengeful Ghost
-    if events.playerData.necromancy.conjures.vengefulGhost.remainingDuration > 0 then 
-        events.playerData.necromancy.conjures.vengefulGhost.remainingDuration = events.playerData.necromancy.conjures.vengefulGhost.remainingDuration - 1
-    end
-    -- Phantom Guardian
-    if events.playerData.necromancy.conjures.phantomGuardian.remainingDuration > 0 then 
-        events.playerData.necromancy.conjures.phantomGuardian.remainingDuration = events.playerData.necromancy.conjures.phantomGuardian.remainingDuration - 1
-    end
+    decrementTimers(events)
 end)
 
 local function remainingTicks(name, name2)
