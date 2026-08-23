@@ -65,6 +65,31 @@ function M.CreateSprites(parent)
                 nine    = Plugin.resources.sprites.necromancy.bloat.nine,
                 ten     = Plugin.resources.sprites.necromancy.bloat.ten
             }
+        },
+        magic = {
+            sunshine = {
+                active = Plugin.resources.sprites.magic.sunshine.active,
+                inactive = Plugin.resources.sprites.magic.sunshine.inactive,
+                greater_active = Plugin.resources.sprites.magic.sunshine.gactive,
+                greater_inactive = Plugin.resources.sprites.magic.sunshine.ginactive
+            },
+            tsunami = {
+                active = Plugin.resources.sprites.magic.tsunami.active,
+                inactive = Plugin.resources.sprites.magic.tsunami.inactive,
+            },
+            runic_charge = {
+                active = Plugin.resources.sprites.magic.runic_charge.active,
+                inactive = Plugin.resources.sprites.magic.runic_charge.inactive,
+                active_borderless = Plugin.resources.sprites.magic.runic_charge.active_borderless,
+            },
+            instability = {
+                active = Plugin.resources.sprites.magic.instability.active,
+                inactive = Plugin.resources.sprites.magic.instability.inactive
+            },
+            soulfire = {
+                active = Plugin.resources.sprites.magic.soulfire.active,
+                inactive = Plugin.resources.sprites.magic.soulfire.inactive
+            }
         }
     }
 

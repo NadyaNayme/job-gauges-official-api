@@ -21,7 +21,21 @@ local defaults = {
         ["hide-residual-souls"] = true,
         ["necromancy_gauge_offset_x"] = 0,
         ["necromancy_gauge_offset_y"] = 0
-    }
+    },
+
+    magicVisibleGaugeComponents = {
+        ["show-sunshine"] = true,
+        ["show-tsunami"] = true,
+        ["show-runic-charge"] = true,
+        ["show-instability"] = true,
+        ["show-soulfire"] = true,
+        ["show-active-spell"] = true
+    },
+
+    magicUISettings = {
+        ["magic_gauge_offset_x"] = 0,
+        ["magic_gauge_offset_y"] = 0
+    },
 }
 
 

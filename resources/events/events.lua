@@ -1,8 +1,16 @@
+local settings = require("resources/database/settings")
+local spells = require("resources/data/spells")
+
 local events = {
     currentTick = 0,
     playerData = {
         inCombat = false,
         combatStyle = 'necromancy',
+        active_aspect = nil,
+        ultimates = {
+            greater_sunshine_unlocked = 0,
+            greater_deaths_swiftness_unlocked = 0
+        },
         necromancy = {
             necrosisStacks = '0',
             residualSoulStacks = '0',
@@ -79,23 +87,134 @@ local events = {
                     onCooldown = 0
                 }
             }
+        },
+        magic = {
+            active_spell = {
+                icon = '',
+                name = ''
+            },
+            runic_charge = {
+                active = 0,
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
+            },
+            tsunami = {
+                active = 0,
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
+            },
+            sunshine = {
+                active = 0,
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
+            },
+            instability = {
+                active = 0,
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
+            },
+            soulfire = {
+                active = 0,
+                remainingDuration = 0,
+                activeStart = 0,
+                activeEnd = 0,
+                cooldown = 0,
+                onCooldown = 0
+            },
+            stacks = {
+                exsanguinate = 0,
+                incite_fear = 0
+            }
         }
     }
 }
 
-Event.VarTransmit.Subscribe("livingDeath", function(event)
+local GREATER_DURATION = 62
+local NORMAL_DURATION = 50
+
+Event.VarTransmit.Subscribe("cooldownTracking", function(event)
+    -- Ignore anything that hasn't changed value
 	if event.oldValue == event.newValue then
 		return
 	end
 
+    -- Living Death
     if event.var.configName == "COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT" then
         if event.oldValue == -1 then 
             events.playerData.necromancy.livingDeath.active = 1
             events.playerData.necromancy.livingDeath.remainingDuration = 50
+            if settings.Get('automaticallySwapGauge') == 'dynamic' then
+                events.playerData.combatStyle = 'necromancy'
+            end
         else 
             events.playerData.necromancy.livingDeath.active = 0
             events.playerData.necromancy.livingDeath.remainingDuration = 0
             events.playerData.necromancy.livingDeath.cooldown = 100
+        end
+    end
+
+    -- Runic Charge
+    if event.var.configName == "COMBATV2_BUFF_MAGIC_WRACK_ACTIVE" then
+        if event.oldValue == 0 and event.newValue == 1 then
+            events.playerData.magic.runic_charge.active = 1
+            events.playerData.magic.runic_charge.remainingDuration = 25
+            events.playerData.magic.runic_charge.cooldown = 50
+            if settings.Get('automaticallySwapGauge') == 'dynamic' then
+                events.playerData.combatStyle = 'magic'
+            end
+        else
+            events.playerData.magic.runic_charge.active = 0
+            events.playerData.magic.runic_charge.remainingDuration = 0
+        end
+    end
+
+    -- Used for Sunshine & Death's Swiftness checks
+    local function plantedFeetEquipped()
+        local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
+        return rank ~= nil and rank > 0
+    end
+
+    -- Sunshine
+    if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START" then
+        if event.oldValue ~= event.newValue then
+            events.playerData.magic.sunshine.active = 1
+            if events.playerData.ultimates.greater_deaths_swiftness_unlocked == 1 then
+                events.playerData.magic.sunshine.remainingDuration = GREATER_DURATION
+            else 
+                if (plantedFeetEquipped()) then
+                    events.playerData.magic.sunshine.remainingDuration = GREATER_DURATION
+                else
+                    events.playerData.magic.sunshine.remainingDuration = NORMAL_DURATION
+                end
+            end
+            events.playerData.magic.sunshine.cooldown = 100
+            if settings.Get('automaticallySwapGauge') == 'dynamic' then
+                events.playerData.combatStyle = 'magic'
+            end
+        end
+    end
+
+    -- Tsunami
+    if event.var.configName == "COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT" then
+        if event.oldValue == 0 and event.newValue == 1 then
+            events.playerData.magic.tsunami.active = 1
+            events.playerData.magic.tsunami.remainingDuration = 50
+            events.playerData.magic.tsunami.cooldown = 100
+            if settings.Get('automaticallySwapGauge') == 'dynamic' then
+                events.playerData.combatStyle = 'magic'
+            end
         end
     end
 
@@ -107,10 +226,40 @@ Event.VarTransmit.Subscribe("livingDeath", function(event)
             events.playerData.necromancy.livingDeath.onCooldown = 0
         end
     end
+    if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_SUNSHINE_END" then
+        if event.newValue == 0 then
+            events.playerData.magic.sunshine.cooldown = 0
+            events.playerData.magic.sunshine.onCooldown = 0
+        end
+    end
+    if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_TSUNAMI_END" then
+        if event.newValue == 0 then
+            events.playerData.magic.tsunami.cooldown = 0
+            events.playerData.magic.tsunami.onCooldown = 0
+        end
+    end
+    if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_END" then
+        if event.newValue == 0 then
+            events.playerData.magic.instability.cooldown = 0
+            events.playerData.magic.instability.onCooldown = 0
+        end
+    end
+    if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END" then
+        if event.newValue == 0 then
+            events.playerData.magic.soulfire.cooldown = 0
+            events.playerData.magic.soulfire.onCooldown = 0
+        end
+    end
 
     -- Treat the player as Out of Combat if they can manage to bank so the gauges don't block the bank UI
     if event.var.configName == "BANK_TEMP" then
         events.playerData.inCombat = false
+    end
+
+    -- Update the player's autocast spell whenever it changes
+    if event.var.configName == "LASTCASTSPELL" then
+        events.playerData.magic.active_spell.name = spells[event.newValue].name
+        events.playerData.magic.active_spell.icon = spells[event.newValue].icon
     end
 
 end)
@@ -128,6 +277,13 @@ local function decrementTimers(tbl)
             and value > 0 then
 
             tbl[key] = value - 1
+
+            -- Force inactive if the ability is active but has no remaining duration and no remaining cooldown
+            -- this is necessary because some abilities (non-Necromancy ultimates) don't transmit anything when they end, unlike Living Death
+            if (tbl.active == 1 and tbl.remainingDuration == 0 and tbl.cooldown == 0) then
+                tbl.onCooldown = 0
+                tbl.active = 0
+            end
         end
     end
 end
@@ -245,6 +401,13 @@ local function updatePlayerData()
     events.playerData.necromancy.incantations.splitSoul.active = var.VarPlayer["COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE"].value
     -- END INCANTATIONS
 
+
+    -- Magic
+    -- Active Spell
+    events.playerData.magic.active_spell.name = spells[var.VarPlayer["LASTCASTSPELL"].value].name
+    events.playerData.magic.active_spell.icon = spells[var.VarPlayer["LASTCASTSPELL"].value].icon
+    events.playerData.ultimates.greater_sunshine_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
+    events.playerData.ultimates.greater_deaths_swiftness_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
 
 end
 
