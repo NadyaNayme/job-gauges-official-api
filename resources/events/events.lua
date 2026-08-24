@@ -2,14 +2,13 @@ local settings = require("resources/database/settings")
 local spells = require("resources/data/spells")
 
 local events = {
-    currentTick = 0,
     playerData = {
         inCombat = false,
         combatStyle = 'necromancy',
-        active_aspect = nil,
+        activeAspect = nil,
         ultimates = {
-            greater_sunshine_unlocked = 0,
-            greater_deaths_swiftness_unlocked = 0
+            greaterSunshineUnlocked = 0,
+            greaterDeathsSwiftnessUnlocked = 0
         },
         necromancy = {
             necrosisStacks = '0',
@@ -89,11 +88,11 @@ local events = {
             }
         },
         magic = {
-            active_spell = {
+            activeSpell = {
                 icon = '',
                 name = ''
             },
-            runic_charge = {
+            runicCharge = {
                 active = 0,
                 remainingDuration = 0,
                 activeStart = 0,
@@ -141,8 +140,25 @@ local events = {
     }
 }
 
-local GREATER_DURATION = 62
-local NORMAL_DURATION = 50
+local ULT_GREATER_DURATION = 62
+local ULT_NORMAL_DURATION = 50
+
+-- Used for Sunshine & Death's Swiftness checks
+local function isPlantedFeetEquipped()
+    local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
+    return rank ~= nil and rank > 0
+end
+
+local function updateActiveSpell(spellId)
+    local spell = spells[spellId]
+
+    if not spell then
+        return
+    end
+
+    events.playerData.magic.activeSpell.name = spell.name
+    events.playerData.magic.activeSpell.icon = spell.icon
+end
 
 Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     -- Ignore anything that hasn't changed value
@@ -168,35 +184,29 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     -- Runic Charge
     if event.var.configName == "COMBATV2_BUFF_MAGIC_WRACK_ACTIVE" then
         if event.oldValue == 0 and event.newValue == 1 then
-            events.playerData.magic.runic_charge.active = 1
-            events.playerData.magic.runic_charge.remainingDuration = 25
-            events.playerData.magic.runic_charge.cooldown = 50
+            events.playerData.magic.runicCharge.active = 1
+            events.playerData.magic.runicCharge.remainingDuration = 25
+            events.playerData.magic.runicCharge.cooldown = 50
             if settings.Get('automaticallySwapGauge') == 'dynamic' then
                 events.playerData.combatStyle = 'magic'
             end
         else
-            events.playerData.magic.runic_charge.active = 0
-            events.playerData.magic.runic_charge.remainingDuration = 0
+            events.playerData.magic.runicCharge.active = 0
+            events.playerData.magic.runicCharge.remainingDuration = 0
         end
-    end
-
-    -- Used for Sunshine & Death's Swiftness checks
-    local function plantedFeetEquipped()
-        local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
-        return rank ~= nil and rank > 0
     end
 
     -- Sunshine
     if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START" then
         if event.oldValue ~= event.newValue then
             events.playerData.magic.sunshine.active = 1
-            if events.playerData.ultimates.greater_deaths_swiftness_unlocked == 1 then
-                events.playerData.magic.sunshine.remainingDuration = GREATER_DURATION
+            if events.playerData.ultimates.greaterSunshineUnlocked == 1 then
+                events.playerData.magic.sunshine.remainingDuration = ULT_GREATER_DURATION
             else 
-                if (plantedFeetEquipped()) then
-                    events.playerData.magic.sunshine.remainingDuration = GREATER_DURATION
+                if (isPlantedFeetEquipped()) then
+                    events.playerData.magic.sunshine.remainingDuration = ULT_GREATER_DURATION
                 else
-                    events.playerData.magic.sunshine.remainingDuration = NORMAL_DURATION
+                    events.playerData.magic.sunshine.remainingDuration = ULT_NORMAL_DURATION
                 end
             end
             events.playerData.magic.sunshine.cooldown = 100
@@ -257,15 +267,9 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     end
 
     -- Update the player's autocast spell whenever it changes
-    if event.var.configName == "LASTCASTSPELL" then
-        events.playerData.magic.active_spell.name = spells[event.newValue].name
-        events.playerData.magic.active_spell.icon = spells[event.newValue].icon
-    end
+    updateActiveSpell(spells[event.newValue])
 
 end)
-
-Event.Logic.Subscribe("cdTick", function(e) events.currentTick = e.logicTick end)
-
 
 local function decrementTimers(tbl)
     for key, value in pairs(tbl) do
@@ -289,13 +293,11 @@ local function decrementTimers(tbl)
 end
 
 Event.ServerLogic.Subscribe("decrementCooldowns", function()
-    decrementTimers(events)
+    decrementTimers(events.playerData)
 end)
 
-local function remainingTicks(name, name2)
-    local cooldownStart = var.VarPlayer[name].value
-    local cooldownEnd = var.VarPlayer[name2].value
-    return cooldownEnd - cooldownStart
+local function getRemainingTicks(startVar, endVar)
+    return var.VarPlayer[endVar].value - var.VarPlayer[startVar].value 
 end
 
 local function updatePlayerData()
@@ -316,7 +318,7 @@ local function updatePlayerData()
     -- Remaining Duration
     if events.playerData.necromancy.conjures.skeletonWarrior.active == 1
         and events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration <= 0 then
-        local skeletonTicks = remainingTicks(
+        local skeletonTicks = getRemainingTicks(
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_SKELETON_WARRIOR_START",
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_SKELETON_WARRIOR_END"
         )
@@ -339,7 +341,7 @@ local function updatePlayerData()
     -- Remaining Duration
     if events.playerData.necromancy.conjures.putridZombie.active == 1
         and events.playerData.necromancy.conjures.putridZombie.remainingDuration <= 0 then
-        local zombieTicks = remainingTicks(
+        local zombieTicks = getRemainingTicks(
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_PUTRID_ZOMBIE_START",
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_PUTRID_ZOMBIE_END"
         )
@@ -357,7 +359,7 @@ local function updatePlayerData()
     -- Remaining Duration
     if events.playerData.necromancy.conjures.vengefulGhost.active == 1
         and events.playerData.necromancy.conjures.vengefulGhost.remainingDuration <= 0 then
-        local ghostTicks = remainingTicks(
+        local ghostTicks = getRemainingTicks(
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_VENGEFUL_GHOST_START",
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_VENGEFUL_GHOST_END"
         )
@@ -375,7 +377,7 @@ local function updatePlayerData()
     -- Remaining Duration
     if events.playerData.necromancy.conjures.phantomGuardian.active == 1
         and events.playerData.necromancy.conjures.phantomGuardian.remainingDuration <= 0 then
-        local guardianTicks = remainingTicks(
+        local guardianTicks = getRemainingTicks(
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_PHANTOM_GUARDIAN_START",
                 "COMBATV2_BUFF_NECROMANCY_SPIRIT_PHANTOM_GUARDIAN_END"
         )
@@ -403,14 +405,9 @@ local function updatePlayerData()
 
 
     -- Magic
-    -- Active Spell
-    local spell = spells[var.VarPlayer["LASTCASTSPELL"].value]
-    if spell then
-        events.playerData.magic.active_spell.name = spell.name
-        events.playerData.magic.active_spell.icon = spell.icon
-    end
-    events.playerData.ultimates.greater_sunshine_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
-    events.playerData.ultimates.greater_deaths_swiftness_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
+    updateActiveSpell(spells[var.VarPlayer["LASTCASTSPELL"].value])
+    events.playerData.ultimates.greaterSunshineUnlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
+    events.playerData.ultimates.greaterDeathsSwiftnessUnlocked = var.VarPlayer["COMBATV2_ABILITY_RANGED_GREATER_DEATHS_SWIFTNESS_UNLOCKED"].value
 
 end
 
