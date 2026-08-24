@@ -5,6 +5,7 @@ local defaults = {
     automaticallySwapGauge = "dynamic",
     hideGaugeOutOfCombat = "combat-visible",
     showPreciseDurations = "precise-ticks",
+    lastKnownCombatStyle = '',
 
     necroVisibleGaugeComponents = {
         ["show-conjures"] = true,

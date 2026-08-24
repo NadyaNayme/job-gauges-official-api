@@ -13,6 +13,27 @@ local UI_GAUGE_SCALE = 1
 local OFFSET_POSITION_X = settings.Get("necroUISettings")["necromancy_gauge_offset_x"]
 local OFFSET_POSITION_Y = settings.Get("necroUISettings")["necromancy_gauge_offset_y"]
 
+local GAUGE_COMPONENT_POSITIONS = {
+    necromancy = {
+        conjureUndeadArmy = { x = 0, y = 0 },
+        livingDeath = { x = 40, y = 0 },
+        residualSoulsStacks = { x = 2, y = 44 },
+        necrosisStacks = { x = 2, y = 67 },
+
+        invokeDeath = { x = 84, y = 0 },
+        threadsOfFate = { x = 108, y = 0 },
+        darkness = { x = 84, y = 22 },
+        splitSoul = { x = 108, y = 22 },
+    },
+
+    magic = {
+        runicCharge = { x = 0, y = 0 },
+        tsunami = { x = 40, y = 0 },
+        sunshine = { x = 80, y = 0 },
+        activeSpell = { x = 124, y = 11 },
+    }
+}
+
 local function hexToVector4(hex)
     local r = math.floor(hex / 16777216) % 256
     local g = math.floor(hex / 65536) % 256
@@ -30,7 +51,6 @@ end
 local FONT_COLOUR = hexToVector4(settings.Get('fontColour'))
 local fontTexts = {}
 
--- Helpers
 local function ticksToSeconds(ticks)
     local durationDisplayMode = settings.Get("showPreciseDurations")
     if durationDisplayMode == "precise-ticks" then 
@@ -43,174 +63,184 @@ end
 local function scaleToFactor(number)
     return math.floor(number * UI_GAUGE_SCALE)
 end
--- End Helpers
+
+local function createGaugeLayer(parent)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(600, 600, 1.0, 1.0)
+    return layer
+end
+
+local function createAbilityLayer(parent)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(40, 40, 1.0, 1.0)
+    return layer
+end
+
+local function createIconLayer(parent)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(24, 21, 1.0, 1.0)
+    return layer
+end
+
+local function createAbilityIndicator(parent, x, y)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(40, 40, 1.0, 1.0)
+
+    local sprite = ui.Sprite.new(layer)
+    sprite:SetPos(
+        math.floor(x + OFFSET_POSITION_X),
+        math.floor(y + OFFSET_POSITION_Y)
+    )
+    sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(x + 8 + OFFSET_POSITION_X),
+        math.floor(y + 14 + OFFSET_POSITION_Y)
+    )
+    text:SetSize(22, 15)
+    text:MoveToFront()
+    text.content = ""
+    text.font = id.Font.MUSEO_SANS_13PT_BOLD
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    text.alignHorizontal = ui.AlignMode.CENTRE
+    text.alignVertical = ui.AlignMode.CENTRE
+
+    table.insert(fontTexts, text)
+
+    return {
+        layer = layer,
+        sprite = sprite,
+        text = text,
+    }
+end
+
+local function createSpriteIndicator(parent, x, y, width, height)
+    local sprite = ui.Sprite.new(parent)
+
+    sprite:SetPos(
+        math.floor(x + OFFSET_POSITION_X),
+        math.floor(y + OFFSET_POSITION_Y)
+    )
+
+    sprite:SetSize(
+        scaleToFactor(width),
+        scaleToFactor(height)
+    )
+
+    return sprite
+end
+
+local function setAbilityIndicatorPosition(indicator, position)
+    indicator.sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
+    indicator.text:SetPos(
+        math.floor(position.x + 8 + OFFSET_POSITION_X),
+        math.floor(position.y + 14 + OFFSET_POSITION_Y)
+    )
+end
 
 local CreateUI = function()
-  local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__GAME_AREA)
-  if not gameArea then
+    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__GAME_AREA)
+    if not gameArea then
     log("Can't find game area")
     return
-  end
+    end
 
-  local jobGaugeLayer = ui.Layer.new(gameArea)
-  jobGaugeLayer:SetSize(600, 600, 1.0, 1.0)
-  local overlaySprites = overlay.CreateSprites(jobGaugeLayer)
+    local jobGaugeLayer = createGaugeLayer(gameArea)
+    local overlaySprites = overlay.CreateSprites(jobGaugeLayer)
 
-  -- Necromancy Job Gauge
-  local necromancyGaugeLayer = ui.Layer.new(jobGaugeLayer)
-  necromancyGaugeLayer:SetSize(600, 600, 1.0, 1.0)
-
-
-  local conjureUndeadArmyLayer = ui.Layer.new(necromancyGaugeLayer)
-  conjureUndeadArmyLayer:SetSize(40, 40, 1.0, 1.0)
-
-  local livingDeathLayer = ui.Layer.new(necromancyGaugeLayer)
-  livingDeathLayer:SetSize(40, 40, 1.0, 1.0)
+    local necromancyGaugeLayer = createGaugeLayer(jobGaugeLayer)
+    local conjureUndeadArmy = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy.x, GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy.y)
+    local livingDeath = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.livingDeath.x, GAUGE_COMPONENT_POSITIONS.necromancy.livingDeath.y)
 
 
+    local residualSoulsStacks = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.residualSoulsStacks.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.residualSoulsStacks.y,
+        132,
+        24
+    )
 
-    -- Necromancy Overlay Sprites
-    local   conjureUndeadArmySprite = ui.Sprite.new(conjureUndeadArmyLayer)
-            conjureUndeadArmySprite:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            conjureUndeadArmySprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+    local necrosisStacks = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.necrosisStacks.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.necrosisStacks.y,
+        132,
+        20
+    )
 
-    local conjureText = ui.Text.new(conjureUndeadArmyLayer)
-        conjureText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        conjureText:SetSize(22, 15)
-        conjureText:MoveToFront()
-        conjureText.content = ""
-        conjureText.font = id.Font.MUSEO_SANS_13PT_BOLD
-        conjureText.colour = FONT_COLOUR
-        conjureText.isShadowed = true
-        conjureText.alignHorizontal = ui.AlignMode.CENTRE
-        conjureText.alignVertical = ui.AlignMode.CENTRE
-        table.insert(fontTexts, conjureText)
+    local invokeDeath = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.invokeDeath.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.invokeDeath.y,
+        24,
+        21
+    )
 
-    local   livingDeathSprite = ui.Sprite.new(livingDeathLayer)
-            livingDeathSprite:SetPos(math.floor(40 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            livingDeathSprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+    local threadsOfFate = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.threadsOfFate.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.threadsOfFate.y,
+        24,
+        21
+    )
 
-    local livingDeathText = ui.Text.new(livingDeathLayer)
-        livingDeathText:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        livingDeathText:SetSize(22, 15)
-        livingDeathText:MoveToFront()
-        livingDeathText.content = ""
-        livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
-        livingDeathText.colour = FONT_COLOUR
-        livingDeathText.isShadowed = true
-        livingDeathText.alignHorizontal = ui.AlignMode.CENTRE
-        livingDeathText.alignVertical = ui.AlignMode.CENTRE
-        table.insert(fontTexts, livingDeathText)
+    local darkness = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.darkness.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.darkness.y,
+        24,
+        21
+    )
 
-    local   residualSoulsStacks = ui.Sprite.new(necromancyGaugeLayer)
-            residualSoulsStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(44 + OFFSET_POSITION_Y))
-            residualSoulsStacks:SetSize(scaleToFactor(132), scaleToFactor(24))
-
-    local   necrosisStacks = ui.Sprite.new(necromancyGaugeLayer)
-            necrosisStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(67 + OFFSET_POSITION_Y))
-            necrosisStacks:SetSize(scaleToFactor(132), scaleToFactor(20))
-
-    local   invokeDeath = ui.Sprite.new(necromancyGaugeLayer)
-            invokeDeath:SetPos(math.floor(84 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            invokeDeath:SetSize(scaleToFactor(24), scaleToFactor(21))
-
-    local   threadsOfFate = ui.Sprite.new(necromancyGaugeLayer)
-            threadsOfFate:SetPos(math.floor(108 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            threadsOfFate:SetSize(scaleToFactor(24), scaleToFactor(21))
-
-    local   darkness = ui.Sprite.new(necromancyGaugeLayer)
-            darkness:SetPos(math.floor(84 + OFFSET_POSITION_X), math.floor(22 + OFFSET_POSITION_Y))
-            darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
-
-    local   splitSoul = ui.Sprite.new(necromancyGaugeLayer)
-            splitSoul:SetPos(math.floor(108 + OFFSET_POSITION_X), math.floor(22 + OFFSET_POSITION_Y))
-            splitSoul:SetSize(scaleToFactor(24), scaleToFactor(21))
+    local splitSoul = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.splitSoul.x,
+        GAUGE_COMPONENT_POSITIONS.necromancy.splitSoul.y,
+        24,
+        21
+    )
 
   -- Magic Overlay
-  local magicGaugeLayer = ui.Layer.new(gameArea)
-  magicGaugeLayer:SetSize(600, 600, 1.0, 1.0)
+    local magicGaugeLayer = createGaugeLayer(jobGaugeLayer)
 
-  local tsunamiLayer = ui.Layer.new(magicGaugeLayer)
-  tsunamiLayer:SetSize(40, 40, 1.0, 1.0)
+    local tsunami = createAbilityIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.tsunami.x,
+        GAUGE_COMPONENT_POSITIONS.magic.tsunami.y
+    )
 
-    local   tsunamiSprite = ui.Sprite.new(tsunamiLayer)
-            tsunamiSprite:SetPos(math.floor(40 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            tsunamiSprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+    local sunshine = createAbilityIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.sunshine.x,
+        GAUGE_COMPONENT_POSITIONS.magic.sunshine.y
+    )
 
-    local tsunamiText = ui.Text.new(tsunamiLayer)
-        tsunamiText:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        tsunamiText:SetSize(22, 15)
-        tsunamiText:MoveToFront()
-        tsunamiText.content = ""
-        tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
-        tsunamiText.colour = FONT_COLOUR
-        tsunamiText.isShadowed = true
-        tsunamiText.alignHorizontal = ui.AlignMode.CENTRE
-        tsunamiText.alignVertical = ui.AlignMode.CENTRE
-        table.insert(fontTexts, tsunamiText)
+    local runicCharge = createAbilityIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.runicCharge.x,
+        GAUGE_COMPONENT_POSITIONS.magic.runicCharge.y
+    )
 
-    local sunshineLayer = ui.Layer.new(magicGaugeLayer)
-    sunshineLayer:SetSize(40, 40, 1.0, 1.0)
+    local activeSpellSprite = createSpriteIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.activeSpell.x,
+        GAUGE_COMPONENT_POSITIONS.magic.activeSpell.y,
+        24,
+        21
+    )
 
-    local   sunshineSprite = ui.Sprite.new(sunshineLayer)
-            sunshineSprite:SetPos(math.floor(80 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            sunshineSprite:SetSize(scaleToFactor(40), scaleToFactor(40))
-
-    local sunshineText = ui.Text.new(sunshineLayer)
-        sunshineText:SetPos(math.floor(88 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        sunshineText:SetSize(22, 15)
-        sunshineText:MoveToFront()
-        sunshineText.content = ""
-        sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
-        sunshineText.colour = FONT_COLOUR
-        sunshineText.isShadowed = true
-        sunshineText.alignHorizontal = ui.AlignMode.CENTRE
-        sunshineText.alignVertical = ui.AlignMode.CENTRE
-        table.insert(fontTexts, sunshineText)
-
-    local runicChargeLayer = ui.Layer.new(magicGaugeLayer)
-    runicChargeLayer:SetSize(40, 40, 1.0, 1.0)
-
-    local   runicChargeSprite = ui.Sprite.new(runicChargeLayer)
-            runicChargeSprite:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-            runicChargeSprite:SetSize(scaleToFactor(40), scaleToFactor(40))
-
-    local runicChargeText = ui.Text.new(runicChargeLayer)
-        runicChargeText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        runicChargeText:SetSize(22, 15)
-        runicChargeText:MoveToFront()
-        runicChargeText.content = ""
-        runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
-        runicChargeText.colour = FONT_COLOUR
-        runicChargeText.isShadowed = true
-        runicChargeText.alignHorizontal = ui.AlignMode.CENTRE
-        runicChargeText.alignVertical = ui.AlignMode.CENTRE
-        table.insert(fontTexts, runicChargeText)
-
-    local   activeSpellSprite = ui.Sprite.new(magicGaugeLayer)
-            activeSpellSprite:SetPos(math.floor(124 + OFFSET_POSITION_X), math.floor(11 + OFFSET_POSITION_Y))
-            activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
-
-  -- Ranged Overlay
-  local rangedGaugeLayer = ui.Layer.new(gameArea)
-  rangedGaugeLayer:SetSize(600, 600, 1.0, 1.0)
-
-  -- Melee Overlay
-  local meleeGaugeLayer = ui.Layer.new(gameArea)
-  meleeGaugeLayer:SetSize(600, 600, 1.0, 1.0)
-
+    local rangedGaugeLayer = createGaugeLayer(jobGaugeLayer)
+    local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
 
     local function updateOverlayPositions()
-        conjureUndeadArmySprite:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        conjureText:SetPos(math.floor(8 + OFFSET_POSITION_X), math.floor(14 + OFFSET_POSITION_Y))
-        livingDeathSprite:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        livingDeathText:SetPos(math.floor(48 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        residualSoulsStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(50 + OFFSET_POSITION_Y))
-        necrosisStacks:SetPos(math.floor(0 + OFFSET_POSITION_X), math.floor(82 + OFFSET_POSITION_Y))
-        invokeDeath:SetPos(math.floor(95 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        threadsOfFate:SetPos(math.floor(125 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
-        darkness:SetPos(math.floor(95 + OFFSET_POSITION_X), math.floor(26 + OFFSET_POSITION_Y))
-        splitSoul:SetPos(math.floor(125 + OFFSET_POSITION_X), math.floor(26 + OFFSET_POSITION_Y))
+        
     end
 
   local settingsBox = prettyui.Window.new(gameArea, {
@@ -365,36 +395,6 @@ local CreateUI = function()
     end,
     })
 
-    -- necroPage:AddText("Necromancy Gauge Position - Offset X")
-    -- local necroGaugeOffsetX = necroPage:AddSlider({
-    --     min = 0,
-    --     max = 1920,
-    --     value = settings.Get("necroUISettings")["necromancy_gauge_offset_x"],
-    --     step = 1,
-    --     onChange = function(_, value)
-    --         local current = settings.Get("necroUISettings")
-    --         current["necromancy_gauge_offset_x"] = value
-    --         settings.Set("necroUISettings", current)
-    --         OFFSET_POSITION_X = value
-    --         updateOverlayPositions()
-    --     end,
-    -- })
-
-    -- necroPage:AddText("Necromancy Gauge Position - Offset Y")
-    -- local necroGaugeOffsetY = necroPage:AddSlider({
-    --     min = 0,
-    --     max = 1080,
-    --     value = settings.Get("necroUISettings")["necromancy_gauge_offset_y"],
-    --     step = 1,
-    --     onChange = function(_, value)
-    --         local current = settings.Get("necroUISettings")
-    --         current["necromancy_gauge_offset_y"] = value
-    --         settings.Set("necroUISettings", current)
-    --         OFFSET_POSITION_Y = value
-    --         updateOverlayPositions()
-    --     end,
-    -- })
-
   -- Page: Magic
 
     local magicComponentSettings = settings.Get("magicVisibleGaugeComponents")
@@ -414,36 +414,6 @@ local CreateUI = function()
         end,
     })
 
-    -- magicPage:AddText("Magic Gauge Position - Offset X")
-    -- local magicGaugeOffsetX = magicPage:AddSlider({
-    --     min = 0,
-    --     max = 1920,
-    --     value = settings.Get("magicUISettings")["magic_gauge_offset_x"],
-    --     step = 1,
-    --     onChange = function(_, value)
-    --         local current = settings.Get("magicUISettings")
-    --         current["magic_gauge_offset_x"] = value
-    --         settings.Set("magicUISettings", current)
-    --         OFFSET_POSITION_X = value
-    --         updateOverlayPositions()
-    --     end,
-    -- })
-
-    -- magicPage:AddText("Magic Gauge Position - Offset Y")
-    -- local magicGaugeOffsetY = magicPage:AddSlider({
-    --     min = 0,
-    --     max = 1080,
-    --     value = settings.Get("magicUISettings")["magic_gauge_offset_y"],
-    --     step = 1,
-    --     onChange = function(_, value)
-    --         local current = settings.Get("magicUISettings")
-    --         current["magic_gauge_offset_y"] = value
-    --         settings.Set("magicUISettings", current)
-    --         OFFSET_POSITION_Y = value
-    --         updateOverlayPositions()
-    --     end,
-    -- })
-
   -- Page: Melee
 
   -- Page: Ranged
@@ -462,10 +432,11 @@ local CreateUI = function()
     }, {
         selectedValue = '',
 
-        onChange = function(group, value)
-            events.combatStyle = value
+        onChange = function(_, value)
+            events.playerData.combatStyle = value
             dynamicGaugeSetting:SetSelectedValue('static')
             settings.Set('automaticallySwapGauge', 'static')
+            settings.Set('lastKnownCombatStyle', value)
         end,
     })
 
@@ -477,36 +448,35 @@ end
 
 Event.VarTransmit.Subscribe("updateDebugData", updateDebugData)
 
+local function updateGaugeVisibility()
+    necromancyGaugeLayer.hidden = true
+    magicGaugeLayer.hidden = true
+    -- rangedGaugeLayer.hidden = true
+    -- meleeGaugeLayer.hidden = true
+
+    if events.playerData.combatStyle == nil then
+        events.playerData.combatStyle = settings.Get('lastKnownCombatStyle')
+    end
+
+    if events.playerData.combatStyle == 'necromancy' then
+        necromancyGaugeLayer.hidden = false
+
+    elseif events.playerData.combatStyle == 'magic' then
+        magicGaugeLayer.hidden = false
+
+    elseif events.playerData.combatStyle == 'ranged' then
+        -- rangedGaugeLayer.hidden = false
+
+    elseif events.playerData.combatStyle == 'melee' then
+        -- meleeGaugeLayer.hidden = false
+    end
+end
+
 local function updateOverlays()
 
     if overlaySprites == nil then return end
 
-    if events.combatStyle == 'necromancy' then
-        necromancyGaugeLayer.hidden = false
-        magicGaugeLayer.hidden = true
-        -- rangedGaugeLayer.hidden = true
-        -- meleeGaugeLayer.hidden = true
-    elseif events.combatStyle == 'magic' then
-        necromancyGaugeLayer.hidden = true
-        magicGaugeLayer.hidden = false
-        -- rangedGaugeLayer.hidden = true
-        -- meleeGaugeLayer.hidden = true
-    elseif events.combatStyle == 'ranged' then
-        necromancyGaugeLayer.hidden = true
-        magicGaugeLayer.hidden = true
-        -- rangedGaugeLayer.hidden = false
-        -- meleeGaugeLayer.hidden = true
-    elseif events.combatStyle == 'melee' then
-        necromancyGaugeLayer.hidden = true
-        magicGaugeLayer.hidden = true
-        -- rangedGaugeLayer.hidden = true
-        -- meleeGaugeLayer.hidden = false
-    else
-        necromancyGaugeLayer.hidden = true
-        magicGaugeLayer.hidden = true
-        -- rangedGaugeLayer.hidden = true
-        -- meleeGaugeLayer.hidden = true
-    end
+    updateGaugeVisibility()
     
     if events.playerData.inCombat ~= true and settings.Get("hideGaugeOutOfCombat") == "combat-visible" then
         necromancyGaugeLayer.hidden = true
@@ -517,50 +487,51 @@ local function updateOverlays()
 
     -- Conjure Undead Army
     if settings.Get("necroVisibleGaugeComponents")["show-conjures"] then 
-        conjureUndeadArmyLayer.hidden = false
+        conjureUndeadArmy.layer.hidden = false
         if events.playerData.necromancy.conjures.skeletonWarrior.active == 1
         or events.playerData.necromancy.conjures.putridZombie.active == 1
         or events.playerData.necromancy.conjures.vengefulGhost.active == 1
         or events.playerData.necromancy.conjures.phantomGuardian.active == 1
             then
-                conjureUndeadArmySprite.sprite = overlaySprites.necromancy.conjures.active
-                conjureText.font = id.Font.MUSEO_SANS_13PT_BOLD
+                conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.active
+                conjureUndeadArmy.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 if (events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration > 0) then
-                    conjureText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
+                    conjureUndeadArmy.text.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
                 end
             else 
-                conjureUndeadArmySprite.sprite = overlaySprites.necromancy.conjures.inactive
-                conjureText.content = ""
+                conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.inactive
+                conjureUndeadArmy.text.content = ""
         end
     else 
-        conjureUndeadArmyLayer.hidden = true
+        conjureUndeadArmy.layer.hidden = true
     end
 
     if settings.Get("necroVisibleGaugeComponents")["show-living-death"] then 
-        livingDeathLayer.hidden = false
+        livingDeath.layer.hidden = false
         if events.playerData.necromancy.livingDeath.active == 1
             then 
-                livingDeathSprite.sprite = overlaySprites.necromancy.living_death.active
+                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.active
                 if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                    events.combatStyle = 'necromancy'
+                    events.playerData.combatStyle = 'necromancy'
+                    settings.Set('lastKnownCombatStyle', 'necromancy')
                 end
-                livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
+                livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                livingDeath.text.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
             elseif events.playerData.necromancy.livingDeath.cooldown >= 1 then 
-                livingDeathSprite.sprite = overlaySprites.necromancy.living_death.inactive
-                livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown))
+                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.inactive
+                livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                livingDeath.text.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown))
             else
-                livingDeathSprite.sprite = overlaySprites.necromancy.living_death.inactive
-                livingDeathText.content = ""
+                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.inactive
+                livingDeath.text.content = ""
                 if ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown) == 0.0 then
-                    livingDeathSprite.sprite = overlaySprites.necromancy.living_death.active
-                    livingDeathText.font = id.Font.MUSEO_SANS_11PT_REGULAR
-                    livingDeathText.content = "Ready"
+                    livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.active
+                    livingDeath.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    livingDeath.text.content = "Ready"
                 end
         end
     else 
-        livingDeathLayer.hidden = true
+        livingDeath.layer.hidden = true
     end
     
     -- Residual Soul Stacks
@@ -646,106 +617,109 @@ local function updateOverlays()
     -- Magic Gauge
     -- Sunshine
     if settings.Get("magicVisibleGaugeComponents")["show-sunshine"] then 
-        sunshineLayer.hidden = false
+        sunshine.layer.hidden = false
         if events.playerData.magic.sunshine.active == 1
             then 
                 if events.playerData.ultimates.greaterSunshineUnlocked == 1 then
-                    sunshineSprite.sprite = overlaySprites.magic.sunshine.greater_active
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_active
                 else
-                    sunshineSprite.sprite = overlaySprites.magic.sunshine.active
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.active
                 end
                 if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                    events.combatStyle = 'magic'
+                    events.playerData.combatStyle = 'magic'
+                    settings.Set('lastKnownCombatStyle', 'magic')
                 end
                 if ticksToSeconds(events.playerData.magic.sunshine.remainingDuration) == 0.0 then
                     events.playerData.magic.sunshine.active = 0
                 end
-                sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                sunshineText.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.remainingDuration))
+                sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                sunshine.text.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.remainingDuration))
             elseif events.playerData.magic.sunshine.cooldown >= 1 then 
-                sunshineSprite.sprite = overlaySprites.magic.sunshine.inactive
-                sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                sunshineText.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.cooldown))
+                sunshine.sprite.sprite = overlaySprites.magic.sunshine.inactive
+                sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                sunshine.text.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.cooldown))
             else
                 if events.playerData.ultimates.greaterSunshineUnlocked == 1 then
-                    sunshineSprite.sprite = overlaySprites.magic.sunshine.greater_inactive
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_inactive
                 else
-                    sunshineSprite.sprite = overlaySprites.magic.sunshine.inactive
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.inactive
                 end
-                sunshineText.content = ""
+                sunshine.text.content = ""
                 if ticksToSeconds(events.playerData.magic.sunshine.cooldown) == 0.0 then
                     if events.playerData.ultimates.greaterSunshineUnlocked == 1 then
-                        sunshineSprite.sprite = overlaySprites.magic.sunshine.greater_active
+                        sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_active
                     else
-                        sunshineSprite.sprite = overlaySprites.magic.sunshine.active
+                        sunshine.sprite.sprite = overlaySprites.magic.sunshine.active
                     end
-                    sunshineText.font = id.Font.MUSEO_SANS_11PT_REGULAR
-                    sunshineText.content = "Ready"
+                    sunshine.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    sunshine.text.content = "Ready"
                 end
         end
     else 
-        sunshineLayer.hidden = true
+        sunshine.layer.hidden = true
     end
 
     -- Tsunami
     if settings.Get("magicVisibleGaugeComponents")["show-tsunami"] then 
-        tsunamiLayer.hidden = false
+        tsunami.layer.hidden = false
         if events.playerData.magic.tsunami.active == 1
             then 
-                tsunamiSprite.sprite = overlaySprites.magic.tsunami.active
+                tsunami.sprite.sprite = overlaySprites.magic.tsunami.active
                 if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                    events.combatStyle = 'magic'
+                    events.playerData.combatStyle = 'magic'
+                    settings.Set('lastKnownCombatStyle', 'magic')
                 end
                 if ticksToSeconds(events.playerData.magic.tsunami.remainingDuration) == 0.0 then
                     events.playerData.magic.tsunami.active = 0
                 end
-                tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.remainingDuration))
+                tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                tsunami.text.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.remainingDuration))
             elseif events.playerData.magic.tsunami.cooldown >= 1 then 
-                tsunamiSprite.sprite = overlaySprites.magic.tsunami.inactive
-                tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.cooldown))
+                tsunami.sprite.sprite = overlaySprites.magic.tsunami.inactive
+                tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                tsunami.text.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.cooldown))
             else
-                tsunamiSprite.sprite = overlaySprites.magic.tsunami.inactive
-                tsunamiText.content = ""
+                tsunami.sprite.sprite = overlaySprites.magic.tsunami.inactive
+                tsunami.text.content = ""
                 if ticksToSeconds(events.playerData.magic.tsunami.cooldown) == 0.0 then
-                    tsunamiSprite.sprite = overlaySprites.magic.tsunami.active
-                    tsunamiText.font = id.Font.MUSEO_SANS_11PT_REGULAR
-                    tsunamiText.content = "Ready"
+                    tsunami.sprite.sprite = overlaySprites.magic.tsunami.active
+                    tsunami.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    tsunami.text.content = "Ready"
                 end
         end
     else 
-        tsunamiLayer.hidden = true
+        tsunami.layer.hidden = true
     end
 
     -- Runic Charge
     if settings.Get("magicVisibleGaugeComponents")["show-runic-charge"] then 
-        runicChargeLayer.hidden = false
+        runicCharge.layer.hidden = false
         if events.playerData.magic.runicCharge.active == 1
             then 
-                runicChargeSprite.sprite = overlaySprites.magic.runicCharge.active
+                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.active
                 if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                    events.combatStyle = 'magic'
+                    events.playerData.combatStyle = 'magic'
+                    settings.Set('lastKnownCombatStyle', 'magic')
                 end
                 if ticksToSeconds(events.playerData.magic.runicCharge.remainingDuration) == 0.0 then
                     events.playerData.magic.runicCharge.active = 0
                 end
-                runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                runicChargeText.content = tostring(ticksToSeconds(events.playerData.magic.runicCharge.remainingDuration))
+                runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                runicCharge.text.content = tostring(ticksToSeconds(events.playerData.magic.runicCharge.remainingDuration))
             elseif events.playerData.magic.runicCharge.cooldown >= 1 then 
-                runicChargeSprite.sprite = overlaySprites.magic.runicCharge.inactive
-                runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
-                runicChargeText.content = tostring(ticksToSeconds(events.playerData.magic.runicCharge.cooldown))
+                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.inactive
+                runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                runicCharge.text.content = tostring(ticksToSeconds(events.playerData.magic.runicCharge.cooldown))
             else
-                runicChargeSprite.sprite = overlaySprites.magic.runicCharge.inactive
+                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.inactive
                 if ticksToSeconds(events.playerData.magic.runicCharge.cooldown) == 0.0 then
-                    runicChargeSprite.sprite = overlaySprites.magic.runicCharge.active
-                    runicChargeText.font = id.Font.MUSEO_SANS_11PT_REGULAR
-                    runicChargeText.content = "Ready"
+                    runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.active
+                    runicCharge.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    runicCharge.text.content = "Ready"
                 end
         end
     else 
-        runicChargeLayer.hidden = true
+        runicCharge.layer.hidden = true
     end
 
     if settings.Get("magicVisibleGaugeComponents")["show-active-spell"] then 
@@ -773,6 +747,3 @@ end
 M.CreateUI = CreateUI
 
 return M
-
-
-

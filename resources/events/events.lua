@@ -4,21 +4,21 @@ local spells = require("resources/data/spells")
 local events = {
     playerData = {
         inCombat = false,
-        combatStyle = 'necromancy',
         activeAspect = nil,
+        combatStyle = nil,
         ultimates = {
-            greaterSunshineUnlocked = 0,
-            greaterDeathsSwiftnessUnlocked = 0
+            greaterSunshineUnlocked = nil,
+            greaterDeathsSwiftnessUnlocked = nil
         },
         necromancy = {
-            necrosisStacks = '0',
-            residualSoulStacks = '0',
+            necrosisStacks = 0,
+            residualSoulStacks = 0,
             livingDeath = {
                 active = 0,
                 remainingDuration = 0,
                 cooldown = 0,
             },
-            deathSparkStacks = '0',
+            deathSparkStacks = 0,
 
             conjures = {
                 skeletonWarrior = {
@@ -147,6 +147,7 @@ local function updateActiveSpell(spellId)
 end
 
 local function swapGaugeToCombatStyle(style)
+    settings.Set('lastKnownCombatStyle', style)
     if settings.Get('automaticallySwapGauge') == 'dynamic' then
         events.playerData.combatStyle = style
     end
@@ -246,20 +247,6 @@ local function handleCooldownReset(event)
     end
 end
 
-Event.VarTransmit.Subscribe("cooldownTracking", function(event)
-    -- Ignore anything that hasn't changed value
-    if event.oldValue == event.newValue then
-        return
-    end
-
-    local handler = VAR_TRANSMIT_HANDLERS[event.var.configName]
-    if handler then
-        handler(event)
-    end
-
-    handleCooldownReset(event)
-end)
-
 local function decrementTimers(tbl)
     for key, value in pairs(tbl) do
         if type(value) == "table" then
@@ -279,10 +266,6 @@ local function decrementTimers(tbl)
         end
     end
 end
-
-Event.ServerLogic.Subscribe("decrementCooldowns", function()
-    decrementTimers(events.playerData)
-end)
 
 local function getRemainingTicks(startVar, endVar)
     return var.VarPlayer[endVar].value - var.VarPlayer[startVar].value 
@@ -397,12 +380,35 @@ local function checkGreaterUnlocks()
 end
 
 local function updatePlayerData()
-    checkGreaterUnlocks()
-    updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
     updateInCombatState()
     updateNecromancy()
 end
 
+Event.GameStateChanged.Subscribe("dataInitialization", function()
+    if GameState.FromID(gameStateChangedEvent.newState) == 30 then
+        checkGreaterUnlocks()
+        updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
+        swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
+    end
+end)
+
+Event.VarTransmit.Subscribe("cooldownTracking", function(event)
+    -- Ignore anything that hasn't changed value
+    if event.oldValue == event.newValue then
+        return
+    end
+
+    local handler = VAR_TRANSMIT_HANDLERS[event.var.configName]
+    if handler then
+        handler(event)
+    end
+
+    handleCooldownReset(event)
+end)
+
+Event.ServerLogic.Subscribe("decrementCooldowns", function()
+    decrementTimers(events.playerData)
+end)
 Event.Logic.Subscribe("updatePlayerData", updatePlayerData)
 
 return events
