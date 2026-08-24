@@ -396,6 +396,22 @@ local function updateGaugeVisibility()
     end
 end
 
+local function getLowestConjureDuration(conjures)
+    local lowestDuration = nil
+
+    for _, conjure in pairs(conjures) do
+        if conjure.active == 1 and conjure.remainingDuration > 0 then
+            if lowestDuration == nil
+                or conjure.remainingDuration < lowestDuration
+            then
+                lowestDuration = conjure.remainingDuration
+            end
+        end
+    end
+
+    return lowestDuration
+end
+
 local function updateOverlays()
 
     if overlaySprites == nil then return end
@@ -424,15 +440,22 @@ local function updateOverlays()
     -- Conjure Undead Army
     if necroSettings["show-conjures"] then 
         conjureUndeadArmy.layer.hidden = false
-        if necromancy.conjures.skeletonWarrior.active == 1
-        or necromancy.conjures.putridZombie.active == 1
-        or necromancy.conjures.vengefulGhost.active == 1
-        or necromancy.conjures.phantomGuardian.active == 1
+
+        local conjures = necromancy.conjures
+        local lowestDuration = getLowestConjureDuration(conjures)
+
+        if conjures.skeletonWarrior.active == 1
+        or conjures.putridZombie.active == 1
+        or conjures.vengefulGhost.active == 1
+        or conjures.phantomGuardian.active == 1
             then
                 conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.active
                 conjureUndeadArmy.text.font = id.Font.MUSEO_SANS_13PT_BOLD
-                if (necromancy.conjures.skeletonWarrior.remainingDuration > 0) then
-                    conjureUndeadArmy.text.content = tostring(ticksToSeconds(necromancy.conjures.skeletonWarrior.remainingDuration))
+                if lowestDuration then
+                    conjureUndeadArmy.text.content =
+                        tostring(ticksToSeconds(lowestDuration))
+                else
+                    conjureUndeadArmy.text.content = ""
                 end
             else 
                 conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.inactive
