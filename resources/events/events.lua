@@ -330,6 +330,8 @@ local function updateConjure(name, definition)
 
         conjure.remainingDuration = math.max(0, remainingTicks)
 
+        swapGaugeToCombatStyle('necromancy')
+
     elseif conjure.active == 0 then
         conjure.remainingDuration = 0
     end
@@ -363,6 +365,10 @@ local function updateIncantations()
 
     incantations.splitSoul.active =
         var.VarPlayer["COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE"].value
+
+    if (incantations.threadsOfFate.active == 1 or incantations.invokeDeath.active == 1 or incantations.splitSoul.active == 1) then
+        swapGaugeToCombatStyle('necromancy')
+    end
 end
 
 local function updateNecromancy()

@@ -1,4 +1,5 @@
 local settings = require("resources/database/settings")
+local events = require("resources/events/events")
 
 local M = {}
 
@@ -23,7 +24,7 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("Dynamically swap active style gauge based on active buffs (ie. after Ultimate Ability used)")
+    page:AddText("Dynamically swap active style gauge based on active buffs (ie. after a style specific Ability is used)")
 
     options.dynamicGaugeSetting = page:AddRadioButton({
         { text = "Yes", value = "dynamic" },
@@ -31,10 +32,33 @@ function M.Create(page, options)
     }, {
         selectedValue = settings.Get("automaticallySwapGauge"),
 
-        onChange = function(group, value)
+        onChange = function(_, value)
             settings.Set("automaticallySwapGauge", value)
         end,
     })
+
+    page:AddText("You will need to select your active gauge if you do not have Dynamic Swapping enabled.")
+
+    page:AddDivider({
+        marginTop = 12,
+        marginBottom = 12,
+    })
+    page:AddSimpleButton("Necromancy", function(self, _)
+        events.playerData.combatStyle = 'necromancy'
+        settings.Set('lastKnownCombatStyle', 'necromancy')
+    end, { inline = true})
+    page:AddSimpleButton("Magic", function(self, _)
+        events.playerData.combatStyle = 'magic'
+        settings.Set('lastKnownCombatStyle', 'magic')
+    end, { inline = true})
+    page:AddSimpleButton("Ranged", function(self, _)
+        events.playerData.combatStyle = 'ranged'
+        settings.Set('lastKnownCombatStyle', 'ranged')
+    end, { inline = true})
+    page:AddSimpleButton("Melee", function(self, _)
+        events.playerData.combatStyle = 'melee'
+        settings.Set('lastKnownCombatStyle', 'melee')
+    end, { inline = true})
 
     page:AddText("Hide the combat style gauge while out of combat")
     page:AddRadioButton({

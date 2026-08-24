@@ -309,14 +309,13 @@ local CreateUI = function()
     onClick = function(handle, active) settingsBox.root.hidden = not active end,
   })
 
-  local tabs = settingsBox:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged", "Debug" }, { height = -20, heightAnchor = 1.0 })
+  local tabs = settingsBox:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged" }, { height = -20, heightAnchor = 1.0 })
 
   local generalPage = tabs:GetPage(1)
   local necromancyPage = tabs:GetPage(2)
   local magicPage = tabs:GetPage(3)
   local meleePage = tabs:GetPage(4)
   local rangedPage = tabs:GetPage(5)
-  local debugPage = tabs:GetPage(6)
 
   -- Page: General
     generalSettings.Create(generalPage, {
@@ -343,34 +342,6 @@ local CreateUI = function()
     magicSettings.Create(magicPage)
     -- meleeSettings.Create(meleePage)
     -- rangedSettings.Create(rangedPage)
-
-  -- Page: Debug
-  debugPage:AddTitle("Player State")
-
-  local playerInCombatDebugLabel = debugPage:AddText("In Combat: false")
-
-    debugPage:AddText("Change Active Combat Style")
-    local forceCombatStyle = debugPage:AddRadioButton({
-        { text = "Necromancy", value = "necromancy" },
-        { text = "Magic", value = "magic" },
-        { text = "Ranged", value = "ranged" },
-        { text = "Melee", value = "melee" }
-    }, {
-        selectedValue = '',
-
-        onChange = function(_, value)
-            events.playerData.combatStyle = value
-            settings.Set('lastKnownCombatStyle', value)
-        end,
-    })
-
-  
-
-local function updateDebugData()
-    playerInCombatDebugLabel.content = "In Combat: " .. tostring(events.playerData.inCombat)
-end
-
-Event.VarTransmit.Subscribe("updateDebugData", updateDebugData)
 
 local function updateGaugeVisibility()
     necromancyGaugeLayer.hidden = true
