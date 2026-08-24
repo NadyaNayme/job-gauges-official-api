@@ -1,6 +1,6 @@
 local settings = require("resources/database/settings")
 local events = require("resources/events/events")
-local overlay = require("resources/ui/overlay")
+local sprites = require("resources/ui/sprites")
 
 local generalSettings = require("resources/ui/settings/general")
 local necromancySettings = require("resources/ui/settings/necromancy")
@@ -153,7 +153,7 @@ local CreateUI = function()
     end
 
     local jobGaugeLayer = createGaugeLayer(gameArea)
-    local overlaySprites = overlay.CreateSprites(jobGaugeLayer)
+    local overlaySprites = sprites.CreateSprites(jobGaugeLayer)
 
     local necromancyGaugeLayer = createGaugeLayer(jobGaugeLayer)
     local conjureUndeadArmy = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy)
