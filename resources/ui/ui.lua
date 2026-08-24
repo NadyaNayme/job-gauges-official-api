@@ -349,7 +349,7 @@ local CreateUI = function()
 
   local playerInCombatDebugLabel = debugPage:AddText("In Combat: false")
 
-    debugPage:AddText("Force Active Combat Style (Changing this setting will disable the Dynamic Swapping setting)")
+    debugPage:AddText("Change Active Combat Style")
     local forceCombatStyle = debugPage:AddRadioButton({
         { text = "Necromancy", value = "necromancy" },
         { text = "Magic", value = "magic" },
@@ -360,8 +360,6 @@ local CreateUI = function()
 
         onChange = function(_, value)
             events.playerData.combatStyle = value
-            dynamicGaugeSetting:SetSelectedValue('static')
-            settings.Set('automaticallySwapGauge', 'static')
             settings.Set('lastKnownCombatStyle', value)
         end,
     })
