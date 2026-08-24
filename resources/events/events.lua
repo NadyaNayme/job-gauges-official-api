@@ -404,8 +404,11 @@ local function updatePlayerData()
 
     -- Magic
     -- Active Spell
-    events.playerData.magic.active_spell.name = spells[var.VarPlayer["LASTCASTSPELL"].value].name
-    events.playerData.magic.active_spell.icon = spells[var.VarPlayer["LASTCASTSPELL"].value].icon
+    local spell = spells[var.VarPlayer["LASTCASTSPELL"].value]
+    if spell then
+        events.playerData.magic.active_spell.name = spell.name
+        events.playerData.magic.active_spell.icon = spell.icon
+    end
     events.playerData.ultimates.greater_sunshine_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
     events.playerData.ultimates.greater_deaths_swiftness_unlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
 

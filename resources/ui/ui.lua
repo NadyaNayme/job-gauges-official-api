@@ -4,10 +4,31 @@ local overlay = require("resources/ui/overlay")
 
 local M = {}
 
+-- ============================================================
+-- Constants / Configuration
+-- ============================================================
+
 -- Globals
-local SCALE = 1
+local UI_GAUGE_SCALE = 1
 local OFFSET_POSITION_X = settings.Get("necroUISettings")["necromancy_gauge_offset_x"]
 local OFFSET_POSITION_Y = settings.Get("necroUISettings")["necromancy_gauge_offset_y"]
+
+local function hexToVector4(hex)
+    local r = math.floor(hex / 16777216) % 256
+    local g = math.floor(hex / 65536) % 256
+    local b = math.floor(hex / 256) % 256
+    local a = hex % 256
+
+    return Vector4.new(
+        r / 255,
+        g / 255,
+        b / 255,
+        a / 255
+    )
+end
+
+local FONT_COLOUR = hexToVector4(settings.Get('fontColour'))
+local fontTexts = {}
 
 -- Helpers
 local function ticksToSeconds(ticks)
@@ -20,7 +41,7 @@ local function ticksToSeconds(ticks)
 end
 
 local function scaleToFactor(number)
-    return math.floor(number * SCALE)
+    return math.floor(number * UI_GAUGE_SCALE)
 end
 -- End Helpers
 
@@ -58,11 +79,12 @@ local CreateUI = function()
         conjureText:SetSize(22, 15)
         conjureText:MoveToFront()
         conjureText.content = ""
-        conjureText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        conjureText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        conjureText.font = id.Font.MUSEO_SANS_13PT_BOLD
+        conjureText.colour = FONT_COLOUR
         conjureText.isShadowed = true
         conjureText.alignHorizontal = ui.AlignMode.CENTRE
         conjureText.alignVertical = ui.AlignMode.CENTRE
+        table.insert(fontTexts, conjureText)
 
     local   livingDeath = ui.Sprite.new(livingDeathLayer)
             livingDeath:SetPos(math.floor(40 + OFFSET_POSITION_X), math.floor(0 + OFFSET_POSITION_Y))
@@ -73,11 +95,12 @@ local CreateUI = function()
         livingDeathText:SetSize(22, 15)
         livingDeathText:MoveToFront()
         livingDeathText.content = ""
-        livingDeathText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        livingDeathText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
+        livingDeathText.colour = FONT_COLOUR
         livingDeathText.isShadowed = true
         livingDeathText.alignHorizontal = ui.AlignMode.CENTRE
         livingDeathText.alignVertical = ui.AlignMode.CENTRE
+        table.insert(fontTexts, livingDeathText)
 
     local   residualSoulsStacks = ui.Sprite.new(necromancyGaugeLayer)
             residualSoulsStacks:SetPos(math.floor(2 + OFFSET_POSITION_X), math.floor(44 + OFFSET_POSITION_Y))
@@ -119,11 +142,12 @@ local CreateUI = function()
         tsunamiText:SetSize(22, 15)
         tsunamiText:MoveToFront()
         tsunamiText.content = ""
-        tsunamiText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        tsunamiText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
+        tsunamiText.colour = FONT_COLOUR
         tsunamiText.isShadowed = true
         tsunamiText.alignHorizontal = ui.AlignMode.CENTRE
         tsunamiText.alignVertical = ui.AlignMode.CENTRE
+        table.insert(fontTexts, tsunamiText)
 
     local sunshineLayer = ui.Layer.new(magicGaugeLayer)
     sunshineLayer:SetSize(40, 40, 1.0, 1.0)
@@ -137,11 +161,12 @@ local CreateUI = function()
         sunshineText:SetSize(22, 15)
         sunshineText:MoveToFront()
         sunshineText.content = ""
-        sunshineText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        sunshineText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
+        sunshineText.colour = FONT_COLOUR
         sunshineText.isShadowed = true
         sunshineText.alignHorizontal = ui.AlignMode.CENTRE
         sunshineText.alignVertical = ui.AlignMode.CENTRE
+        table.insert(fontTexts, sunshineText)
 
     local runicChargeLayer = ui.Layer.new(magicGaugeLayer)
     runicChargeLayer:SetSize(40, 40, 1.0, 1.0)
@@ -155,15 +180,24 @@ local CreateUI = function()
         runicChargeText:SetSize(22, 15)
         runicChargeText:MoveToFront()
         runicChargeText.content = ""
-        runicChargeText.font = id.Font.MUSEO_SANS_15PT_REGULAR
-        runicChargeText.colour = Vector4.new(1.0, 1.0, 1.0, 1.0)
+        runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
+        runicChargeText.colour = FONT_COLOUR
         runicChargeText.isShadowed = true
         runicChargeText.alignHorizontal = ui.AlignMode.CENTRE
         runicChargeText.alignVertical = ui.AlignMode.CENTRE
+        table.insert(fontTexts, runicChargeText)
 
     local   activeSpellLayer = ui.Sprite.new(magicGaugeLayer)
             activeSpellLayer:SetPos(math.floor(124 + OFFSET_POSITION_X), math.floor(11 + OFFSET_POSITION_Y))
             activeSpellLayer:SetSize(scaleToFactor(24), scaleToFactor(21))
+
+  -- Ranged Overlay
+  local rangedGaugeLayer = ui.Layer.new(gameArea)
+  rangedGaugeLayer:SetSize(600, 600, 1.0, 1.0)
+
+  -- Melee Overlay
+  local meleeGaugeLayer = ui.Layer.new(gameArea)
+  meleeGaugeLayer:SetSize(600, 600, 1.0, 1.0)
 
 
     local function updateOverlayPositions()
@@ -207,15 +241,35 @@ local CreateUI = function()
   -- Page: General
   generalPage:AddTitle("Job Gauge Settings")
 
-    generalPage:AddText("Dynamically swap combat style gauge based on active buffs (ie. after Ultimate Ability used)")
+    local fontColourPicker = generalPage:AddColourPicker({
+        value = settings.Get("fontColour"),
+        alphaSlider = true,
+        buttonSize = 48,
+        windowTitle = "Font Colour",
+        tooltip = "Choose the colour of duration and cooldown text",
+        acceptText = "Set Color",
+        onChange = function(_, colour)
+            settings.Set("fontColour", string.format("0x%08X", colour))
+            local function updateFontColour(colour)
+                FONT_COLOUR = hexToVector4(colour)
+
+                for _, text in ipairs(fontTexts) do
+                    text.colour = FONT_COLOUR
+                end
+            end
+            updateFontColour(colour)
+        end,
+    })
+
+    generalPage:AddText("Dynamically swap active style gauge based on active buffs (ie. after Ultimate Ability used)")
     local automaticallySwapGauge = generalPage:AddRadioButton({
         { text = "Yes", value = "dynamic" },
         { text = "No", value = "static" },
     }, {
         selectedValue = settings.Get("automaticallySwapGauge"),
 
-        onChange = function(group, value)
-            settings.Set("automaticallySwapGauge", value)
+        onChange = function(group, colour)
+            settings.Set("automaticallySwapGauge", colour)
         end,
     })
 
@@ -231,7 +285,7 @@ local CreateUI = function()
         end,
     })
 
-    generalPage:AddText("Show precise ticks or round to nearest second?")
+    generalPage:AddText("Show precise time remaining or round to the nearest second?")
     local showPreciseDurations = generalPage:AddRadioButton({
         { text = "Precise Ticks", value = "precise-ticks" },
         { text = "Nearest Second", value = "nearest-second" },
@@ -350,7 +404,7 @@ local CreateUI = function()
         { text = "Show Tsunami", value = "show-tsunami", selected = magicComponents["show-tsunami"] },
         { text = "Show Runic Charge", value = "show-runic-charge", selected = magicComponents["show-runic-charge"] },
         { text = "Show Instability (Fractured Staff of Armadyl Special Attack)", value = "show-instability", selected = magicComponents["show-instability"] },
-        { text = "Show Soulfire (Rod of Awakening Special Attack)", value = "show-soulfire", selected = magicComponents["show-soulfire"] },
+        { text = "Show Soulfire (Roar of Awakening Special Attack)", value = "show-soulfire", selected = magicComponents["show-soulfire"] },
         { text = "Show Active Spell", value = "show-active-spell", selected = magicComponents["show-active-spell"] },
     }, {
         onChange = function(group, values, changedValue, selected)
@@ -399,103 +453,28 @@ local CreateUI = function()
 
   local playerInCombatDebugLabel = debugPage:AddText("In Combat: false")
 
-    debugPage:AddText("Force Combat Style")
+    debugPage:AddText("Force Active Combat Style (Changing this setting will disable the Dynamic Swapping setting)")
     local forceCombatStyle = debugPage:AddRadioButton({
         { text = "Necromancy", value = "necromancy" },
         { text = "Magic", value = "magic" },
         { text = "Ranged", value = "ranged" },
         { text = "Melee", value = "melee" }
     }, {
-        selectedValue = 'necromancy',
+        selectedValue = '',
 
         onChange = function(group, value)
-            if settings.Get('automaticallySwapGauge') == 'static' then
-                events.combatStyle = value
-            end
+            events.combatStyle = value
+            automaticallySwapGauge:SetSelectedValue('static')
+            settings.Set('automaticallySwapGauge', 'static')
         end,
     })
 
-  debugPage:AddDivider({
-    marginTop = 0,
-    marginBottom = 4
-  })
-  debugPage:AddTitle("Necromancy")
-  -- Necromancy Stacks
-  local necrosisStacksDebugLabel = debugPage:AddText("Necrosis Stacks: 0")
-  local residualSoulsDebugLabel = debugPage:AddText("Residual Souls: 0")
-
-  -- Living Death
-  local livingDeathDebugLabel = debugPage:AddText("Living Death: Inactive")
-  local livingDeathDurationDebugLabel = debugPage:AddText("Living Death Duration: 0")
-  local deathSparkStacksDebugLabel = debugPage:AddText("Death Spark Stacks: 0")
-
-  -- Necromancy Conjures
-  debugPage:AddTitle("Conjures")
-  -- Skeleton Warrior
-  local skeletonWarriorDebugLabel = debugPage:AddText("Skeleton Warrior: Inactive")
-  local skeletonWarriorDurationDebugLabel = debugPage:AddText("Skeleton Warrior Duration: 0")
-  local skeletonWarriorStacksDebugLabel = debugPage:AddText("Skeleton Warrior Stacks: 0")
-
-  -- Putrid Zombie
-  local putridZombieDebugLabel = debugPage:AddText("Putrid Zombie: Inactive")
-  local putridZombieDurationDebugLabel = debugPage:AddText("Putrid Zombie Duration: 0")
-
-  -- Vengeful Ghost
-  local vengefulGhostDebugLabel = debugPage:AddText("Vengeful Ghost: Inactive")
-  local vengefulGhostDurationDebugLabel = debugPage:AddText("Vengeful Ghost Duration: 0")
-
-  -- Phantom Guardian
-  local phantomGuardianDebugLabel = debugPage:AddText("Phantom Guardian: Inactive")
-  local phantomGuardianDurationDebugLabel = debugPage:AddText("Phantom Guardian Duration: 0")
-  local phantomGuardianStacksDebugLabel = debugPage:AddText("Phantom Guardian Stacks: 0")
-
-  -- Necromancy Incantations
-  debugPage:AddTitle("Incantations")
-  -- Darkness
-  local darknessDebugLabel = debugPage:AddText("Darkness: Inactive")
-  -- Invoke Death
-  local invokeDeathDebugLabel = debugPage:AddText("Invoke Death: Inactive")
-  -- Split Soul
-  local splitSoulDebugLabel = debugPage:AddText("Split Soul: Inactive")
-  -- Threads of Fate
-  local threadsOfFateDebugLabel = debugPage:AddText("Threads of Fate: Inactive")
-
-  debugPage:AddTitle("Magic")
-  local activeSpellDebugLabel = debugPage:AddText("Active Spell: unset")
-  local runicChargeDebugLabel = debugPage:AddText("Runic Charge: Inactive")
+  
 
 local function updateDebugData()
-
-playerInCombatDebugLabel.content = "In Combat: " .. tostring(events.playerData.inCombat)
-
--- Necromancy
-necrosisStacksDebugLabel.content = "Necrosis Stacks: " .. tostring(events.playerData.necromancy.necrosisStacks)
-residualSoulsDebugLabel.content = "Residual Soul Stacks: " .. tostring(events.playerData.necromancy.residualSoulStacks)
-livingDeathDebugLabel.content = "Living Death: " .. (events.playerData.necromancy.livingDeath.active == -1 and "Inactive" or "Active")
-livingDeathDebugLabel.content = "Living Death: " .. tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
-deathSparkStacksDebugLabel.content = "Death Spark Stacks: " .. tostring(events.playerData.necromancy.deathSparkStacks)
--- Conjures
-skeletonWarriorDebugLabel.content = "Skeleton Warrior: " .. (events.playerData.necromancy.conjures.skeletonWarrior.active == 1 and "Active" or "Inactive")
-skeletonWarriorDurationDebugLabel.content = "Skeleton Warrior Duration: " .. tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
-skeletonWarriorStacksDebugLabel.content = "Skeleton Warrior Stacks: " .. tostring(events.playerData.necromancy.conjures.skeletonWarrior.stacks)
-putridZombieDebugLabel.content = "Putrid Zombie: " .. (events.playerData.necromancy.conjures.putridZombie.active == 1 and "Active" or "Inactive")
-putridZombieDurationDebugLabel.content = "Putrid Zombie Duration: " .. tostring(ticksToSeconds(events.playerData.necromancy.conjures.putridZombie.remainingDuration))
-vengefulGhostDebugLabel.content = "Vengeful Ghost: " .. (events.playerData.necromancy.conjures.vengefulGhost.active == 1 and "Active" or "Inactive")
-vengefulGhostDurationDebugLabel.content = "Vengeful Ghost Duration: " .. tostring(ticksToSeconds(events.playerData.necromancy.conjures.vengefulGhost.remainingDuration))
-phantomGuardianDebugLabel.content = "Phantom Guardian: " .. (events.playerData.necromancy.conjures.phantomGuardian.active == 1 and "Active" or "Inactive")
-phantomGuardianDurationDebugLabel.content = "Phantom Guardian Duration: " .. tostring(ticksToSeconds(events.playerData.necromancy.conjures.phantomGuardian.remainingDuration))
-phantomGuardianStacksDebugLabel.content = "Phantom Guardian Stacks: " .. tostring(events.playerData.necromancy.conjures.phantomGuardian.stacks)
--- Incantations
-darknessDebugLabel.content = "Darkness: " .. (events.playerData.necromancy.incantations.darkness.active == 1 and "Active" or "Inactive")
-invokeDeathDebugLabel.content = "Invoke Death: " .. (events.playerData.necromancy.incantations.invokeDeath.active == 1 and "Active" or "Inactive")
-splitSoulDebugLabel.content = "Split Soul: " .. (events.playerData.necromancy.incantations.splitSoul.active == 1 and "Active" or "Inactive")
-threadsOfFateDebugLabel.content = "Threads of Fate: " .. (events.playerData.necromancy.incantations.threadsOfFate.active == 1 and "Active" or "Inactive")
-
--- Magic
-activeSpellDebugLabel.content = "Active Spell: ".. (events.playerData.magic.active_spell.name)
-runicChargeDebugLabel.content = "Runic Charge: ".. (events.playerData.magic.runic_charge.active == 1 and "Active" or "Inactive")
-
+    playerInCombatDebugLabel.content = "In Combat: " .. tostring(events.playerData.inCombat)
 end
+
 Event.VarTransmit.Subscribe("updateDebugData", updateDebugData)
 
 local function updateOverlays()
@@ -531,6 +510,9 @@ local function updateOverlays()
     
     if events.playerData.inCombat ~= true and settings.Get("hideGaugeOutOfCombat") == "combat-visible" then
         necromancyGaugeLayer.hidden = true
+        magicGaugeLayer.hidden = true
+        rangedGaugeLayer.hidden = true
+        meleeGaugeLayer.hidden = true
      end
 
     -- Conjure Undead Army
@@ -542,7 +524,8 @@ local function updateOverlays()
         or events.playerData.necromancy.conjures.phantomGuardian.active == 1
             then
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.active
-                if ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration) == 0.0 then return end
+                --if ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration) == 0.0 then return end
+                conjureText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 conjureText.content = tostring(ticksToSeconds(events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration))
             else 
                 conjureUndeadArmy.sprite = overlaySprites.necromancy.conjures.inactive
@@ -560,17 +543,20 @@ local function updateOverlays()
                 if settings.Get('automaticallySwapGauge') == 'dynamic' then
                     events.combatStyle = 'necromancy'
                 end
-                if ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration) == 0.0 then return end
+                --if ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration) == 0.0 then return end
+                livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.remainingDuration))
             elseif events.playerData.necromancy.livingDeath.cooldown >= 1 then 
                 livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
+                livingDeathText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeathText.content = tostring(ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown))
             else
                 livingDeath.sprite = overlaySprites.necromancy.living_death.inactive
                 livingDeathText.content = ""
                 if ticksToSeconds(events.playerData.necromancy.livingDeath.cooldown) == 0.0 then
                     livingDeath.sprite = overlaySprites.necromancy.living_death.active
-                    livingDeathText.content = "RDY"
+                    livingDeathText.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    livingDeathText.content = "Ready"
                 end
         end
     else 
@@ -674,9 +660,11 @@ local function updateOverlays()
                 if ticksToSeconds(events.playerData.magic.sunshine.remainingDuration) == 0.0 then
                     events.playerData.magic.sunshine.active = 0
                 end
+                sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 sunshineText.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.remainingDuration))
             elseif events.playerData.magic.sunshine.cooldown >= 1 then 
                 sunshine.sprite = overlaySprites.magic.sunshine.inactive
+                sunshineText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 sunshineText.content = tostring(ticksToSeconds(events.playerData.magic.sunshine.cooldown))
             else
                 if events.playerData.ultimates.greater_sunshine_unlocked == 1 then
@@ -691,7 +679,8 @@ local function updateOverlays()
                     else
                         sunshine.sprite = overlaySprites.magic.sunshine.active
                     end
-                    sunshineText.content = "RDY"
+                    sunshineText.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    sunshineText.content = "Ready"
                 end
         end
     else 
@@ -710,16 +699,19 @@ local function updateOverlays()
                 if ticksToSeconds(events.playerData.magic.tsunami.remainingDuration) == 0.0 then
                     events.playerData.magic.tsunami.active = 0
                 end
+                tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.remainingDuration))
             elseif events.playerData.magic.tsunami.cooldown >= 1 then 
                 tsunami.sprite = overlaySprites.magic.tsunami.inactive
+                tsunamiText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.cooldown))
             else
                 tsunami.sprite = overlaySprites.magic.tsunami.inactive
                 tsunamiText.content = ""
                 if ticksToSeconds(events.playerData.magic.tsunami.cooldown) == 0.0 then
                     tsunami.sprite = overlaySprites.magic.tsunami.active
-                    tsunamiText.content = "RDY"
+                    tsunamiText.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    tsunamiText.content = "Ready"
                 end
         end
     else 
@@ -738,47 +730,22 @@ local function updateOverlays()
                 if ticksToSeconds(events.playerData.magic.runic_charge.remainingDuration) == 0.0 then
                     events.playerData.magic.runic_charge.active = 0
                 end
+                runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 runicChargeText.content = tostring(ticksToSeconds(events.playerData.magic.runic_charge.remainingDuration))
             elseif events.playerData.magic.runic_charge.cooldown >= 1 then 
                 runicCharge.sprite = overlaySprites.magic.runic_charge.inactive
+                runicChargeText.font = id.Font.MUSEO_SANS_13PT_BOLD
                 runicChargeText.content = tostring(ticksToSeconds(events.playerData.magic.runic_charge.cooldown))
             else
                 runicCharge.sprite = overlaySprites.magic.runic_charge.inactive
                 if ticksToSeconds(events.playerData.magic.runic_charge.cooldown) == 0.0 then
                     runicCharge.sprite = overlaySprites.magic.runic_charge.active
-                    runicChargeText.content = "RDY"
+                    runicChargeText.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                    runicChargeText.content = "Ready"
                 end
         end
     else 
         runicChargeLayer.hidden = true
-    end
-
-    -- Active Spell
-    if settings.Get("magicVisibleGaugeComponents")["show-active-spell"] then 
-        activeSpellLayer.hidden = false
-        if events.playerData.magic.tsunami.active == 1
-            then 
-                tsunami.sprite = overlaySprites.magic.tsunami.active
-                if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                    events.combatStyle = 'magic'
-                end
-                if ticksToSeconds(events.playerData.magic.tsunami.remainingDuration) == 0.0 then
-                    events.playerData.magic.tsunami.active = 0
-                end
-                tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.remainingDuration))
-            elseif events.playerData.magic.tsunami.cooldown >= 1 then 
-                tsunami.sprite = overlaySprites.magic.tsunami.inactive
-                tsunamiText.content = tostring(ticksToSeconds(events.playerData.magic.tsunami.cooldown))
-            else
-                tsunami.sprite = overlaySprites.magic.tsunami.inactive
-                tsunamiText.content = ""
-                if ticksToSeconds(events.playerData.magic.tsunami.cooldown) == 0.0 then
-                    tsunami.sprite = overlaySprites.magic.tsunami.active
-                    tsunamiText.content = "RDY"
-                end
-        end
-    else 
-        activeSpellLayer.hidden = true
     end
 
     if settings.Get("magicVisibleGaugeComponents")["show-active-spell"] then 
@@ -806,5 +773,6 @@ end
 M.CreateUI = CreateUI
 
 return M
+
 
 
