@@ -113,6 +113,8 @@ local function isPlantedFeetEquipped()
     return rank ~= nil and rank > 0
 end
 
+-- New spells may be added in the future and since spells are hard-coded
+-- rather than data driven, we need to do a nil check to make sure we have the data
 local function updateActiveSpell(spellId)
     local spell = spells[spellId]
 
@@ -122,6 +124,41 @@ local function updateActiveSpell(spellId)
 
     events.playerData.magic.activeSpell.name = spell.name
     events.playerData.magic.activeSpell.icon = spell.icon
+end
+
+local function swapGaugeToCombatStyle(style)
+    if settings.Get('automaticallySwapGauge') == 'dynamic' then
+        events.playerData.combatStyle = style
+    end
+end
+
+local COOLDOWN_RESET_VARS = {
+    COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END =
+        events.playerData.necromancy.livingDeath,
+
+    COMBATV2_COOLDOWN_MAGIC_SUNSHINE_END =
+        events.playerData.magic.sunshine,
+
+    COMBATV2_COOLDOWN_MAGIC_TSUNAMI_END =
+        events.playerData.magic.tsunami,
+
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_END =
+        events.playerData.magic.instability,
+
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END =
+        events.playerData.magic.soulfire,
+}
+
+local function handleCooldownReset(event)
+    if event.newValue ~= 0 then
+        return
+    end
+
+    local ability = COOLDOWN_RESET_VARS[event.var.configName]
+
+    if ability then
+        ability.cooldown = 0
+    end
 end
 
 Event.VarTransmit.Subscribe("cooldownTracking", function(event)
@@ -135,9 +172,7 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
         if event.oldValue == -1 then 
             events.playerData.necromancy.livingDeath.active = 1
             events.playerData.necromancy.livingDeath.remainingDuration = 50
-            if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                events.playerData.combatStyle = 'necromancy'
-            end
+            swapGaugeToCombatStyle('necromancy')
         else 
             events.playerData.necromancy.livingDeath.active = 0
             events.playerData.necromancy.livingDeath.remainingDuration = 0
@@ -151,9 +186,7 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
             events.playerData.magic.runicCharge.active = 1
             events.playerData.magic.runicCharge.remainingDuration = 25
             events.playerData.magic.runicCharge.cooldown = 50
-            if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                events.playerData.combatStyle = 'magic'
-            end
+            swapGaugeToCombatStyle('magic')
         else
             events.playerData.magic.runicCharge.active = 0
             events.playerData.magic.runicCharge.remainingDuration = 0
@@ -174,9 +207,7 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
                 end
             end
             events.playerData.magic.sunshine.cooldown = 100
-            if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                events.playerData.combatStyle = 'magic'
-            end
+            swapGaugeToCombatStyle('magic')
         end
     end
 
@@ -186,39 +217,13 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
             events.playerData.magic.tsunami.active = 1
             events.playerData.magic.tsunami.remainingDuration = 50
             events.playerData.magic.tsunami.cooldown = 100
-            if settings.Get('automaticallySwapGauge') == 'dynamic' then
-                events.playerData.combatStyle = 'magic'
-            end
+            swapGaugeToCombatStyle('magic')
         end
     end
 
     -- The user can reset their cooldowns at the Altar of War. The altar does this
     -- by setting all _END values to 0, forcing them to be off cooldown.
-    if event.var.configName == "COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END" then
-        if event.newValue == 0 then
-            events.playerData.necromancy.livingDeath.cooldown = 0
-        end
-    end
-    if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_SUNSHINE_END" then
-        if event.newValue == 0 then
-            events.playerData.magic.sunshine.cooldown = 0
-        end
-    end
-    if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_TSUNAMI_END" then
-        if event.newValue == 0 then
-            events.playerData.magic.tsunami.cooldown = 0
-        end
-    end
-    if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_END" then
-        if event.newValue == 0 then
-            events.playerData.magic.instability.cooldown = 0
-        end
-    end
-    if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END" then
-        if event.newValue == 0 then
-            events.playerData.magic.soulfire.cooldown = 0
-        end
-    end
+    handleCooldownReset(event)
 
     -- Treat the player as Out of Combat if they can manage to bank so the gauges don't block the bank UI
     if event.var.configName == "BANK_TEMP" then
