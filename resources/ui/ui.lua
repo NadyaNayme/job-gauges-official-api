@@ -309,10 +309,10 @@ local CreateUI = function()
     onClick = function(handle, active) settingsBox.root.hidden = not active end,
   })
 
-  local tabs = settingsBox:AddTabs({ "General", "Necro", "Magic", "Melee", "Ranged", "Debug" }, { height = -20, heightAnchor = 1.0 })
+  local tabs = settingsBox:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged", "Debug" }, { height = -20, heightAnchor = 1.0 })
 
   local generalPage = tabs:GetPage(1)
-  local necroPage = tabs:GetPage(2)
+  local necromancyPage = tabs:GetPage(2)
   local magicPage = tabs:GetPage(3)
   local meleePage = tabs:GetPage(4)
   local rangedPage = tabs:GetPage(5)
@@ -339,7 +339,7 @@ local CreateUI = function()
         updateOverlayPositions = updateOverlayPositions,
     })
         
-    necromancySettings.Create(necroPage)
+    necromancySettings.Create(necromancyPage)
     magicSettings.Create(magicPage)
     -- meleeSettings.Create(meleePage)
     -- rangedSettings.Create(rangedPage)
