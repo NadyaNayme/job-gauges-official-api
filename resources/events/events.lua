@@ -267,7 +267,9 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     end
 
     -- Update the player's autocast spell whenever it changes
-    updateActiveSpell(spells[event.newValue])
+    if event.var.configName == "LASTCASTSPELL" then
+        updateActiveSpell(event.newValue)
+    end
 
 end)
 
@@ -405,7 +407,7 @@ local function updatePlayerData()
 
 
     -- Magic
-    updateActiveSpell(spells[var.VarPlayer["LASTCASTSPELL"].value])
+    updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
     events.playerData.ultimates.greaterSunshineUnlocked = var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
     events.playerData.ultimates.greaterDeathsSwiftnessUnlocked = var.VarPlayer["COMBATV2_ABILITY_RANGED_GREATER_DEATHS_SWIFTNESS_UNLOCKED"].value
 
