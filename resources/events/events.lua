@@ -136,6 +136,8 @@ end
 local function updateActiveSpell(spellId)
     local spell = spells[spellId]
 
+    -- Known Issue: This can result in stale state if a user sets an unsupported spell as active.
+    -- Keeping this bug around means users will report it and I can update spells.lua faster :)
     if not spell then
         return
     end
