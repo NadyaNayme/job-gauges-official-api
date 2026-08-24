@@ -19,7 +19,6 @@ local events = {
                 activeStart = 0,
                 activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             deathSparkStacks = '0',
 
@@ -27,27 +26,19 @@ local events = {
                 skeletonWarrior = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     stacks = 0
                 },
                 putridZombie = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                 },
                 vengefulGhost = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                 },
                 phantomGuardian = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     stacks = 0
                 }
             },
@@ -56,34 +47,22 @@ local events = {
                 threadsOfFate = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     cooldown = 0,
-                    onCooldown = 0
                 },
                 invokeDeath = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     cooldown = 0,
-                    onCooldown = 0
                 },
                 splitSoul = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     cooldown = 0,
-                    onCooldown = 0
                 },
                 darkness = {
                     active = 0,
                     remainingDuration = 0,
-                    activeStart = 0,
-                    activeEnd = 0,
                     cooldown = 0,
-                    onCooldown = 0
                 }
             }
         },
@@ -95,42 +74,27 @@ local events = {
             runicCharge = {
                 active = 0,
                 remainingDuration = 0,
-                activeStart = 0,
-                activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             tsunami = {
                 active = 0,
                 remainingDuration = 0,
-                activeStart = 0,
-                activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             sunshine = {
                 active = 0,
                 remainingDuration = 0,
-                activeStart = 0,
-                activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             instability = {
                 active = 0,
                 remainingDuration = 0,
-                activeStart = 0,
-                activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             soulfire = {
                 active = 0,
                 remainingDuration = 0,
-                activeStart = 0,
-                activeEnd = 0,
                 cooldown = 0,
-                onCooldown = 0
             },
             stacks = {
                 exsanguinate = 0,
@@ -233,31 +197,26 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     if event.var.configName == "COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END" then
         if event.newValue == 0 then
             events.playerData.necromancy.livingDeath.cooldown = 0
-            events.playerData.necromancy.livingDeath.onCooldown = 0
         end
     end
     if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_SUNSHINE_END" then
         if event.newValue == 0 then
             events.playerData.magic.sunshine.cooldown = 0
-            events.playerData.magic.sunshine.onCooldown = 0
         end
     end
     if event.var.configName == "COMBATV2_COOLDOWN_MAGIC_TSUNAMI_END" then
         if event.newValue == 0 then
             events.playerData.magic.tsunami.cooldown = 0
-            events.playerData.magic.tsunami.onCooldown = 0
         end
     end
     if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_END" then
         if event.newValue == 0 then
             events.playerData.magic.instability.cooldown = 0
-            events.playerData.magic.instability.onCooldown = 0
         end
     end
     if event.var.configName == "COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END" then
         if event.newValue == 0 then
             events.playerData.magic.soulfire.cooldown = 0
-            events.playerData.magic.soulfire.onCooldown = 0
         end
     end
 
@@ -287,7 +246,6 @@ local function decrementTimers(tbl)
             -- Force inactive if the ability is active but has no remaining duration and no remaining cooldown
             -- this is necessary because some abilities (non-Necromancy ultimates) don't transmit anything when they end, unlike Living Death
             if (tbl.active == 1 and tbl.remainingDuration == 0 and tbl.cooldown == 0) then
-                tbl.onCooldown = 0
                 tbl.active = 0
             end
         end
