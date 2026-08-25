@@ -69,25 +69,25 @@ function M.Create(page)
     })
 
 
-    page:AddTitle("UI Settings")
+    -- page:AddTitle("UI Settings")
 
-    local uiSettings = settings.Get("necroUISettings")
+    -- local uiSettings = settings.Get("necroUISettings")
 
-    page:AddCheckboxButton({
-        {
-            text = "Hide Native Residual Souls",
-            value = "hide-residual-souls",
-            selected = uiSettings["hide-residual-souls"]
-        }
-    }, {
-        onChange = function(_, _, changedValue, selected)
-            local current = settings.Get("necroUISettings")
+    -- page:AddCheckboxButton({
+    --     {
+    --         text = "Hide Native Residual Souls",
+    --         value = "hide-residual-souls",
+    --         selected = uiSettings["hide-residual-souls"]
+    --     }
+    -- }, {
+    --     onChange = function(_, _, changedValue, selected)
+    --         local current = settings.Get("necroUISettings")
 
-            current[changedValue] = selected
+    --         current[changedValue] = selected
 
-            settings.Set("necroUISettings", current)
-        end,
-    })
+    --         settings.Set("necroUISettings", current)
+    --     end,
+    -- })
 
 end
 
