@@ -686,7 +686,7 @@ local function updateOverlays()
         runicCharge.layer.hidden = true
     end
 
-    if magicSettings["show-runic-charge"] then 
+    if magicSettings["show-soulfire"] then 
         soulfire.layer.hidden = false
         if magic.soulfire.active == 1
             then 
@@ -709,7 +709,7 @@ local function updateOverlays()
         soulfire.layer.hidden = true
     end
 
-    if magicSettings["show-runic-charge"] then 
+    if magicSettings["show-instability"] then 
         instability.layer.hidden = false
         if magic.instability.active == 1
             then 
