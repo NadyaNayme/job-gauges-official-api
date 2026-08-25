@@ -517,7 +517,6 @@ local function updateCombatStyle()
         if combatStyle then
             events.playerData.combatStyle = combatStyle
             settings.Set("lastKnownCombatStyle", combatStyle)
-            log(combatStyle)
         end
     end
 end
