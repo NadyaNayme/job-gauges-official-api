@@ -502,7 +502,7 @@ local function updatePlayerData()
 
 end
 
-local function updateCombatStyle()
+local function checkEquippedMainhand()
     if settings.Get('automaticallySwapGauge') ~= 'mainhand' then return end
 
     local worn = Inventory.Find(config.Inv.WORN)
@@ -550,7 +550,7 @@ Event.Logic.Subscribe("updatePlayerData", function()
     updatePlayerData()
 end)
 Event.ServerLogic.Subscribe("wornMainhand", function() 
-    updateCombatStyle()
+    checkEquippedMainhand()
 end)
 
 return events
