@@ -40,6 +40,10 @@ local GAUGE_COMPONENT_POSITIONS = {
         soulfire = { x = 0, y = -34 },
         instability = { x = 40, y = -34 },
         activeSpell = { x = 88, y = -24 },
+    },
+    
+    ranged = {
+        deathsSwiftness = { x = 0, y = 0 }
     }
 }
 
@@ -214,7 +218,6 @@ local CreateUI = function()
 
   -- Magic Overlay
     local magicGaugeLayer = createGaugeLayer(jobGaugeLayer)
-
     local tsunami = createAbilityIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.tsunami
@@ -248,6 +251,12 @@ local CreateUI = function()
     )
 
     local rangedGaugeLayer = createGaugeLayer(jobGaugeLayer)
+    local deathsSwiftness = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.deathsSwiftness
+    )
+    
+
     local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
 
     local function updateOverlayPositions()
@@ -326,6 +335,12 @@ local CreateUI = function()
             activeSpellSprite,
             positions.magic.activeSpell
         )
+
+        setAbilityIndicatorPosition(
+            deathsSwiftness,
+            positions.ranged.deathsSwiftness
+        )
+
     end
 
   local settingsBox = prettyui.Window.new(gameArea, {
@@ -376,7 +391,7 @@ local CreateUI = function()
     necromancySettings.Create(necromancyPage)
     magicSettings.Create(magicPage)
     -- meleeSettings.Create(meleePage)
-    -- rangedSettings.Create(rangedPage)
+    rangedSettings.Create(rangedPage)
 
 local function updateGaugeVisibility()
     necromancyGaugeLayer.hidden = true
@@ -422,10 +437,13 @@ local function updateOverlays()
 
     local necroSettings = settings.Get("necroVisibleGaugeComponents")
     local magicSettings = settings.Get("magicVisibleGaugeComponents")
+    local rangedSettings = settings.Get("rangedVisibleGaugeComponents")
 
     local playerData = events.playerData
     local necromancy = playerData.necromancy
     local magic = playerData.magic
+    local ranged = playerData.ranged
+    -- local melee = playerData.melee
     local ultimates = playerData.ultimates
 
     if playerData.combatStyle == nil then
@@ -737,6 +755,39 @@ local function updateOverlays()
         activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
         activeSpellSprite:SetSize(0, 0)
+    end
+
+    -- Ranged Gauge
+    -- Death's Swiftness
+    if rangedSettings["show-deaths-swiftness"] then 
+        deathsSwiftness.layer.hidden = false
+        if ranged.deathsSwiftness.active == 1
+            then 
+                if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                else
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                end
+                if ticksToSeconds(ranged.deathsSwiftness.remainingDuration) == 0.0 then
+                    ranged.deathsSwiftness.active = 0
+                end
+                deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
+            elseif ranged.deathsSwiftness.cooldown >= 1 then 
+                deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.inactive
+                deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
+            else
+                if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                else
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                end
+                deathsSwiftness.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                deathsSwiftness.text.content = "Ready"
+        end
+    else 
+        deathsSwiftness.layer.hidden = true
     end
 
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then

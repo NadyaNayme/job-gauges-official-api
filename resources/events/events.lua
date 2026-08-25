@@ -102,6 +102,61 @@ local events = {
                 exsanguinate = 0,
                 incite_fear = 0
             }
+        },
+        ranged = {
+            activeAmmo = {
+                icon = '',
+                name = ''
+            },
+            arrows = {
+                bikArrows = {
+                    stacks = 0,
+                    remainingDuration = 0,
+                },
+                wenArrows = {
+                    stacks = 0,
+                    remainingDuration = 0,
+                },
+                deathsporeArrows = {
+                    stacks = 0,
+                    remainingDuration = 0,
+                },
+                splinteringArrows = {
+                    stacks = 0,
+                    remainingDuration = 0,
+                }
+            },
+            deathsSwiftness = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            crystalRain = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            splitSoul = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            searingWinds = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            shadowImbued = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            perfectEquilibrium = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+                stacks = 0,
+            }
         }
     }
 }
@@ -224,6 +279,14 @@ local function handleTsunami(event)
     end
 end
 
+local function handleDeathsSwiftness(event)
+    events.playerData.ranged.deathsSwiftness.active = 1
+    events.playerData.ranged.deathsSwiftness.remainingDuration = getDeathsSwiftnessDuration()
+    events.playerData.ranged.deathsSwiftness.cooldown = 100
+
+    swapGaugeToCombatStyle('ranged')
+end
+
 -- Treats the player as 'Out of Combat' if they bank, so the gauge doesn't block the bank UI
 local function handleBank()
     events.playerData.inCombat = false
@@ -240,6 +303,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleSoulfire,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
+    COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
 
     BANK_TEMP = handleBank,
     LASTCASTSPELL = handleLastCastSpell,
@@ -260,6 +324,12 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END =
         events.playerData.magic.soulfire,
+
+    COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_END =
+        events.playerData.ranged.deathsSwiftness,
+
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END =
+        events.playerData.ranged.crystalRain,
 }
 
 -- The user can reset their cooldowns at the Altar of War. The altar does this

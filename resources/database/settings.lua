@@ -39,6 +39,13 @@ local defaults = {
         ["magic_gauge_offset_x"] = 0,
         ["magic_gauge_offset_y"] = 0
     },
+
+    rangedVisibleGaugeComponents = {
+        ["show-deaths-swiftness"] = true,
+        ["show-perfect-equilibrium"] = true,
+        ["show-split-soul"] = true,
+        ["show-crystal-rain"] = true,
+    },
 }
 
 

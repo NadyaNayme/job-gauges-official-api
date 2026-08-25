@@ -90,6 +90,24 @@ function M.CreateSprites(parent)
                 active = Plugin.resources.sprites.magic.soulfire.active,
                 inactive = Plugin.resources.sprites.magic.soulfire.inactive
             }
+        },
+        ranged = {
+            deaths_swiftness = {
+                active = Plugin.resources.sprites.ranged.deaths_swiftness.active,
+                inactive = Plugin.resources.sprites.ranged.deaths_swiftness.inactive,
+            },
+            perfect_equilibrium = {
+                active = Plugin.resources.sprites.ranged.perfect_equilibrium.active,
+                inactive = Plugin.resources.sprites.ranged.perfect_equilibrium.inactive,
+            },
+            split_soul = {
+                active = Plugin.resources.sprites.ranged.split_soul.active,
+                inactive = Plugin.resources.sprites.ranged.split_soul.inactive,
+            },
+            crystal_rain = {
+                active = Plugin.resources.sprites.ranged.crystal_rain.active,
+                inactive = Plugin.resources.sprites.ranged.crystal_rain.inactive,
+            }
         }
     }
 
