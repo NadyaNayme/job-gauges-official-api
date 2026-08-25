@@ -24,11 +24,12 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("Dynamically swap active style gauge based on active buffs (ie. after a style specific Ability is used)")
+    page:AddText("Dynamically swap active style gauge using...")
 
     options.dynamicGaugeSetting = page:AddRadioButton({
-        { text = "Yes", value = "dynamic" },
-        { text = "No", value = "static" },
+        { text = "Abilities Used", value = "dynamic" },
+        { text = "Mainhand Weapon", value = "mainhand" },
+        { text = "I'll set it myself", value = "static" },
     }, {
         selectedValue = settings.Get("automaticallySwapGauge"),
 
@@ -37,7 +38,7 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("You will need to select your active gauge if you do not have Dynamic Swapping enabled.")
+    page:AddText("If you chose to set it yourself, set your gauge using the below buttons.")
 
     page:AddDivider({
         marginTop = 12,
