@@ -24,6 +24,7 @@ local GAUGE_COMPONENT_POSITIONS = {
         conjureUndeadArmy = { x = 0, y = 0 },
         livingDeath = { x = 40, y = 0 },
         residualSoulsStacks = { x = 2, y = 44 },
+        bloat = { x = 2, y = 87 },
         necrosisStacks = { x = 2, y = 67 },
 
         invokeDeath = { x = 84, y = 0 },
@@ -36,7 +37,9 @@ local GAUGE_COMPONENT_POSITIONS = {
         runicCharge = { x = 0, y = 0 },
         tsunami = { x = 40, y = 0 },
         sunshine = { x = 80, y = 0 },
-        activeSpell = { x = 124, y = 11 },
+        soulfire = { x = 0, y = -34 },
+        instability = { x = 40, y = -34 },
+        activeSpell = { x = 88, y = -24 },
     }
 }
 
@@ -174,6 +177,13 @@ local CreateUI = function()
         20
     )
 
+    local bloat = createSpriteIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.bloat,
+        132,
+        24
+    )
+
     local invokeDeath = createSpriteIndicator(
         necromancyGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.necromancy.invokeDeath,
@@ -220,6 +230,16 @@ local CreateUI = function()
         GAUGE_COMPONENT_POSITIONS.magic.runicCharge
     )
 
+    local soulfire = createAbilityIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.soulfire
+    )
+
+    local instability = createAbilityIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.instability
+    )
+
     local activeSpellSprite = createSpriteIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.activeSpell,
@@ -250,6 +270,11 @@ local CreateUI = function()
         setSpriteIndicatorPosition(
             necrosisStacks,
             positions.necromancy.necrosisStacks
+        )
+
+        setSpriteIndicatorPosition(
+            bloat,
+            positions.necromancy.bloat
         )
 
         setSpriteIndicatorPosition(
@@ -285,6 +310,16 @@ local CreateUI = function()
         setAbilityIndicatorPosition(
             sunshine,
             positions.magic.sunshine
+        )
+
+        setAbilityIndicatorPosition(
+            soulfire,
+            positions.magic.soulfire
+        )
+
+        setAbilityIndicatorPosition(
+            instability,
+            positions.magic.instability
         )
 
         setSpriteIndicatorPosition(
@@ -496,6 +531,42 @@ local function updateOverlays()
         necrosisStacks:SetSize(0, 0)
     end
 
+    if necroSettings["show-bloat"] then
+        bloat:SetSize(scaleToFactor(132), scaleToFactor(24))
+
+        if necromancy.bloat.active then
+            if necromancy.bloat.remainingDuration < 1 then
+                bloat.sprite = overlaySprites.necromancy.bloat.expired
+            elseif necromancy.bloat.remainingDuration < 3 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_0
+            elseif necromancy.bloat.remainingDuration < 6 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_10
+            elseif necromancy.bloat.remainingDuration < 9 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_20
+            elseif necromancy.bloat.remainingDuration < 12 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_30
+            elseif necromancy.bloat.remainingDuration < 15 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_40
+            elseif necromancy.bloat.remainingDuration < 18 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_50
+            elseif necromancy.bloat.remainingDuration < 21 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_60
+            elseif necromancy.bloat.remainingDuration < 24 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_70
+            elseif necromancy.bloat.remainingDuration < 27 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_80
+            elseif necromancy.bloat.remainingDuration < 30 then
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_90
+            else
+                bloat.sprite = overlaySprites.necromancy.bloat.bloat_100
+            end
+        else
+            bloat.sprite = overlaySprites.necromancy.bloat.expired
+        end
+    else
+        bloat:SetSize(0, 0)
+    end
+
     -- Incantations
     if necroSettings["show-darkness"] then 
         darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
@@ -615,11 +686,70 @@ local function updateOverlays()
         runicCharge.layer.hidden = true
     end
 
+    if magicSettings["show-runic-charge"] then 
+        soulfire.layer.hidden = false
+        if magic.soulfire.active == 1
+            then 
+                soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
+                if ticksToSeconds(magic.soulfire.remainingDuration) == 0.0 then
+                    magic.soulfire.active = 0
+                end
+                soulfire.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.remainingDuration))
+            elseif magic.soulfire.cooldown >= 1 then 
+                soulfire.sprite.sprite = overlaySprites.magic.soulfire.inactive
+                soulfire.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.cooldown))
+            else
+                soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
+                soulfire.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                soulfire.text.content = "Ready"
+        end
+    else 
+        soulfire.layer.hidden = true
+    end
+
+    if magicSettings["show-runic-charge"] then 
+        instability.layer.hidden = false
+        if magic.instability.active == 1
+            then 
+                instability.sprite.sprite = overlaySprites.magic.instability.active
+                if ticksToSeconds(magic.instability.remainingDuration) == 0.0 then
+                    magic.instability.active = 0
+                end
+                instability.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                instability.text.content = tostring(ticksToSeconds(magic.instability.remainingDuration))
+            elseif magic.instability.cooldown >= 1 then 
+                instability.sprite.sprite = overlaySprites.magic.instability.inactive
+                instability.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                instability.text.content = tostring(ticksToSeconds(magic.instability.cooldown))
+            else
+                instability.sprite.sprite = overlaySprites.magic.instability.active
+                instability.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                instability.text.content = "Ready"
+        end
+    else 
+        instability.layer.hidden = true
+    end
+
     if magicSettings["show-active-spell"] then 
         activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
         activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
         activeSpellSprite:SetSize(0, 0)
+    end
+
+    if Mouse.IsAvailable() and Keyboard.IsAvailable() then
+        local shiftDown = Keyboard.IsShiftDown()
+        local altDown = Keyboard.IsAltDown()
+        if shiftDown and altDown then
+            local mousePositionXY = Mouse.GetPosition()
+            OFFSET_POSITION_X = mousePositionXY.x
+            OFFSET_POSITION_Y = mousePositionXY.y
+             updateOverlayPositions()
+        end
+    else
+        log("No mouse data available")
     end
 
 end

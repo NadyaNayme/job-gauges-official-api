@@ -84,43 +84,7 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("Gauge Position - Offset X")
-    page:AddSlider({
-        min = 0,
-        max = 1920,
-        value = settings.Get("necroUISettings")["necromancy_gauge_offset_x"],
-        step = 1,
-
-        onChange = function(_, value)
-            local current = settings.Get("necroUISettings")
-
-            current["necromancy_gauge_offset_x"] = value
-
-            settings.Set("necroUISettings", current)
-
-            options.setOffsetX(value)
-            options.updateOverlayPositions()
-        end,
-    })
-
-    page:AddText("Gauge Position - Offset Y")
-    page:AddSlider({
-        min = 0,
-        max = 1080,
-        value = settings.Get("necroUISettings")["necromancy_gauge_offset_y"],
-        step = 1,
-
-        onChange = function(_, value)
-            local current = settings.Get("necroUISettings")
-
-            current["necromancy_gauge_offset_y"] = value
-
-            settings.Set("necroUISettings", current)
-
-            options.setOffsetY(value)
-            options.updateOverlayPositions()
-        end,
-    })
+    page:AddText("Tip! Hold Shift+Alt to reposition your gauges.")
 
 end
 

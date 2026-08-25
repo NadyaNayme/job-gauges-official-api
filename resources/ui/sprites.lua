@@ -53,17 +53,17 @@ function M.CreateSprites(parent)
             },
             bloat = {
                 expired = Plugin.resources.sprites.necromancy.bloat.expired,
-                applied = Plugin.resources.sprites.necromancy.bloat.applied,
-                one     = Plugin.resources.sprites.necromancy.bloat.one,
-                two     = Plugin.resources.sprites.necromancy.bloat.two,
-                three   = Plugin.resources.sprites.necromancy.bloat.three,
-                four    = Plugin.resources.sprites.necromancy.bloat.four ,
-                five    = Plugin.resources.sprites.necromancy.bloat.five ,
-                six     = Plugin.resources.sprites.necromancy.bloat.six ,
-                seven   = Plugin.resources.sprites.necromancy.bloat.seven,
-                eight   = Plugin.resources.sprites.necromancy.bloat.eight ,
-                nine    = Plugin.resources.sprites.necromancy.bloat.nine,
-                ten     = Plugin.resources.sprites.necromancy.bloat.ten
+                bloat_100 = Plugin.resources.sprites.necromancy.bloat.applied,
+                bloat_0     = Plugin.resources.sprites.necromancy.bloat.ten,
+                bloat_10     = Plugin.resources.sprites.necromancy.bloat.nine,
+                bloat_20   = Plugin.resources.sprites.necromancy.bloat.eight,
+                bloat_30    = Plugin.resources.sprites.necromancy.bloat.seven,
+                bloat_40    = Plugin.resources.sprites.necromancy.bloat.six,
+                bloat_50     = Plugin.resources.sprites.necromancy.bloat.five,
+                bloat_60   = Plugin.resources.sprites.necromancy.bloat.four,
+                bloat_70   = Plugin.resources.sprites.necromancy.bloat.three,
+                bloat_80    = Plugin.resources.sprites.necromancy.bloat.two,
+                bloat_90     = Plugin.resources.sprites.necromancy.bloat.one
             }
         },
         magic = {

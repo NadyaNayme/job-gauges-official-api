@@ -6,6 +6,7 @@ local defaults = {
     hideGaugeOutOfCombat = "combat-visible",
     showPreciseDurations = "precise-ticks",
     lastKnownCombatStyle = '',
+    lastKnownActiveSpell = nil,
 
     necroVisibleGaugeComponents = {
         ["show-conjures"] = true,

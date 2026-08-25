@@ -18,6 +18,10 @@ local events = {
                 remainingDuration = 0,
                 cooldown = 0,
             },
+            bloat = {
+                active = 0,
+                remainingDuration = 0,
+            },
             deathSparkStacks = 0,
 
             conjures = {
@@ -139,11 +143,18 @@ local function updateActiveSpell(spellId)
     -- Known Issue: This can result in stale state if a user sets an unsupported spell as active.
     -- Keeping this bug around means users will report it and I can update spells.lua faster :)
     if not spell then
+        local lastKnownSpell = settings.Get('lastKnownActiveSpell')
+        if lastKnownSpell then
+            local spell = spells[lastKnownSpell]            
+            events.playerData.magic.activeSpell.name = spell.name
+            events.playerData.magic.activeSpell.icon = spell.icon
+        end
         return
     end
 
     events.playerData.magic.activeSpell.name = spell.name
     events.playerData.magic.activeSpell.icon = spell.icon
+    settings.Set('lastKnownActiveSpell', spell)
 end
 
 local function swapGaugeToCombatStyle(style)
@@ -187,6 +198,22 @@ local function handleSunshine(event)
     swapGaugeToCombatStyle('magic')
 end
 
+local function handleSoulfire(event)
+    events.playerData.magic.soulfire.active = 1
+    events.playerData.magic.soulfire.remainingDuration = 0
+    events.playerData.magic.soulfire.cooldown = 75
+
+    swapGaugeToCombatStyle('magic')
+end
+
+local function handleInstability(event)
+    events.playerData.magic.instability.active = 1
+    events.playerData.magic.instability.remainingDuration = 50
+    events.playerData.magic.instability.cooldown = 100
+
+    swapGaugeToCombatStyle('magic')
+end
+
 local function handleTsunami(event)
     if event.oldValue == 0 and event.newValue == 1 then
         events.playerData.magic.tsunami.active = 1
@@ -210,6 +237,8 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT = handleLivingDeath,
     COMBATV2_BUFF_MAGIC_WRACK_ACTIVE = handleRunicCharge,
     COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START = handleSunshine,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleSoulfire,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
 
     BANK_TEMP = handleBank,
@@ -361,7 +390,7 @@ local function updateIncantations()
         var.VarPlayer["COMBATV2_BUFF_NECROMANCY_DARKNESS_ACTIVE"].value
 
     incantations.invokeDeath.active =
-        var.VarPlayer["COMBATV2_BUFF_NECROMANCY_INVOKE_DEATH_ACTIVE"].value
+        var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_DEATH_MARK"].value
 
     incantations.splitSoul.active =
         var.VarPlayer["COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE"].value
@@ -371,10 +400,34 @@ local function updateIncantations()
     end
 end
 
+local function updateBloat()
+    local bloat = events.playerData.necromancy.bloat
+
+    local bloatIsActive = 
+        var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_NECROMANCY_BLOATED"].value
+
+    -- This is intentionally "fuzzy" in that it completely resets the duration if Bloat is re-applied before it falls off
+    -- the player cannot always know when their target was Bloated, such as during Group Content. If the debuff is seen around
+    -- was previously not seen, it is assumed to be fresh. When it falls off - the bar will immediately display 0s remaining.
+    -- This makes it useful to know that Bloat needs to be re-applied, but the timer is only guaranteed to be accurate in solo content
+    -- when a player does not re-apply the debuff before it falls off.
+    if bloat.active == 0 and bloatIsActive == 1 then
+        bloat.remainingDuration = 33
+        bloat.active = bloatIsActive
+    elseif bloat.remainingDuration == 0 and bloatIsActive == 1 then
+        bloat.remainingDuration = 33
+    elseif bloatIsActive == 0 then
+        bloat.active = 0
+        bloat.remainingDuration = 0
+    end
+
+end
+
 local function updateNecromancy()
     updateNecromancyResources()
     updateConjures()
     updateIncantations()
+    updateBloat()
 end
 
 local function checkGreaterUnlocks()
@@ -385,9 +438,19 @@ local function checkGreaterUnlocks()
         var.VarPlayer["COMBATV2_ABILITY_RANGED_GREATER_DEATHS_SWIFTNESS_UNLOCKED"].value
 end
 
+local checkOnce = false
+
 local function updatePlayerData()
     updateInCombatState()
     updateNecromancy()
+
+    if (not checkOnce) then
+        checkGreaterUnlocks()
+        updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
+        swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
+        checkOnce = true
+    end
+
 end
 
 Event.GameStateChanged.Subscribe("dataInitialization", function()
