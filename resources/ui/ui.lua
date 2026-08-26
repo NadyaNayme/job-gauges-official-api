@@ -53,16 +53,6 @@ local GAUGE_COMPONENT_POSITIONS = {
     }
 }
 
-local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
-local ACTIVE_RUNE_COLOUR = Vector4.new(0.3686, 0.9922, 0.5765, 1.0)
-local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
-local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
-local RUNE_SHADOW_OFFSET = 1
-
-local ABILITY_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 0.9)
-local ABILITY_SHADOW_SIZE = 42
-local ABILITY_SHADOW_OFFSET = -1
-
 local RUNE_LAYOUT = {
     BALANCE = {
         [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
@@ -100,6 +90,12 @@ local RUNE_LAYOUT = {
         stacksText = { x = 67, y = -30},
     },
 }
+
+local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
+local ACTIVE_RUNE_COLOUR = Vector4.new(0.3686, 0.9922, 0.5765, 1.0)
+local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
+local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
+local RUNE_SHADOW_OFFSET = 1
 
 local function getRuneLayout(perfectEquilibriumActive)
     local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
@@ -237,6 +233,7 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 end
 
 local function hexToVector4(hex)
+    if hex == nil then return end
     local r = math.floor(hex / 16777216) % 256
     local g = math.floor(hex / 65536) % 256
     local b = math.floor(hex / 256) % 256
@@ -249,6 +246,11 @@ local function hexToVector4(hex)
         a / 255
     )
 end
+
+local ABILITY_SHADOW_COLOUR = hexToVector4(settings.Get("abilityShadowColour")) or Vector4.new(0.1, 0.1, 0.1, 0.9)
+local ABILITY_SHADOW_SIZE = 42
+local ABILITY_SHADOW_OFFSET = -1
+local abilityShadows = {}
 
 local FONT_COLOUR = hexToVector4(settings.Get('fontColour'))
 local fontTexts = {}
@@ -271,40 +273,6 @@ local function createGaugeLayer(parent)
     layer:SetSize(600, 600, 1.0, 1.0)
     return layer
 end
-
--- local function createAbilityIndicator(parent, position)
---     local layer = ui.Layer.new(parent)
---     layer:SetSize(40, 40, 1.0, 1.0)
-
---     local sprite = ui.Sprite.new(layer)
---     sprite:SetPos(
---         math.floor(position.x + OFFSET_POSITION_X),
---         math.floor(position.y + OFFSET_POSITION_Y)
---     )
---     sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
-
---     local text = ui.Text.new(layer)
---     text:SetPos(
---         math.floor(position.x + 8 + OFFSET_POSITION_X),
---         math.floor(position.y + 14 + OFFSET_POSITION_Y)
---     )
---     text:SetSize(22, 15)
---     text:MoveToFront()
---     text.content = ""
---     text.font = id.Font.MUSEO_SANS_13PT_BOLD
---     text.colour = FONT_COLOUR
---     text.isShadowed = true
---     text.alignHorizontal = ui.AlignMode.CENTRE
---     text.alignVertical = ui.AlignMode.CENTRE
-
---     table.insert(fontTexts, text)
-
---     return {
---         layer = layer,
---         sprite = sprite,
---         text = text,
---     }
--- end
 
 local function setAbilityIndicatorSprite(indicator, sprite)
     indicator.shadow.sprite = sprite
@@ -346,6 +314,7 @@ local function createAbilityIndicator(parent, position)
     text.alignVertical = ui.AlignMode.CENTRE
 
     table.insert(fontTexts, text)
+    table.insert(abilityShadows, shadow)
 
     return {
         layer = layer,
@@ -669,6 +638,13 @@ local CreateUI = function()
 
             for _, text in ipairs(fontTexts) do
                 text.colour = FONT_COLOUR
+            end
+        end,
+
+        setAbilityShadowColour = function(colour)
+            ABILITY_SHADOW_COLOUR = hexToVector4(colour)
+            for _, ability in ipairs(abilityShadows) do
+                ability.colour = ABILITY_SHADOW_COLOUR
             end
         end,
 

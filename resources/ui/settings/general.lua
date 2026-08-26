@@ -6,23 +6,6 @@ local M = {}
 function M.Create(page, options)
 
     page:AddTitle("Job Gauge Settings")
-    page:AddColourPicker({
-        value = settings.Get("fontColour"),
-        alphaSlider = true,
-        buttonSize = 48,
-        windowTitle = "Font Colour",
-        tooltip = "Choose the colour of duration and cooldown text",
-        acceptText = "Set Color",
-
-        onChange = function(_, colour)
-            settings.Set(
-                "fontColour",
-                string.format("0x%08X", colour)
-            )
-
-            options.setFontColour(colour)
-        end,
-    })
 
     page:AddText("Dynamically swap active style gauge using...")
 
@@ -82,6 +65,48 @@ function M.Create(page, options)
 
         onChange = function(group, value)
             settings.Set("showPreciseDurations", value)
+        end,
+    })
+
+    page:AddDivider()
+
+    page:AddTitle("Colour Settings")
+
+    page:AddText("Text Colour")
+    page:AddColourPicker({
+        value = settings.Get("fontColour"),
+        alphaSlider = true,
+        buttonSize = 48,
+        windowTitle = "Font Colour",
+        tooltip = "Choose the colour of duration and cooldown text",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "fontColour",
+                string.format("0x%08X", colour)
+            )
+
+            options.setFontColour(colour)
+        end,
+    })
+
+    page:AddText("Ability Shadow Colour")
+    page:AddColourPicker({
+        value = settings.Get("abilityShadowColour"),
+        alphaSlider = true,
+        buttonSize = 48,
+        windowTitle = "Ability Shadow Colour",
+        tooltip = "Choose the colour of the shadow behind ability icons",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "abilityShadowColour",
+                string.format("0x%08X", colour)
+            )
+
+            options.setAbilityShadowColour(colour)
         end,
     })
 

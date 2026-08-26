@@ -2,6 +2,7 @@ local settings = {}
 
 local defaults = {
     fontColour = 0xFFFFFFFF,
+    abilityShadowColour = 0x0000005A,
     automaticallySwapGauge = "dynamic",
     hideGaugeOutOfCombat = "combat-visible",
     showPreciseDurations = "precise-ticks",
