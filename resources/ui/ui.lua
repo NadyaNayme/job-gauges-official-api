@@ -65,12 +65,14 @@ local RUNE_LAYOUT = {
         [5] = { x_offset = 50,  size = { width = 24, height = 24 } },
         [6] = { x_offset = 66,  size = { width = 24, height = 24 } },
         [7] = { x_offset = 82,  size = { width = 24, height = 24 } },
+        stacksText = { x = 120, y = -30},
     },
 
     NYU = {
         [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
         [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
         [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
+        stacksText = { x = 67, y = -30},
     },
 
     SEVEN = {
@@ -81,14 +83,34 @@ local RUNE_LAYOUT = {
         [5] = { x_offset = 48,  size = { width = 24, height = 24 } },
         [6] = { x_offset = 60,  size = { width = 24, height = 24 } },
         [7] = { x_offset = 72,  size = { width = 24, height = 24 } },
+        stacksText = { x = 120, y = -30},
     },
 
     THREE = {
         [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
         [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
         [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
+        stacksText = { x = 67, y = -30},
     },
 }
+
+local function getRuneLayout(perfectEquilibriumActive)
+    local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
+
+    if selectedGuthixianRune == "lore" then
+        if perfectEquilibriumActive then
+            return RUNE_LAYOUT.NYU
+        else
+            return RUNE_LAYOUT.BALANCE
+        end
+    else
+        if perfectEquilibriumActive then
+            return RUNE_LAYOUT.THREE
+        else
+            return RUNE_LAYOUT.SEVEN
+        end
+    end
+end
 
 local bolgLetters = {}
 
@@ -400,6 +422,18 @@ local CreateUI = function()
     )
 
     createBOLGLetters(rangedGaugeLayer)
+
+    local perfectEquilibriumStacksText = ui.Text.new(rangedGaugeLayer)
+    perfectEquilibriumStacksText:SetSize(22, 24)
+    perfectEquilibriumStacksText:MoveToFront()
+    perfectEquilibriumStacksText.content = "0"
+    perfectEquilibriumStacksText.font = id.Font.MUSEO_SANS_15PT_BOLD
+    perfectEquilibriumStacksText.colour = FONT_COLOUR
+    perfectEquilibriumStacksText.isShadowed = true
+    perfectEquilibriumStacksText.alignHorizontal = ui.AlignMode.CENTRE
+    perfectEquilibriumStacksText.alignVertical = ui.AlignMode.CENTRE
+
+    table.insert(fontTexts, perfectEquilibriumStacksText)
     
 
     local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
@@ -499,6 +533,11 @@ local CreateUI = function()
         setAbilityIndicatorPosition(
             perfectEquilibrium,
             positions.ranged.perfectEquilibrium
+        )
+
+        perfectEquilibriumStacksText:SetPos(
+            layout["stacksText"].x + OFFSET_POSITION_X,
+            layout["stacksText"].y + OFFSET_POSITION_Y
         )
 
     end
@@ -1008,19 +1047,32 @@ local function updateOverlays()
         if ranged.perfectEquilibrium.active == 1
             then 
                 perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.active
+
                 if ticksToSeconds(ranged.perfectEquilibrium.remainingDuration) == 0.0 then
                     ranged.perfectEquilibrium.active = 0
                 end
+
                 perfectEquilibrium.text.font = id.Font.MUSEO_SANS_13PT_BOLD
-                perfectEquilibrium.text.content = tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
+                perfectEquilibrium.text.content =
+                    tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
             else
                 perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.inactive
-                perfectEquilibrium.text.font = id.Font.MUSEO_SANS_13PT_BOLD
-                perfectEquilibrium.text.content = tostring(ranged.perfectEquilibrium.stacks)
+                perfectEquilibrium.text.content = ""
         end
+
+        perfectEquilibriumStacksText.content =
+            tostring(ranged.perfectEquilibrium.stacks)
     else 
         perfectEquilibrium.layer.hidden = true
     end
+
+    local perfectEquilibriumActive = ranged.perfectEquilibrium.active == 1
+    local layout = getRuneLayout(perfectEquilibriumActive)
+
+    perfectEquilibriumStacksText:SetPos(
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
+    )
 
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then
         local shiftDown = Keyboard.IsShiftDown()
