@@ -54,7 +54,7 @@ local GAUGE_COMPONENT_POSITIONS = {
 }
 
 local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
-local ACTIVE_RUNE_COLOUR = Vector4.new(0.0, 1.0, 0.0, 1.0)
+local ACTIVE_RUNE_COLOUR = Vector4.new(0.3686, 0.9922, 0.5765, 1.0)
 local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
 local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
 local RUNE_SHADOW_OFFSET = 1
