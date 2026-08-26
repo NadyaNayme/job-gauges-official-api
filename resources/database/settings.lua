@@ -9,6 +9,8 @@ local defaults = {
     lastKnownActiveSpell = nil,
     selectedGuthixianRune = "lore",
     selectedGuthixianRuneId = 27,
+    gaugeOffsetX = 0,
+    gaugeOffsetY = 0,
 
     necroVisibleGaugeComponents = {
         ["show-conjures"] = true,
@@ -24,8 +26,6 @@ local defaults = {
 
     necroUISettings = {
         ["hide-residual-souls"] = true,
-        ["necromancy_gauge_offset_x"] = 0,
-        ["necromancy_gauge_offset_y"] = 0
     },
 
     magicVisibleGaugeComponents = {
@@ -35,11 +35,6 @@ local defaults = {
         ["show-instability"] = true,
         ["show-soulfire"] = true,
         ["show-active-spell"] = true
-    },
-
-    magicUISettings = {
-        ["magic_gauge_offset_x"] = 0,
-        ["magic_gauge_offset_y"] = 0
     },
 
     rangedVisibleGaugeComponents = {

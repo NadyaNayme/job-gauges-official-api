@@ -17,8 +17,9 @@ local M = {}
 
 -- Globals
 local UI_GAUGE_SCALE = 1
-local OFFSET_POSITION_X = settings.Get("necroUISettings")["necromancy_gauge_offset_x"]
-local OFFSET_POSITION_Y = settings.Get("necroUISettings")["necromancy_gauge_offset_y"]
+local OFFSET_POSITION_X = settings.Get("gaugeOffsetX")
+local OFFSET_POSITION_Y = settings.Get("gaugeOffsetY")
+local isDraggingOverlay = false
 
 local GAUGE_COMPONENT_POSITIONS = {
     necromancy = {
@@ -535,10 +536,13 @@ local CreateUI = function()
             positions.ranged.perfectEquilibrium
         )
 
-        perfectEquilibriumStacksText:SetPos(
-            layout["stacksText"].x + OFFSET_POSITION_X,
-            layout["stacksText"].y + OFFSET_POSITION_Y
-        )
+    local perfectEquilibriumActive = events.playerData.ranged.perfectEquilibrium.active == 1
+    local layout = getRuneLayout(perfectEquilibriumActive)
+
+    perfectEquilibriumStacksText:SetPos(
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
+    )
 
     end
 
@@ -1085,14 +1089,22 @@ local function updateOverlays()
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then
         local shiftDown = Keyboard.IsShiftDown()
         local altDown = Keyboard.IsAltDown()
+        
         if shiftDown and altDown then
+            isDraggingOverlay = true
+            
             local mousePositionXY = Mouse.GetPosition()
             OFFSET_POSITION_X = mousePositionXY.x
             OFFSET_POSITION_Y = mousePositionXY.y
-             updateOverlayPositions()
+            updateOverlayPositions()
+        else
+            if isDraggingOverlay then
+                isDraggingOverlay = false
+                
+                settings.Set("gaugeOffsetX", OFFSET_POSITION_X)
+                settings.Set("gaugeOffsetY", OFFSET_POSITION_Y)
+            end
         end
-    else
-        log("No mouse data available")
     end
 
 end
