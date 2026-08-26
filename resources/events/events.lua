@@ -164,6 +164,55 @@ local events = {
 local ULT_GREATER_DURATION = 62
 local ULT_NORMAL_DURATION = 50
 
+local WEAPON_CATEGORIES = {
+    [id.Category.WEAPON_STAFF]      = "magic",
+    [id.Category.WEAPON_ELEMENTAL]  = "magic",
+    [id.Category.WEAPON_WAND]       = "magic",
+
+    [id.Category.WEAPON_THROWN]     = "ranged",
+    [id.Category.WEAPON_ARTILLERY]  = "ranged",
+    [id.Category.WEAPON_CHARGEBOW]  = "ranged",
+    [id.Category.WEAPON_GRENADE]    = "ranged",
+    [id.Category.WEAPON_JAVELIN]    = "ranged",
+    [id.Category.WEAPON_XBOW]       = "ranged",
+    [id.Category.WEAPON_BOW]        = "ranged",
+    [id.Category.WEAPON_2HXBOW]     = "ranged",
+    [id.Category.WEAPON_THROWNDART] = "ranged",
+    [id.Category.WEAPON_THROWNAXE]  = "ranged",
+    [id.Category.WEAPON_THROWNKNIFE] = "ranged",
+    [id.Category.WEAPON_BLOWPIPE]   = "ranged",
+
+    [id.Category.WEAPON_HACKSWORD]  = "melee",
+    [id.Category.WEAPON_STABSWORD]  = "melee",
+    [id.Category.WEAPON_BLUNT]      = "melee",
+    [id.Category.WEAPON_AXE]        = "melee",
+    [id.Category.WEAPON_SPEAR]      = "melee",
+    [id.Category.WEAPON_SPIKED]     = "melee",
+    [id.Category.WEAPON_BANNER]     = "melee",
+    [id.Category.WEAPON_FUN]        = "melee",
+    [id.Category.WEAPON_HEAVYSWORD] = "melee",
+    [id.Category.WEAPON_CLAW]       = "melee",
+    [id.Category.WEAPON_POLEARM]    = "melee",
+    [id.Category.WEAPON_PICK]       = "melee",
+    [id.Category.WEAPON_WHIP]       = "melee",
+    [id.Category.WEAPON_SHORTSWORD] = "melee",
+    [id.Category.WEAPON_LONGSWORD]  = "melee",
+    [id.Category.WEAPON_WARHAMMER]  = "melee",
+    [id.Category.WEAPON_BATTLEAXE]  = "melee",
+    [id.Category.WEAPON_DAGGER]     = "melee",
+    [id.Category.WEAPON_SCIMITAR]   = "melee",
+    [id.Category.WEAPON_MACE]       = "melee",
+    [id.Category.WEAPON_2HSWORD]    = "melee",
+    [id.Category.WEAPON_MAUL]       = "melee",
+    [id.Category.WEAPON_CLAWS]      = "melee",
+    [id.Category.WEAPON_2H_SWORD]   = "melee",
+    [id.Category.WEAPON_PICKAXE]    = "melee",
+    [id.Category.WEAPON_HALBERD]    = "melee",
+    [id.Category.WEAPON_MATTOCK]    = "melee",
+
+    [id.Category.WEAPON_ARMGUARD]   = "necromancy",
+}
+
 -- Used for Sunshine & Death's Swiftness checks
 local function isPlantedFeetEquipped()
     local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
@@ -217,6 +266,35 @@ local function swapGaugeToCombatStyle(style)
     if settings.Get('automaticallySwapGauge') == 'dynamic' then
         events.playerData.combatStyle = style
     end
+end
+
+local function checkEquippedMainhand()
+    if settings.Get('automaticallySwapGauge') ~= 'mainhand' then return end
+
+    local worn = Inventory.Find(config.Inv.WORN)
+    local wornObj = worn:GetSlot(4)
+
+    if wornObj and wornObj.obj then
+        local wornObjCategory = id.Category.FromID(wornObj.obj.category)
+        if wornObjCategory == nil then return end
+
+        local combatStyle = WEAPON_CATEGORIES[id.Category[wornObjCategory]]
+
+        if combatStyle then
+            events.playerData.combatStyle = combatStyle
+            settings.Set("lastKnownCombatStyle", combatStyle)
+        end
+    end
+end
+
+local function returnEquippedMainhand()
+    local worn = Inventory.Find(config.Inv.WORN)
+    local wornObj = worn:GetSlot(4)
+
+    if wornObj and wornObj.obj then
+        return wornObj.obj.configName
+    end
+    return nil
 end
 
 local function handleLivingDeath(event)
@@ -310,9 +388,8 @@ local function handlePerfectEquilibrium(event)
     swapGaugeToCombatStyle('ranged')
 end
 
--- TODO: Add a check to see if mainhand is BOLG
 local function handleBalanceByForce(event)
-    if events.playerData.combatStyle == 'ranged' then
+    if returnEquippedMainhand():find("EGWD_ZAMORAK_BOSS_RANGED_WEAPON", 1, true) then
         events.playerData.ranged.perfectEquilibrium.remainingDuration = 50
     end
 end
@@ -561,55 +638,6 @@ local function checkGreaterUnlocks()
         var.VarPlayer["COMBATV2_ABILITY_RANGED_GREATER_DEATHS_SWIFTNESS_UNLOCKED"].value
 end
 
-local weaponCategories = {
-    [id.Category.WEAPON_STAFF]      = "magic",
-    [id.Category.WEAPON_ELEMENTAL]  = "magic",
-    [id.Category.WEAPON_WAND]       = "magic",
-
-    [id.Category.WEAPON_THROWN]     = "ranged",
-    [id.Category.WEAPON_ARTILLERY]  = "ranged",
-    [id.Category.WEAPON_CHARGEBOW]  = "ranged",
-    [id.Category.WEAPON_GRENADE]    = "ranged",
-    [id.Category.WEAPON_JAVELIN]    = "ranged",
-    [id.Category.WEAPON_XBOW]       = "ranged",
-    [id.Category.WEAPON_BOW]        = "ranged",
-    [id.Category.WEAPON_2HXBOW]     = "ranged",
-    [id.Category.WEAPON_THROWNDART] = "ranged",
-    [id.Category.WEAPON_THROWNAXE]  = "ranged",
-    [id.Category.WEAPON_THROWNKNIFE] = "ranged",
-    [id.Category.WEAPON_BLOWPIPE]   = "ranged",
-
-    [id.Category.WEAPON_HACKSWORD]  = "melee",
-    [id.Category.WEAPON_STABSWORD]  = "melee",
-    [id.Category.WEAPON_BLUNT]      = "melee",
-    [id.Category.WEAPON_AXE]        = "melee",
-    [id.Category.WEAPON_SPEAR]      = "melee",
-    [id.Category.WEAPON_SPIKED]     = "melee",
-    [id.Category.WEAPON_BANNER]     = "melee",
-    [id.Category.WEAPON_FUN]        = "melee",
-    [id.Category.WEAPON_HEAVYSWORD] = "melee",
-    [id.Category.WEAPON_CLAW]       = "melee",
-    [id.Category.WEAPON_POLEARM]    = "melee",
-    [id.Category.WEAPON_PICK]       = "melee",
-    [id.Category.WEAPON_WHIP]       = "melee",
-    [id.Category.WEAPON_SHORTSWORD] = "melee",
-    [id.Category.WEAPON_LONGSWORD]  = "melee",
-    [id.Category.WEAPON_WARHAMMER]  = "melee",
-    [id.Category.WEAPON_BATTLEAXE]  = "melee",
-    [id.Category.WEAPON_DAGGER]     = "melee",
-    [id.Category.WEAPON_SCIMITAR]   = "melee",
-    [id.Category.WEAPON_MACE]       = "melee",
-    [id.Category.WEAPON_2HSWORD]    = "melee",
-    [id.Category.WEAPON_MAUL]       = "melee",
-    [id.Category.WEAPON_CLAWS]      = "melee",
-    [id.Category.WEAPON_2H_SWORD]   = "melee",
-    [id.Category.WEAPON_PICKAXE]    = "melee",
-    [id.Category.WEAPON_HALBERD]    = "melee",
-    [id.Category.WEAPON_MATTOCK]    = "melee",
-
-    [id.Category.WEAPON_ARMGUARD]   = "necromancy",
-}
-
 local checkOnce = false
 
 local function updatePlayerData()
@@ -624,25 +652,6 @@ local function updatePlayerData()
         checkOnce = true
     end
 
-end
-
-local function checkEquippedMainhand()
-    if settings.Get('automaticallySwapGauge') ~= 'mainhand' then return end
-
-    local worn = Inventory.Find(config.Inv.WORN)
-    local wornObj = worn:GetSlot(4)
-
-    if wornObj and wornObj.obj then
-        local wornObjCategory = id.Category.FromID(wornObj.obj.category)
-        if wornObjCategory == nil then return end
-
-        local combatStyle = weaponCategories[id.Category[wornObjCategory]]
-
-        if combatStyle then
-            events.playerData.combatStyle = combatStyle
-            settings.Set("lastKnownCombatStyle", combatStyle)
-        end
-    end
 end
 
 Event.GameStateChanged.Subscribe("dataInitialization", function()
