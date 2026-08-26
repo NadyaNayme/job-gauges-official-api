@@ -247,7 +247,7 @@ local function hexToVector4(hex)
     )
 end
 
-local ABILITY_SHADOW_COLOUR = hexToVector4(settings.Get("abilityShadowColour")) or Vector4.new(0.1, 0.1, 0.1, 0.9)
+local ABILITY_SHADOW_COLOUR = hexToVector4(settings.Get("abilityShadowColour"))
 local ABILITY_SHADOW_SIZE = 42
 local ABILITY_SHADOW_OFFSET = -1
 local abilityShadows = {}
