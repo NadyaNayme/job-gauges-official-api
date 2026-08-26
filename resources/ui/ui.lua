@@ -839,7 +839,11 @@ local function updateOverlays()
                 sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.remainingDuration))
             elseif magic.sunshine.cooldown >= 1 then 
-                sunshine.sprite.sprite = overlaySprites.magic.sunshine.inactive
+                if ultimates.greaterSunshineUnlocked == 1 then
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_inactive
+                else
+                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.inactive
+                end
                 sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.cooldown))
             else
@@ -963,7 +967,7 @@ local function updateOverlays()
         if ranged.deathsSwiftness.active == 1
             then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_active
                 else
                     deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
                 end
@@ -973,12 +977,16 @@ local function updateOverlays()
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
             elseif ranged.deathsSwiftness.cooldown >= 1 then 
-                deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.inactive
+                if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_inactive
+                else
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.inactive
+                end
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
             else
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_active
                 else
                     deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
                 end

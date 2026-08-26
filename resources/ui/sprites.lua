@@ -95,6 +95,8 @@ function M.CreateSprites(parent)
             deaths_swiftness = {
                 active = Plugin.resources.sprites.ranged.deaths_swiftness.active,
                 inactive = Plugin.resources.sprites.ranged.deaths_swiftness.inactive,
+                greater_active = Plugin.resources.sprites.ranged.deaths_swiftness.gactive,
+                greater_inactive = Plugin.resources.sprites.ranged.deaths_swiftness.ginactive
             },
             searing_winds = {
                 active = Plugin.resources.sprites.ranged.searing_winds.active,
