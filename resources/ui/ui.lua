@@ -43,7 +43,10 @@ local GAUGE_COMPONENT_POSITIONS = {
     },
     
     ranged = {
-        deathsSwiftness = { x = 0, y = 0 }
+        deathsSwiftness = { x = 80, y = 0 },
+        searingWinds = { x = 0, y = 0 },
+        shadowImbued = { x = 40, y = 0 },
+        perfectEquilibrium = { x = 20, y = -40 },
     }
 }
 
@@ -255,6 +258,21 @@ local CreateUI = function()
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.deathsSwiftness
     )
+
+    local searingWinds = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.searingWinds
+    )
+
+    local shadowImbued = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.shadowImbued
+    )
+
+    local perfectEquilibrium = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.perfectEquilibrium
+    )
     
 
     local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
@@ -339,6 +357,16 @@ local CreateUI = function()
         setAbilityIndicatorPosition(
             deathsSwiftness,
             positions.ranged.deathsSwiftness
+        )
+
+        setAbilityIndicatorPosition(
+            searingWinds,
+            positions.ranged.searingWinds
+        )
+
+        setAbilityIndicatorPosition(
+            shadowImbued,
+            positions.ranged.shadowImbued
         )
 
     end
@@ -788,6 +816,74 @@ local function updateOverlays()
         end
     else 
         deathsSwiftness.layer.hidden = true
+    end
+
+    -- Searing Winds
+    if rangedSettings["show-searing-winds"] then 
+        searingWinds.layer.hidden = false
+        if ranged.searingWinds.active == 1
+            then 
+                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.active
+                if ticksToSeconds(ranged.searingWinds.remainingDuration) == 0.0 then
+                    ranged.searingWinds.active = 0
+                end
+                searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.remainingDuration))
+            elseif ranged.searingWinds.cooldown >= 1 then 
+                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.inactive
+                searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
+            else
+                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.active
+                searingWinds.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                searingWinds.text.content = "Ready"
+        end
+    else 
+        searingWinds.layer.hidden = true
+    end
+
+    -- Shadow Imbued
+    if rangedSettings["show-shadow-imbued"] then 
+        shadowImbued.layer.hidden = false
+        if ranged.shadowImbued.active == 1
+            then 
+                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.active
+                if ticksToSeconds(ranged.shadowImbued.remainingDuration) == 0.0 then
+                    ranged.shadowImbued.active = 0
+                end
+                shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.remainingDuration))
+            elseif ranged.shadowImbued.cooldown >= 1 then 
+                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.inactive
+                shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
+            else
+                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.active
+                shadowImbued.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                shadowImbued.text.content = "Ready"
+        end
+    else 
+        shadowImbued.layer.hidden = true
+    end
+
+    -- Perfect Equilibrium
+    if rangedSettings["show-shadow-imbued"] then 
+        perfectEquilibrium.layer.hidden = false
+        if ranged.perfectEquilibrium.active == 1
+            then 
+                perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.active
+                if ticksToSeconds(ranged.perfectEquilibrium.remainingDuration) == 0.0 then
+                    ranged.perfectEquilibrium.active = 0
+                end
+                perfectEquilibrium.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                perfectEquilibrium.text.content = tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
+            else
+                perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.inactive
+                perfectEquilibrium.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                perfectEquilibrium.text.content = tostring(ranged.perfectEquilibrium.stacks)
+        end
+    else 
+        perfectEquilibrium.layer.hidden = true
     end
 
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then

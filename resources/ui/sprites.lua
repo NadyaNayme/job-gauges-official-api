@@ -96,6 +96,14 @@ function M.CreateSprites(parent)
                 active = Plugin.resources.sprites.ranged.deaths_swiftness.active,
                 inactive = Plugin.resources.sprites.ranged.deaths_swiftness.inactive,
             },
+            searing_winds = {
+                active = Plugin.resources.sprites.ranged.searing_winds.active,
+                inactive = Plugin.resources.sprites.ranged.searing_winds.inactive,
+            },
+            shadow_imbued = {
+                active = Plugin.resources.sprites.ranged.shadow_imbued.active,
+                inactive = Plugin.resources.sprites.ranged.shadow_imbued.inactive,
+            },
             perfect_equilibrium = {
                 active = Plugin.resources.sprites.ranged.perfect_equilibrium.active,
                 inactive = Plugin.resources.sprites.ranged.perfect_equilibrium.inactive,

@@ -273,7 +273,7 @@ local function handleTsunami(event)
     if event.oldValue == 0 and event.newValue == 1 then
         events.playerData.magic.tsunami.active = 1
         events.playerData.magic.tsunami.remainingDuration = 50
-        events.playerData.magic.tsunami.cooldown = 100
+        events.playerData.magic.tsunami.cooldown = 100 
 
         swapGaugeToCombatStyle('magic')
     end
@@ -285,6 +285,36 @@ local function handleDeathsSwiftness(event)
     events.playerData.ranged.deathsSwiftness.cooldown = 100
 
     swapGaugeToCombatStyle('ranged')
+end
+
+local function handleSearingWinds(event)
+    events.playerData.ranged.searingWinds.active = 1
+    events.playerData.ranged.searingWinds.remainingDuration = 10
+    events.playerData.ranged.searingWinds.cooldown = 34
+
+    swapGaugeToCombatStyle('ranged')
+end
+
+local function handleShadowImbued(event)
+    events.playerData.ranged.shadowImbued.active = 1
+    events.playerData.ranged.shadowImbued.remainingDuration = 50
+    events.playerData.ranged.shadowImbued.cooldown = 100
+
+    swapGaugeToCombatStyle('ranged')
+end
+
+local function handlePerfectEquilibrium(event)
+    events.playerData.ranged.perfectEquilibrium.active = 1
+    events.playerData.ranged.perfectEquilibrium.cooldown = 0
+
+    swapGaugeToCombatStyle('ranged')
+end
+
+-- TODO: Add a check to see if mainhand is BOLG
+local function handleBalanceByForce(event)
+    if events.playerData.combatStyle == 'ranged' then
+        events.playerData.ranged.perfectEquilibrium.remainingDuration = 50
+    end
 end
 
 -- Treats the player as 'Out of Combat' if they bank, so the gauge doesn't block the bank UI
@@ -304,6 +334,10 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
+    COMBATV2_COOLDOWN_RANGED_GALESHOT_START = handleSearingWinds,
+    COMBATV2_COOLDOWN_RANGED_IMBUE_SHADOWS_START = handleShadowImbued,
+    EGWD_ZAMORAK_BOSS_TEMP_2  = handlePerfectEquilibrium,
+    COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleBalanceByForce,
 
     BANK_TEMP = handleBank,
     LASTCASTSPELL = handleLastCastSpell,
@@ -327,6 +361,12 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_END =
         events.playerData.ranged.deathsSwiftness,
+
+    COMBATV2_COOLDOWN_RANGED_GALESHOT_END =
+        events.playerData.ranged.searingWinds,
+
+    COMBATV2_COOLDOWN_RANGED_IMBUED_SHADOWS_END =
+        events.playerData.ranged.shadowImbued,
 
     COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END =
         events.playerData.ranged.crystalRain,
@@ -500,6 +540,19 @@ local function updateNecromancy()
     updateBloat()
 end
 
+local function updatePerfectEquilibrium()
+
+    events.playerData.ranged.perfectEquilibrium.active =
+        var.VarPlayer["COMBATV2_BUFF_BALANCE_BY_FORCE_ACTIVE"].value
+
+    events.playerData.ranged.perfectEquilibrium.stacks =
+        var.VarPlayer["COMBATV2_BUFF_PERFECT_EQUILIBRIUM_STACKS"].value
+end
+
+local function updateRanged()
+    updatePerfectEquilibrium()
+end
+
 local function checkGreaterUnlocks()
     events.playerData.ultimates.greaterSunshineUnlocked = 
         var.VarPlayer["COMBATV2_ABILITY_MAGIC_GREATER_SUNSHINE_UNLOCKED"].value
@@ -562,6 +615,7 @@ local checkOnce = false
 local function updatePlayerData()
     updateInCombatState()
     updateNecromancy()
+    updateRanged()
 
     if (not checkOnce) then
         checkGreaterUnlocks()

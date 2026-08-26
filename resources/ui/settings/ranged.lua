@@ -14,6 +14,16 @@ function M.Create(page)
             selected = rangedComponentSettings["show-deaths-swiftness"]
         },
         {
+            text = "Show Searing Winds (Galeshot)",
+            value = "show-searing-winds",
+            selected = rangedComponentSettings["show-searing-winds"]
+        },
+        {
+            text = "Show Shadow Imbued (Imbue: Shadows)",
+            value = "show-shadow-imbued",
+            selected = rangedComponentSettings["show-shadow-imbued"]
+        },
+        {
             text = "Show Perfect Equilibrium",
             value = "show-perfect-equilibrium",
             selected = rangedComponentSettings["show-perfect-equilibrium"]

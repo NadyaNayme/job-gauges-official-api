@@ -42,6 +42,8 @@ local defaults = {
 
     rangedVisibleGaugeComponents = {
         ["show-deaths-swiftness"] = true,
+        ["show-searing-winds"] = true,
+        ["show-shadow-imbued"] = true,
         ["show-perfect-equilibrium"] = true,
         ["show-split-soul"] = true,
         ["show-crystal-rain"] = true,
