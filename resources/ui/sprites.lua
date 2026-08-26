@@ -117,6 +117,9 @@ function M.CreateSprites(parent)
                 active = Plugin.resources.sprites.ranged.crystal_rain.active,
                 inactive = Plugin.resources.sprites.ranged.crystal_rain.inactive,
             }
+        },
+        utility = {
+            shadow = Plugin.resources.sprites.utility.shadow
         }
     }
 

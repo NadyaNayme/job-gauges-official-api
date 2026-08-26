@@ -274,8 +274,8 @@ local function createGaugeLayer(parent)
     return layer
 end
 
-local function setAbilityIndicatorSprite(indicator, sprite)
-    indicator.shadow.sprite = sprite
+local function setAbilityIndicatorSprite(indicator, sprite, shadowSprite)
+    indicator.shadow.sprite = shadowSprite
     indicator.sprite.sprite = sprite
 end
 
@@ -744,7 +744,8 @@ local function updateOverlays()
             then
                 setAbilityIndicatorSprite(
                     conjureUndeadArmy,
-                    overlaySprites.necromancy.conjures.active
+                    overlaySprites.necromancy.conjures.active,
+                    overlaySprites.utility.shadow
                 )
                 conjureUndeadArmy.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 if lowestDuration then
@@ -756,7 +757,8 @@ local function updateOverlays()
             else 
                 setAbilityIndicatorSprite(
                     conjureUndeadArmy,
-                    overlaySprites.necromancy.conjures.inactive
+                    overlaySprites.necromancy.conjures.inactive,
+                    overlaySprites.utility.shadow
                 )
                 conjureUndeadArmy.text.content = ""
         end
@@ -770,21 +772,24 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     livingDeath,
-                    overlaySprites.necromancy.living_death.active
+                    overlaySprites.necromancy.living_death.active,
+                    overlaySprites.utility.shadow
                 )
                 livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.remainingDuration))
             elseif necromancy.livingDeath.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     livingDeath,
-                    overlaySprites.necromancy.living_death.inactive
+                    overlaySprites.necromancy.living_death.inactive,
+                    overlaySprites.utility.shadow
                 )
                 livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.cooldown))
             else
                 setAbilityIndicatorSprite(
                     livingDeath,
-                    overlaySprites.necromancy.living_death.active
+                    overlaySprites.necromancy.living_death.active,
+                    overlaySprites.utility.shadow
                 )
                 livingDeath.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 livingDeath.text.content = "Ready"
@@ -918,12 +923,14 @@ local function updateOverlays()
                 if ultimates.greaterSunshineUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.greater_active
+                        overlaySprites.magic.sunshine.greater_active,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.active
+                        overlaySprites.magic.sunshine.active,
+                        overlaySprites.utility.shadow
                     )
                 end
                 if ticksToSeconds(magic.sunshine.remainingDuration) == 0.0 then
@@ -935,12 +942,14 @@ local function updateOverlays()
                 if ultimates.greaterSunshineUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.greater_inactive
+                        overlaySprites.magic.sunshine.greater_inactive,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.inactive
+                        overlaySprites.magic.sunshine.inactive,
+                        overlaySprites.utility.shadow
                     )
                 end
                 sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
@@ -949,12 +958,14 @@ local function updateOverlays()
                 if ultimates.greaterSunshineUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.greater_active
+                        overlaySprites.magic.sunshine.greater_active,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         sunshine,
-                        overlaySprites.magic.sunshine.active
+                        overlaySprites.magic.sunshine.active,
+                        overlaySprites.utility.shadow
                     )
                 end
                 sunshine.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
@@ -971,7 +982,8 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     tsunami,
-                    overlaySprites.magic.tsunami.active
+                    overlaySprites.magic.tsunami.active,
+                    overlaySprites.utility.shadow
                 )
                 if ticksToSeconds(magic.tsunami.remainingDuration) == 0.0 then
                     magic.tsunami.active = 0
@@ -981,14 +993,16 @@ local function updateOverlays()
             elseif magic.tsunami.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     tsunami,
-                    overlaySprites.magic.tsunami.inactive
+                    overlaySprites.magic.tsunami.inactive,
+                    overlaySprites.utility.shadow
                 )
                 tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.cooldown))
             else
                 setAbilityIndicatorSprite(
                     tsunami,
-                    overlaySprites.magic.tsunami.active
+                    overlaySprites.magic.tsunami.active,
+                    overlaySprites.utility.shadow
                 )
                 tsunami.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 tsunami.text.content = "Ready"
@@ -1004,7 +1018,8 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     runicCharge,
-                    overlaySprites.magic.runicCharge.active
+                    overlaySprites.magic.runicCharge.active,
+                    overlaySprites.utility.shadow
                 )
                 if ticksToSeconds(magic.runicCharge.remainingDuration) == 0.0 then
                     magic.runicCharge.active = 0
@@ -1014,14 +1029,16 @@ local function updateOverlays()
             elseif magic.runicCharge.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     runicCharge,
-                    overlaySprites.magic.runicCharge.inactive
+                    overlaySprites.magic.runicCharge.inactive,
+                    overlaySprites.utility.shadow
                 )
                 runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.cooldown))
             else
                 setAbilityIndicatorSprite(
                     runicCharge,
-                    overlaySprites.magic.runicCharge.active
+                    overlaySprites.magic.runicCharge.active,
+                    overlaySprites.utility.shadow
                 )
                 runicCharge.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 runicCharge.text.content = "Ready"
@@ -1092,12 +1109,14 @@ local function updateOverlays()
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.greater_active
+                        overlaySprites.ranged.deaths_swiftness.greater_active,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.active
+                        overlaySprites.ranged.deaths_swiftness.active,
+                        overlaySprites.utility.shadow
                     )
                 end
                 if ticksToSeconds(ranged.deathsSwiftness.remainingDuration) == 0.0 then
@@ -1109,12 +1128,14 @@ local function updateOverlays()
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.greater_inactive
+                        overlaySprites.ranged.deaths_swiftness.greater_inactive,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.inactive
+                        overlaySprites.ranged.deaths_swiftness.inactive,
+                        overlaySprites.utility.shadow
                     )
                 end
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
@@ -1123,12 +1144,14 @@ local function updateOverlays()
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.greater_active
+                        overlaySprites.ranged.deaths_swiftness.greater_active,
+                        overlaySprites.utility.shadow
                     )
                 else
                     setAbilityIndicatorSprite(
                         deathsSwiftness,
-                        overlaySprites.ranged.deaths_swiftness.active
+                        overlaySprites.ranged.deaths_swiftness.active,
+                        overlaySprites.utility.shadow
                     )
                 end
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
@@ -1145,7 +1168,8 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     searingWinds,
-                    overlaySprites.ranged.searing_winds.active
+                    overlaySprites.ranged.searing_winds.active,
+                    overlaySprites.utility.shadow
                 )
                 if ticksToSeconds(ranged.searingWinds.remainingDuration) == 0.0 then
                     ranged.searingWinds.active = 0
@@ -1155,14 +1179,16 @@ local function updateOverlays()
             elseif ranged.searingWinds.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     searingWinds,
-                    overlaySprites.ranged.searing_winds.inactive
+                    overlaySprites.ranged.searing_winds.inactive,
+                    overlaySprites.utility.shadow
                 )
                 searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
             else
                 setAbilityIndicatorSprite(
                     searingWinds,
-                    overlaySprites.ranged.searing_winds.active
+                    overlaySprites.ranged.searing_winds.active,
+                    overlaySprites.utility.shadow
                 )
                 searingWinds.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 searingWinds.text.content = "Ready"
@@ -1178,7 +1204,8 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     shadowImbued,
-                    overlaySprites.ranged.shadow_imbued.active
+                    overlaySprites.ranged.shadow_imbued.active,
+                    overlaySprites.utility.shadow
                 )
                 if ticksToSeconds(ranged.shadowImbued.remainingDuration) == 0.0 then
                     ranged.shadowImbued.active = 0
@@ -1188,14 +1215,16 @@ local function updateOverlays()
             elseif ranged.shadowImbued.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     shadowImbued,
-                    overlaySprites.ranged.shadow_imbued.inactive
+                    overlaySprites.ranged.shadow_imbued.inactive,
+                    overlaySprites.utility.shadow
                 )
                 shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
             else
                 setAbilityIndicatorSprite(
                     shadowImbued,
-                    overlaySprites.ranged.shadow_imbued.active
+                    overlaySprites.ranged.shadow_imbued.active,
+                    overlaySprites.utility.shadow
                 )
                 shadowImbued.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 shadowImbued.text.content = "Ready"
@@ -1215,7 +1244,8 @@ local function updateOverlays()
             then 
                 setAbilityIndicatorSprite(
                     perfectEquilibrium,
-                    overlaySprites.ranged.perfect_equilibrium.active
+                    overlaySprites.ranged.perfect_equilibrium.active,
+                    overlaySprites.utility.shadow
                 )
 
                 if ticksToSeconds(ranged.perfectEquilibrium.remainingDuration) == 0.0 then
@@ -1228,7 +1258,8 @@ local function updateOverlays()
             else
                 setAbilityIndicatorSprite(
                     perfectEquilibrium,
-                    overlaySprites.ranged.perfect_equilibrium.inactive
+                    overlaySprites.ranged.perfect_equilibrium.inactive,
+                    overlaySprites.utility.shadow
                 )
                 perfectEquilibrium.text.content = ""
         end
