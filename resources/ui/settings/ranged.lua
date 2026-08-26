@@ -51,6 +51,60 @@ function M.Create(page)
             )
         end,
     })
+
+    page:AddText("Guthixian Rune for Perfect Equilibrium Stacks")
+
+    page:AddComboBox({
+    entries = {
+        { label = "A", id = 1 },
+        { label = "B", id = 2 },
+        { label = "C", id = 3 },
+        { label = "D", id = 4 },
+        { label = "E", id = 5 },
+        { label = "F", id = 6 },
+        { label = "G", id = 7 },
+        { label = "H", id = 8 },
+        { label = "I", id = 9 },
+        { label = "J", id = 10 },
+        { label = "K", id = 11 },
+        { label = "L", id = 12 },
+        { label = "M", id = 13 },
+        { label = "N", id = 14 },
+        { label = "O", id = 15 },
+        { label = "P", id = 16 },
+        { label = "Q", id = 17 },
+        { label = "R", id = 18 },
+        { label = "S", id = 19 },
+        { label = "T", id = 20 },
+        { label = "U", id = 21 },
+        { label = "V", id = 22 },
+        { label = "W", id = 23 },
+        { label = "X", id = 24 },
+        { label = "Y", id = 25 },
+        { label = "Z", id = 26 },
+        { label = "???", id = 27 },
+    },
+    selectedID = settings.Get("selectedGuthixianRuneId") or 27,
+    onChange = function(_, id, label)
+
+        if id < 27 then
+        settings.Set(
+            "selectedGuthixianRune",
+            label
+        )
+        else 
+        settings.Set(
+            "selectedGuthixianRune",
+            "lore"
+        )
+        end
+        settings.Set(
+            "selectedGuthixianRuneId",
+            id
+        )    
+    end,
+})
+    
 end
 
 return M

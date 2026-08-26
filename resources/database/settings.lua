@@ -7,6 +7,8 @@ local defaults = {
     showPreciseDurations = "precise-ticks",
     lastKnownCombatStyle = '',
     lastKnownActiveSpell = nil,
+    selectedGuthixianRune = "lore",
+    selectedGuthixianRuneId = 27,
 
     necroVisibleGaugeComponents = {
         ["show-conjures"] = true,

@@ -1,6 +1,7 @@
 local settings = require("resources/database/settings")
 local events = require("resources/events/events")
 local sprites = require("resources/ui/sprites")
+local guthixian = require("resources/data/guthixian")
 
 local generalSettings = require("resources/ui/settings/general")
 local necromancySettings = require("resources/ui/settings/necromancy")
@@ -46,9 +47,133 @@ local GAUGE_COMPONENT_POSITIONS = {
         deathsSwiftness = { x = 80, y = 0 },
         searingWinds = { x = 0, y = 0 },
         shadowImbued = { x = 40, y = 0 },
-        perfectEquilibrium = { x = 20, y = -40 },
+        perfectEquilibrium = { x = -20, y = -40 },
+        guthixianRunes = { x = 20, y = -30 }
     }
 }
+
+local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
+local ACTIVE_RUNE_COLOUR = Vector4.new(0.0, 1.0, 0.0, 1.0)
+local HIDDEN_RUNE_COLOUR = Vector4.new(0.0, 0.0, 0.0, 0.0)
+
+local RUNE_LAYOUT = {
+    BALANCE = {
+        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
+        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
+        [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
+        [4] = { x_offset = 36,  size = { width = 24, height = 24 } },
+        [5] = { x_offset = 50,  size = { width = 24, height = 24 } },
+        [6] = { x_offset = 66,  size = { width = 24, height = 24 } },
+        [7] = { x_offset = 82,  size = { width = 24, height = 24 } },
+    },
+
+    NYU = {
+        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
+        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
+        [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
+    },
+
+    SEVEN = {
+        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
+        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
+        [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
+        [4] = { x_offset = 36,  size = { width = 24, height = 24 } },
+        [5] = { x_offset = 48,  size = { width = 24, height = 24 } },
+        [6] = { x_offset = 60,  size = { width = 24, height = 24 } },
+        [7] = { x_offset = 72,  size = { width = 24, height = 24 } },
+    },
+
+    THREE = {
+        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
+        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
+        [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
+    },
+}
+
+local bolgLetters = {}
+
+local function createBOLGLetters(parent)
+    for i = 1, 7 do
+        bolgLetters[i] = ui.Sprite.new(parent)
+        bolgLetters[i]:SetSize(0, 0)
+    end
+end
+
+local function updateBOLGLetters(stacks, perfectEquilibriumActive)
+
+    local word
+
+    local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
+
+    if selectedGuthixianRune == "lore" then
+        if perfectEquilibriumActive then
+            word = "NYU"
+        else
+            word = "BALANCE"
+        end
+    else
+        if perfectEquilibriumActive then
+            word = selectedGuthixianRune:rep(3)
+        else
+            word = selectedGuthixianRune:rep(7)
+        end
+    end
+
+    local layout
+
+    if selectedGuthixianRune == "lore" then
+        if perfectEquilibriumActive then
+            layout = RUNE_LAYOUT.NYU
+        else
+            layout = RUNE_LAYOUT.BALANCE
+        end
+    else
+        if perfectEquilibriumActive then
+            layout = RUNE_LAYOUT.THREE
+        else
+            layout = RUNE_LAYOUT.SEVEN
+        end
+    end
+
+    local position = GAUGE_COMPONENT_POSITIONS.ranged.guthixianRunes
+
+    for i = 1, #bolgLetters do
+
+        local sprite = bolgLetters[i]
+        local runeLayout = layout[i]
+
+        if runeLayout then
+            local letter 
+            
+            if selectedGuthixianRune == "lore" then 
+                letter = word:sub(i, i)
+            else
+                letter = selectedGuthixianRune
+            end
+
+            sprite.sprite = guthixian[letter]
+
+            sprite:SetPos(
+                runeLayout.x_offset + position.x + OFFSET_POSITION_X,
+                position.y + OFFSET_POSITION_Y
+            )
+
+            sprite:SetSize(
+                runeLayout.size.width,
+                runeLayout.size.height
+            )
+
+            if i <= stacks then
+                sprite.colour = ACTIVE_RUNE_COLOUR
+            else
+                sprite.colour = INACTIVE_RUNE_COLOUR
+            end
+        else
+            sprite:SetSize(0, 0)
+            sprite.colour = HIDDEN_RUNE_COLOUR
+        end
+    end
+end
 
 local function hexToVector4(hex)
     local r = math.floor(hex / 16777216) % 256
@@ -273,6 +398,8 @@ local CreateUI = function()
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.perfectEquilibrium
     )
+
+    createBOLGLetters(rangedGaugeLayer)
     
 
     local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
@@ -367,6 +494,11 @@ local CreateUI = function()
         setAbilityIndicatorPosition(
             shadowImbued,
             positions.ranged.shadowImbued
+        )
+
+        setAbilityIndicatorPosition(
+            perfectEquilibrium,
+            positions.ranged.perfectEquilibrium
         )
 
     end
@@ -867,8 +999,12 @@ local function updateOverlays()
     end
 
     -- Perfect Equilibrium
-    if rangedSettings["show-shadow-imbued"] then 
+    if rangedSettings["show-perfect-equilibrium"] then 
         perfectEquilibrium.layer.hidden = false
+        updateBOLGLetters(
+            ranged.perfectEquilibrium.stacks,
+            ranged.perfectEquilibrium.active == 1
+        )
         if ranged.perfectEquilibrium.active == 1
             then 
                 perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.active
