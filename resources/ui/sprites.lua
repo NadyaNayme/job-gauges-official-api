@@ -80,7 +80,6 @@ function M.CreateSprites(parent)
             runicCharge = {
                 active = Plugin.resources.sprites.magic.runic_charge.active,
                 inactive = Plugin.resources.sprites.magic.runic_charge.inactive,
-                active_borderless = Plugin.resources.sprites.magic.runic_charge.active_borderless,
             },
             instability = {
                 active = Plugin.resources.sprites.magic.instability.active,

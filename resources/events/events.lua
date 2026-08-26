@@ -297,6 +297,24 @@ local function returnEquippedMainhand()
     return nil
 end
 
+local function returnEquippedAmmo()
+    local worn = Inventory.Find(config.Inv.WORN)
+    local wornObj = worn:GetSlot(14)
+
+    if wornObj and wornObj.obj then
+        local ammo = {
+            wornSlot = {
+                ammoSlotName = wornObj.obj.name or nil,
+                ammoSlotConfigName = wornObj.obj.configName or nil,
+                ammoSlotId = wornObj.obj.id or nil,
+            },
+            quiver_active_ammo = var.VarPlayer["QUIVER_ACTIVE_AMMO"].value.name or nil
+        }
+        return ammo
+    end
+    return nil
+end
+
 local function handleLivingDeath(event)
     if event.oldValue == -1 then
         events.playerData.necromancy.livingDeath.active = 1
@@ -684,6 +702,7 @@ Event.Logic.Subscribe("updatePlayerData", function()
 end)
 Event.ServerLogic.Subscribe("wornMainhand", function() 
     checkEquippedMainhand()
+    returnEquippedAmmo()
 end)
 
 return events

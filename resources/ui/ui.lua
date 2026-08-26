@@ -55,7 +55,13 @@ local GAUGE_COMPONENT_POSITIONS = {
 
 local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
 local ACTIVE_RUNE_COLOUR = Vector4.new(0.0, 1.0, 0.0, 1.0)
-local HIDDEN_RUNE_COLOUR = Vector4.new(0.0, 0.0, 0.0, 0.0)
+local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
+local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
+local RUNE_SHADOW_OFFSET = 1
+
+local ABILITY_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 0.9)
+local ABILITY_SHADOW_SIZE = 42
+local ABILITY_SHADOW_OFFSET = -1
 
 local RUNE_LAYOUT = {
     BALANCE = {
@@ -117,8 +123,18 @@ local bolgLetters = {}
 
 local function createBOLGLetters(parent)
     for i = 1, 7 do
-        bolgLetters[i] = ui.Sprite.new(parent)
-        bolgLetters[i]:SetSize(0, 0)
+
+        local shadow = ui.Sprite.new(parent)
+        shadow:SetSize(0, 0)
+
+        local sprite = ui.Sprite.new(parent)
+        sprite:SetSize(0, 0)
+        sprite:MoveToFront()
+
+        bolgLetters[i] = {
+            shadow = shadow,
+            sprite = sprite,
+        }
     end
 end
 
@@ -162,23 +178,42 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 
     for i = 1, #bolgLetters do
 
-        local sprite = bolgLetters[i]
+        local rune = bolgLetters[i]
+        local sprite = rune.sprite
+        local shadow = rune.shadow
         local runeLayout = layout[i]
 
         if runeLayout then
-            local letter 
-            
-            if selectedGuthixianRune == "lore" then 
+
+            local letter
+
+            if selectedGuthixianRune == "lore" then
                 letter = word:sub(i, i)
             else
                 letter = selectedGuthixianRune
             end
 
-            sprite.sprite = guthixian[letter]
+            local spriteId = guthixian[letter]
+
+            shadow.sprite = spriteId
+            sprite.sprite = spriteId
+
+            local x = runeLayout.x_offset + position.x + OFFSET_POSITION_X
+            local y = position.y + OFFSET_POSITION_Y
+
+            shadow:SetPos(
+                x + RUNE_SHADOW_OFFSET,
+                y + RUNE_SHADOW_OFFSET
+            )
+
+            shadow:SetSize(
+                runeLayout.size.width,
+                runeLayout.size.height
+            )
 
             sprite:SetPos(
-                runeLayout.x_offset + position.x + OFFSET_POSITION_X,
-                position.y + OFFSET_POSITION_Y
+                x,
+                y
             )
 
             sprite:SetSize(
@@ -188,12 +223,15 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 
             if i <= stacks then
                 sprite.colour = ACTIVE_RUNE_COLOUR
+                shadow.colour = ACTIVE_RUNE_SHADOW_COLOUR
             else
                 sprite.colour = INACTIVE_RUNE_COLOUR
+                shadow.colour = INACTIVE_RUNE_SHADOW_COLOUR
             end
+
         else
+            shadow:SetSize(0, 0)
             sprite:SetSize(0, 0)
-            sprite.colour = HIDDEN_RUNE_COLOUR
         end
     end
 end
@@ -234,9 +272,56 @@ local function createGaugeLayer(parent)
     return layer
 end
 
+-- local function createAbilityIndicator(parent, position)
+--     local layer = ui.Layer.new(parent)
+--     layer:SetSize(40, 40, 1.0, 1.0)
+
+--     local sprite = ui.Sprite.new(layer)
+--     sprite:SetPos(
+--         math.floor(position.x + OFFSET_POSITION_X),
+--         math.floor(position.y + OFFSET_POSITION_Y)
+--     )
+--     sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+
+--     local text = ui.Text.new(layer)
+--     text:SetPos(
+--         math.floor(position.x + 8 + OFFSET_POSITION_X),
+--         math.floor(position.y + 14 + OFFSET_POSITION_Y)
+--     )
+--     text:SetSize(22, 15)
+--     text:MoveToFront()
+--     text.content = ""
+--     text.font = id.Font.MUSEO_SANS_13PT_BOLD
+--     text.colour = FONT_COLOUR
+--     text.isShadowed = true
+--     text.alignHorizontal = ui.AlignMode.CENTRE
+--     text.alignVertical = ui.AlignMode.CENTRE
+
+--     table.insert(fontTexts, text)
+
+--     return {
+--         layer = layer,
+--         sprite = sprite,
+--         text = text,
+--     }
+-- end
+
+local function setAbilityIndicatorSprite(indicator, sprite)
+    indicator.shadow.sprite = sprite
+    indicator.sprite.sprite = sprite
+end
+
 local function createAbilityIndicator(parent, position)
     local layer = ui.Layer.new(parent)
     layer:SetSize(40, 40, 1.0, 1.0)
+
+    local shadow = ui.Sprite.new(layer)
+    shadow:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
+        math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
+    )
+    shadow:SetSize(scaleToFactor(ABILITY_SHADOW_SIZE), scaleToFactor(ABILITY_SHADOW_SIZE))
+    shadow.colour = ABILITY_SHADOW_COLOUR
 
     local sprite = ui.Sprite.new(layer)
     sprite:SetPos(
@@ -244,6 +329,7 @@ local function createAbilityIndicator(parent, position)
         math.floor(position.y + OFFSET_POSITION_Y)
     )
     sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+    sprite:MoveToFront()
 
     local text = ui.Text.new(layer)
     text:SetPos(
@@ -263,6 +349,7 @@ local function createAbilityIndicator(parent, position)
 
     return {
         layer = layer,
+        shadow = shadow,
         sprite = sprite,
         text = text,
     }
@@ -285,6 +372,11 @@ local function createSpriteIndicator(parent, position, width, height)
 end
 
 local function setAbilityIndicatorPosition(indicator, position)
+    indicator.shadow:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
+        math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
+    )
+
     indicator.sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
@@ -674,7 +766,10 @@ local function updateOverlays()
         or conjures.vengefulGhost.active == 1
         or conjures.phantomGuardian.active == 1
             then
-                conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.active
+                setAbilityIndicatorSprite(
+                    conjureUndeadArmy,
+                    overlaySprites.necromancy.conjures.active
+                )
                 conjureUndeadArmy.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 if lowestDuration then
                     conjureUndeadArmy.text.content =
@@ -683,7 +778,10 @@ local function updateOverlays()
                     conjureUndeadArmy.text.content = ""
                 end
             else 
-                conjureUndeadArmy.sprite.sprite = overlaySprites.necromancy.conjures.inactive
+                setAbilityIndicatorSprite(
+                    conjureUndeadArmy,
+                    overlaySprites.necromancy.conjures.inactive
+                )
                 conjureUndeadArmy.text.content = ""
         end
     else 
@@ -694,15 +792,24 @@ local function updateOverlays()
         livingDeath.layer.hidden = false
         if necromancy.livingDeath.active == 1
             then 
-                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.active
+                setAbilityIndicatorSprite(
+                    livingDeath,
+                    overlaySprites.necromancy.living_death.active
+                )
                 livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.remainingDuration))
             elseif necromancy.livingDeath.cooldown >= 1 then 
-                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.inactive
+                setAbilityIndicatorSprite(
+                    livingDeath,
+                    overlaySprites.necromancy.living_death.inactive
+                )
                 livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.cooldown))
             else
-                livingDeath.sprite.sprite = overlaySprites.necromancy.living_death.active
+                setAbilityIndicatorSprite(
+                    livingDeath,
+                    overlaySprites.necromancy.living_death.active
+                )
                 livingDeath.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 livingDeath.text.content = "Ready"
         end
@@ -833,9 +940,15 @@ local function updateOverlays()
         if magic.sunshine.active == 1
             then 
                 if ultimates.greaterSunshineUnlocked == 1 then
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_active
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.greater_active
+                    )
                 else
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.active
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.active
+                    )
                 end
                 if ticksToSeconds(magic.sunshine.remainingDuration) == 0.0 then
                     magic.sunshine.active = 0
@@ -844,17 +957,29 @@ local function updateOverlays()
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.remainingDuration))
             elseif magic.sunshine.cooldown >= 1 then 
                 if ultimates.greaterSunshineUnlocked == 1 then
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_inactive
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.greater_inactive
+                    )
                 else
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.inactive
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.inactive
+                    )
                 end
                 sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.cooldown))
             else
                 if ultimates.greaterSunshineUnlocked == 1 then
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.greater_active
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.greater_active
+                    )
                 else
-                    sunshine.sprite.sprite = overlaySprites.magic.sunshine.active
+                    setAbilityIndicatorSprite(
+                        sunshine,
+                        overlaySprites.magic.sunshine.active
+                    )
                 end
                 sunshine.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 sunshine.text.content = "Ready"
@@ -868,18 +993,27 @@ local function updateOverlays()
         tsunami.layer.hidden = false
         if magic.tsunami.active == 1
             then 
-                tsunami.sprite.sprite = overlaySprites.magic.tsunami.active
+                setAbilityIndicatorSprite(
+                    tsunami,
+                    overlaySprites.magic.tsunami.active
+                )
                 if ticksToSeconds(magic.tsunami.remainingDuration) == 0.0 then
                     magic.tsunami.active = 0
                 end
                 tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.remainingDuration))
             elseif magic.tsunami.cooldown >= 1 then 
-                tsunami.sprite.sprite = overlaySprites.magic.tsunami.inactive
+                setAbilityIndicatorSprite(
+                    tsunami,
+                    overlaySprites.magic.tsunami.inactive
+                )
                 tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.cooldown))
             else
-                tsunami.sprite.sprite = overlaySprites.magic.tsunami.active
+                setAbilityIndicatorSprite(
+                    tsunami,
+                    overlaySprites.magic.tsunami.active
+                )
                 tsunami.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 tsunami.text.content = "Ready"
         end
@@ -892,18 +1026,27 @@ local function updateOverlays()
         runicCharge.layer.hidden = false
         if magic.runicCharge.active == 1
             then 
-                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.active
+                setAbilityIndicatorSprite(
+                    runicCharge,
+                    overlaySprites.magic.runicCharge.active
+                )
                 if ticksToSeconds(magic.runicCharge.remainingDuration) == 0.0 then
                     magic.runicCharge.active = 0
                 end
                 runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.remainingDuration))
             elseif magic.runicCharge.cooldown >= 1 then 
-                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.inactive
+                setAbilityIndicatorSprite(
+                    runicCharge,
+                    overlaySprites.magic.runicCharge.inactive
+                )
                 runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.cooldown))
             else
-                runicCharge.sprite.sprite = overlaySprites.magic.runicCharge.active
+                setAbilityIndicatorSprite(
+                    runicCharge,
+                    overlaySprites.magic.runicCharge.active
+                )
                 runicCharge.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 runicCharge.text.content = "Ready"
         end
@@ -971,9 +1114,15 @@ local function updateOverlays()
         if ranged.deathsSwiftness.active == 1
             then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_active
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.greater_active
+                    )
                 else
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.active
+                    )
                 end
                 if ticksToSeconds(ranged.deathsSwiftness.remainingDuration) == 0.0 then
                     ranged.deathsSwiftness.active = 0
@@ -982,17 +1131,29 @@ local function updateOverlays()
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
             elseif ranged.deathsSwiftness.cooldown >= 1 then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_inactive
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.greater_inactive
+                    )
                 else
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.inactive
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.inactive
+                    )
                 end
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
             else
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.greater_active
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.greater_active
+                    )
                 else
-                    deathsSwiftness.sprite.sprite = overlaySprites.ranged.deaths_swiftness.active
+                    setAbilityIndicatorSprite(
+                        deathsSwiftness,
+                        overlaySprites.ranged.deaths_swiftness.active
+                    )
                 end
                 deathsSwiftness.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 deathsSwiftness.text.content = "Ready"
@@ -1006,18 +1167,27 @@ local function updateOverlays()
         searingWinds.layer.hidden = false
         if ranged.searingWinds.active == 1
             then 
-                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.active
+                setAbilityIndicatorSprite(
+                    searingWinds,
+                    overlaySprites.ranged.searing_winds.active
+                )
                 if ticksToSeconds(ranged.searingWinds.remainingDuration) == 0.0 then
                     ranged.searingWinds.active = 0
                 end
                 searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.remainingDuration))
             elseif ranged.searingWinds.cooldown >= 1 then 
-                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.inactive
+                setAbilityIndicatorSprite(
+                    searingWinds,
+                    overlaySprites.ranged.searing_winds.inactive
+                )
                 searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
             else
-                searingWinds.sprite.sprite = overlaySprites.ranged.searing_winds.active
+                setAbilityIndicatorSprite(
+                    searingWinds,
+                    overlaySprites.ranged.searing_winds.active
+                )
                 searingWinds.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 searingWinds.text.content = "Ready"
         end
@@ -1030,18 +1200,27 @@ local function updateOverlays()
         shadowImbued.layer.hidden = false
         if ranged.shadowImbued.active == 1
             then 
-                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.active
+                setAbilityIndicatorSprite(
+                    shadowImbued,
+                    overlaySprites.ranged.shadow_imbued.active
+                )
                 if ticksToSeconds(ranged.shadowImbued.remainingDuration) == 0.0 then
                     ranged.shadowImbued.active = 0
                 end
                 shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.remainingDuration))
             elseif ranged.shadowImbued.cooldown >= 1 then 
-                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.inactive
+                setAbilityIndicatorSprite(
+                    shadowImbued,
+                    overlaySprites.ranged.shadow_imbued.inactive
+                )
                 shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
             else
-                shadowImbued.sprite.sprite = overlaySprites.ranged.shadow_imbued.active
+                setAbilityIndicatorSprite(
+                    shadowImbued,
+                    overlaySprites.ranged.shadow_imbued.active
+                )
                 shadowImbued.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
                 shadowImbued.text.content = "Ready"
         end
@@ -1058,7 +1237,10 @@ local function updateOverlays()
         )
         if ranged.perfectEquilibrium.active == 1
             then 
-                perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.active
+                setAbilityIndicatorSprite(
+                    perfectEquilibrium,
+                    overlaySprites.ranged.perfect_equilibrium.active
+                )
 
                 if ticksToSeconds(ranged.perfectEquilibrium.remainingDuration) == 0.0 then
                     ranged.perfectEquilibrium.active = 0
@@ -1068,7 +1250,10 @@ local function updateOverlays()
                 perfectEquilibrium.text.content =
                     tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
             else
-                perfectEquilibrium.sprite.sprite = overlaySprites.ranged.perfect_equilibrium.inactive
+                setAbilityIndicatorSprite(
+                    perfectEquilibrium,
+                    overlaySprites.ranged.perfect_equilibrium.inactive
+                )
                 perfectEquilibrium.text.content = ""
         end
 
