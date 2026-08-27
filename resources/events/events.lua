@@ -266,9 +266,12 @@ local function updateActiveSpell(spellId)
 end
 
 local function swapGaugeToCombatStyle(style)
-    settings.Set('lastKnownCombatStyle', style)
     if settings.Get('automaticallySwapGauge') == 'dynamic' then
         events.playerData.combatStyle = style
+    end
+
+    if settings.Get('lastKnownCombatStyle') ~= style then
+        settings.Set('lastKnownCombatStyle', style)
     end
 end
 
@@ -314,6 +317,7 @@ local function returnEquippedAmmo()
             },
             quiver_active_ammo = var.VarPlayer["QUIVER_ACTIVE_AMMO"].value.name or nil
         }
+        log(ammo.quiver_active_ammo)
         return ammo
     end
     return nil
@@ -478,7 +482,7 @@ local COOLDOWN_RESET_MAP  = {
     COMBATV2_COOLDOWN_RANGED_GALESHOT_END =
         events.playerData.ranged.searingWinds,
 
-    COMBATV2_COOLDOWN_RANGED_IMBUED_SHADOWS_END =
+    COMBATV2_COOLDOWN_RANGED_IMBUE_SHADOWS_END =
         events.playerData.ranged.shadowImbued,
 
     COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END =
