@@ -403,19 +403,22 @@ local function pauseSearingWinds(event)
 end
 
 local function handleShadowImbued(event)
-    events.playerData.ranged.shadowImbued.active = 1
-    events.playerData.ranged.shadowImbued.remainingDuration = 50
-    events.playerData.ranged.shadowImbued.cooldown = 100
+    if event.newValue == 1 then
+        events.playerData.ranged.shadowImbued.active = 1
+        events.playerData.ranged.shadowImbued.remainingDuration = 50
+        events.playerData.ranged.shadowImbued.cooldown = 100
 
-    swapGaugeToCombatStyle('ranged')
+        swapGaugeToCombatStyle('ranged')
+    end
 end
 
 local function extendShadowImbued(event)
-    
     if events.playerData.ranged.shadowImbued.remainingDuration > 0 and events.playerData.ranged.shadowImbued.remainingDuration < 47 then
         events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
+        if events.playerData.ranged.shadowImbued.cooldown == 100 then
+        events.playerData.ranged.shadowImbued.cooldown = events.playerData.ranged.shadowImbued.cooldown - 5
+        end
     end
-
 end
 
 local function handlePerfectEquilibrium(event)
