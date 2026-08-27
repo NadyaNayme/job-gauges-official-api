@@ -322,7 +322,7 @@ local function handleSoulfire(event)
     events.playerData.magic.soulfire.active = 1
     events.playerData.magic.soulfire.remainingDuration = 0
 
-    if (event.newValue == var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START"].value) then
+    if (var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END"].value == var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START"].value) then
         events.playerData.magic.soulfire.cooldown = 0
     else 
         events.playerData.magic.soulfire.cooldown = 75
@@ -404,6 +404,8 @@ local function handleInciteFear(event)
     events.playerData.magic.upkeep.incite_fear.stacks = event.newValue
     if event.oldValue > 0 and event.newValue ~= 0 then
         events.playerData.magic.upkeep.incite_fear.remainingDuration = 34
+    elseif event.newValue >= 1 then
+        events.playerData.magic.upkeep.incite_fear.remainingDuration = 34
     else
         events.playerData.magic.upkeep.incite_fear.remainingDuration = 0
     end
@@ -413,6 +415,8 @@ local function handleBloodTithe(event)
     events.playerData.magic.upkeep.blood_tithe.stacks = event.newValue
     if event.oldValue > 0 and event.newValue ~= 0 then
         events.playerData.magic.upkeep.blood_tithe.remainingDuration = 34
+    elseif event.newValue >= 1 then
+        events.playerData.magic.upkeep.blood_tithe.remainingDuration = 34
     else
         events.playerData.magic.upkeep.blood_tithe.remainingDuration = 0
     end
@@ -421,6 +425,8 @@ end
 local function handleEssenceCorruption(event)
     events.playerData.magic.upkeep.essence_corruption.stacks = event.newValue
     if event.oldValue > 0 and event.newValue ~= 0 then
+        events.playerData.magic.upkeep.essence_corruption.remainingDuration = 50
+    elseif event.newValue >= 1 then
         events.playerData.magic.upkeep.essence_corruption.remainingDuration = 50
     else
         events.playerData.magic.upkeep.essence_corruption.remainingDuration = 0

@@ -44,8 +44,8 @@ local GAUGE_COMPONENT_POSITIONS = {
         activeSpell = { x = 88, y = -24 },
         upkeep = {
             bloodTithe = { x = 0, y = 50 },
-            inciteFear = { x = 0, y = 62 },
-            essenceCorruption = { x = 0, y = 74 },
+            inciteFear = { x = 0, y = 70 },
+            essenceCorruption = { x = 0, y = 90 },
         },
     },
     
@@ -799,7 +799,7 @@ local function getLowestConjureDuration(conjures)
 end
 
 local function updateMagicUpkeepIndicator(indicator, upkeep, sprite)
-    -- indicator.sprite.sprite = sprite
+    indicator.sprite.sprite = sprite
     indicator.timeText.content = tostring(ticksToSeconds(upkeep.remainingDuration))
     indicator.stacksText.content = tostring(upkeep.stacks)
 end
@@ -1205,19 +1205,19 @@ local function updateOverlays()
     updateMagicUpkeepIndicator(
         bloodTithe,
         magic.upkeep.blood_tithe,
-        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.blood_tithe
+        id.Sprite["SPELL_ANCIENT_MAGICKS_ICON_EXSANGUINATE"]
     )
 
     updateMagicUpkeepIndicator(
         inciteFear,
         magic.upkeep.incite_fear,
-        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.incite_fear
+        id.Sprite["SPELL_ANCIENT_MAGICKS_ICON_INCITE_FEAR"]
     )
 
     updateMagicUpkeepIndicator(
         essenceCorruption,
         magic.upkeep.essence_corruption,
-        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.essence_corruption
+        id.Sprite["ELIDINIS_BOSS_CORRUPTION"]
     )
 
     -- Ranged Gauge
