@@ -383,7 +383,7 @@ local function handleShadowImbued(event)
 end
 
 local function extendShadowImbued(event)
-    if events.playerData.ranged.shadowImbued.remainingDuration > 0 and events.playerData.ranged.shadowImbued.remainingDuration < 47 then
+    if events.playerData.ranged.shadowImbued.remainingDuration > 0 and events.playerData.ranged.shadowImbued.remainingDuration < 49 then
         events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
         if events.playerData.ranged.shadowImbued.cooldown == 100 then
         events.playerData.ranged.shadowImbued.cooldown = events.playerData.ranged.shadowImbued.cooldown - 5

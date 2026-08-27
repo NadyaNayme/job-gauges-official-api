@@ -53,8 +53,8 @@ local GAUGE_COMPONENT_POSITIONS = {
         deathsSwiftness = { x = 80, y = 0 },
         searingWinds = { x = 0, y = 0 },
         shadowImbued = { x = 40, y = 0 },
-        perfectEquilibrium = { x = -20, y = -40 },
-        guthixianRunes = { x = 20, y = -30 }
+        perfectEquilibrium = { x = -20, y = 40 },
+        guthixianRunes = { x = 20, y = 50 }
     }
 }
 
@@ -67,14 +67,14 @@ local RUNE_LAYOUT = {
         [5] = { x_offset = 50,  size = { width = 24, height = 24 } },
         [6] = { x_offset = 66,  size = { width = 24, height = 24 } },
         [7] = { x_offset = 82,  size = { width = 24, height = 24 } },
-        stacksText = { x = 120, y = -30},
+        stacksText = { x = 120, y = 50},
     },
 
     NYU = {
         [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
         [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
         [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
-        stacksText = { x = 67, y = -30},
+        stacksText = { x = 67, y = 50},
     },
 
     SEVEN = {
@@ -85,14 +85,14 @@ local RUNE_LAYOUT = {
         [5] = { x_offset = 48,  size = { width = 24, height = 24 } },
         [6] = { x_offset = 60,  size = { width = 24, height = 24 } },
         [7] = { x_offset = 72,  size = { width = 24, height = 24 } },
-        stacksText = { x = 120, y = -30},
+        stacksText = { x = 120, y = 50},
     },
 
     THREE = {
         [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
         [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
         [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
-        stacksText = { x = 67, y = -30},
+        stacksText = { x = 67, y = 50},
     },
 }
 
@@ -570,7 +570,7 @@ local CreateUI = function()
     perfectEquilibriumStacksText:SetSize(22, 24)
     perfectEquilibriumStacksText:MoveToFront()
     perfectEquilibriumStacksText.content = "0"
-    perfectEquilibriumStacksText.font = id.Font.MUSEO_SANS_15PT_BOLD
+    perfectEquilibriumStacksText.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
     perfectEquilibriumStacksText.colour = FONT_COLOUR
     perfectEquilibriumStacksText.isShadowed = true
     perfectEquilibriumStacksText.alignHorizontal = ui.AlignMode.CENTRE
