@@ -99,9 +99,19 @@ local events = {
                 remainingDuration = 0,
                 cooldown = 0,
             },
-            stacks = {
-                exsanguinate = 0,
-                incite_fear = 0
+            upkeep = {
+                blood_tithe = {
+                    stacks = 0,
+                    remainingDuration = 0
+                },
+                incite_fear = {
+                    stacks = 0,
+                    remainingDuration = 0
+                },
+                essence_corruption = {
+                    stacks = 0,
+                    remainingDuration = 0
+                }
             }
         },
         ranged = {
@@ -269,7 +279,7 @@ local function returnEquippedAmmo()
             },
             quiver_active_ammo = var.VarPlayer["QUIVER_ACTIVE_AMMO"].value.name or nil
         }
-        return ammo
+        events.playerData.ranged.activeAmmo = ammo
     end
     return nil
 end
@@ -311,8 +321,12 @@ end
 local function handleSoulfire(event)
     events.playerData.magic.soulfire.active = 1
     events.playerData.magic.soulfire.remainingDuration = 0
-    events.playerData.magic.soulfire.cooldown = 75
 
+    if (event.newValue == var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START"].value) then
+        events.playerData.magic.soulfire.cooldown = 0
+    else 
+        events.playerData.magic.soulfire.cooldown = 75
+    end
     swapGaugeToCombatStyle('magic')
 end
 
@@ -386,6 +400,59 @@ local function handleBalanceByForce(event)
     end
 end
 
+local function handleInciteFear(event)
+    events.playerData.magic.upkeep.incite_fear.stacks = event.newValue
+    if event.oldValue > 0 and event.newValue ~= 0 then
+        events.playerData.magic.upkeep.incite_fear.remainingDuration = 34
+    else
+        events.playerData.magic.upkeep.incite_fear.remainingDuration = 0
+    end
+end
+
+local function handleBloodTithe(event)
+    events.playerData.magic.upkeep.blood_tithe.stacks = event.newValue
+    if event.oldValue > 0 and event.newValue ~= 0 then
+        events.playerData.magic.upkeep.blood_tithe.remainingDuration = 34
+    else
+        events.playerData.magic.upkeep.blood_tithe.remainingDuration = 0
+    end
+end
+
+local function handleEssenceCorruption(event)
+    events.playerData.magic.upkeep.essence_corruption.stacks = event.newValue
+    if event.oldValue > 0 and event.newValue ~= 0 then
+        events.playerData.magic.upkeep.essence_corruption.remainingDuration = 50
+    else
+        events.playerData.magic.upkeep.essence_corruption.remainingDuration = 0
+    end
+end
+
+local function handleCappedStacks(event)
+    local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
+    local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
+
+    if events.playerData.magic.activeSpell.name == "Exsanguinate" and bloodTithe == 12 then
+        events.playerData.magic.upkeep.blood_tithe.remainingDuration = 33
+        events.playerData.magic.upkeep.blood_tithe.stacks = 12
+    end
+
+    if events.playerData.magic.activeSpell.name == "Incite Fear" and glacialEmbrace == 5 then
+        events.playerData.magic.upkeep.incite_fear.remainingDuration = 33
+        events.playerData.magic.upkeep.incite_fear.stacks = 5
+    end
+
+end
+
+local function handleCappedEssenceCorruption(event)
+    local essenceCorruption = var.VarPlayer["COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS"].value
+    local equippedMainhand = returnEquippedMainhand()
+    if equippedMainhand == nil then return end
+    if equippedMainhand:find("MAGIC_DEVOURER_WAND_T95", 1, true) and essenceCorruption == 100 then
+        events.playerData.magic.upkeep.essence_corruption.remainingDuration = 50
+        events.playerData.magic.upkeep.essence_corruption.stacks = 100
+    end
+end
+
 -- Treats the player as 'Out of Combat' if they bank, so the gauge doesn't block the bank UI
 local function handleBank()
     events.playerData.inCombat = false
@@ -399,7 +466,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT = handleLivingDeath,
     COMBATV2_BUFF_MAGIC_WRACK_ACTIVE = handleRunicCharge,
     COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START = handleSunshine,
-    COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleSoulfire,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END = handleSoulfire,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
@@ -409,6 +476,13 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_COOLDOWN_RANGED_SHADOW_TENDRILS_START = extendShadowImbued,
     EGWD_ZAMORAK_BOSS_TEMP_2  = handlePerfectEquilibrium,
     COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleBalanceByForce,
+    COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS = handleInciteFear,
+    COMBATV2_BUFF_BLOOD_TITHE_STACKS = handleBloodTithe,
+    COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS = handleEssenceCorruption,
+    COMBATV2_GLOBAL_COOLDOWN_START = handleCappedStacks,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleCappedEssenceCorruption,
+    COMBATV2_COOLDOWN_MAGIC_COMBUST_START = handleCappedEssenceCorruption,
+    COMBATV2_COOLDOWN_MAGIC_CORRUPTION_START = handleCappedEssenceCorruption,
 
     BANK_TEMP = handleBank,
     LASTCASTSPELL = handleLastCastSpell,

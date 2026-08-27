@@ -42,6 +42,11 @@ local GAUGE_COMPONENT_POSITIONS = {
         soulfire = { x = 0, y = -34 },
         instability = { x = 40, y = -34 },
         activeSpell = { x = 88, y = -24 },
+        upkeep = {
+            bloodTithe = { x = 0, y = 50 },
+            inciteFear = { x = 0, y = 62 },
+            essenceCorruption = { x = 0, y = 74 },
+        },
     },
     
     ranged = {
@@ -340,6 +345,50 @@ local function createSpriteIndicator(parent, position, width, height)
     return sprite
 end
 
+local function createMagicUpkeepIndicator(parent, position)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(90, 24, 1.0, 1.0)
+
+    local timeText = ui.Text.new(layer)
+    timeText:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+    timeText:SetSize(28, 16)
+    timeText.content = ""
+    timeText.font = id.Font.MUSEO_SANS_13PT_BOLD
+    timeText.colour = FONT_COLOUR
+    timeText.isShadowed = true
+
+    local sprite = ui.Sprite.new(layer)
+    sprite:SetPos(
+        math.floor(position.x + 32 + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    sprite:SetSize(scaleToFactor(24), scaleToFactor(21))
+
+    local stacksText = ui.Text.new(layer)
+    stacksText:SetPos(
+        math.floor(position.x + 58 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+    stacksText:SetSize(28, 16)
+    stacksText.content = ""
+    stacksText.font = id.Font.MUSEO_SANS_13PT_BOLD
+    stacksText.colour = FONT_COLOUR
+    stacksText.isShadowed = true
+
+    table.insert(fontTexts, timeText)
+    table.insert(fontTexts, stacksText)
+
+    return {
+        layer = layer,
+        timeText = timeText,
+        sprite = sprite,
+        stacksText = stacksText,
+    }
+end
+
 local function setAbilityIndicatorPosition(indicator, position)
     indicator.shadow:SetPos(
         math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
@@ -361,6 +410,23 @@ local function setSpriteIndicatorPosition(indicator, position)
     indicator:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
+    )
+end
+
+local function setMagicUpkeepIndicatorPosition(indicator, position)
+    indicator.timeText:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+
+    indicator.sprite:SetPos(
+        math.floor(position.x + 32 + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
+    indicator.stacksText:SetPos(
+        math.floor(position.x + 58 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
     )
 end
 
@@ -460,6 +526,21 @@ local CreateUI = function()
         GAUGE_COMPONENT_POSITIONS.magic.activeSpell,
         24,
         21
+    )
+
+    local bloodTithe = createMagicUpkeepIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.upkeep.bloodTithe
+    )
+
+    local inciteFear = createMagicUpkeepIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.upkeep.inciteFear
+    )
+
+    local essenceCorruption = createMagicUpkeepIndicator(
+        magicGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.magic.upkeep.essenceCorruption
     )
 
     local rangedGaugeLayer = createGaugeLayer(jobGaugeLayer)
@@ -575,6 +656,21 @@ local CreateUI = function()
         setSpriteIndicatorPosition(
             activeSpellSprite,
             positions.magic.activeSpell
+        )
+
+        setMagicUpkeepIndicatorPosition(
+            bloodTithe,
+            positions.magic.upkeep.bloodTithe
+        )
+
+        setMagicUpkeepIndicatorPosition(
+            inciteFear,
+            positions.magic.upkeep.inciteFear
+        )
+
+        setMagicUpkeepIndicatorPosition(
+            essenceCorruption,
+            positions.magic.upkeep.essenceCorruption
         )
 
         setAbilityIndicatorPosition(
@@ -700,6 +796,12 @@ local function getLowestConjureDuration(conjures)
     end
 
     return lowestDuration
+end
+
+local function updateMagicUpkeepIndicator(indicator, upkeep, sprite)
+    -- indicator.sprite.sprite = sprite
+    indicator.timeText.content = tostring(ticksToSeconds(upkeep.remainingDuration))
+    indicator.stacksText.content = tostring(upkeep.stacks)
 end
 
 local function updateOverlays()
@@ -1099,6 +1201,24 @@ local function updateOverlays()
     else
         activeSpellSprite:SetSize(0, 0)
     end
+
+    updateMagicUpkeepIndicator(
+        bloodTithe,
+        magic.upkeep.blood_tithe,
+        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.blood_tithe
+    )
+
+    updateMagicUpkeepIndicator(
+        inciteFear,
+        magic.upkeep.incite_fear,
+        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.incite_fear
+    )
+
+    updateMagicUpkeepIndicator(
+        essenceCorruption,
+        magic.upkeep.essence_corruption,
+        overlaySprites.magic.instability.active -- overlaySprites.magic.upkeep.essence_corruption
+    )
 
     -- Ranged Gauge
     -- Death's Swiftness
