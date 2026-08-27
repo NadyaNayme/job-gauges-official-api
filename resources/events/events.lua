@@ -322,6 +322,9 @@ local function handleSoulfire(event)
     events.playerData.magic.soulfire.active = 1
     events.playerData.magic.soulfire.remainingDuration = 0
 
+    -- When you have >1 Essence Corruption stacks there is a 30% chance to reset the cooldown of the 3 Magic bleeds (Combust, Corruption, Roar Special Attack)
+    -- unlike War's Altar of War which resets _END variables to 0, the reset for Roar sets _END = _START so we need to detect that and set the cooldown to 0 when
+    -- it happens
     if (var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END"].value == var.VarPlayer["COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START"].value) then
         events.playerData.magic.soulfire.cooldown = 0
     else 
@@ -433,6 +436,10 @@ local function handleEssenceCorruption(event)
     end
 end
 
+-- When the player has maximum stacks for Exanguinate or Incite Fear the VarTransmit stops transmitting the Stacks value
+-- So to determine if the Timer should reset for the player's Stacks to be maintained - the activeSpell is checked and
+-- the appropriate spell timer is reinitialized. The stacks are set because if the plugin is started when already at maximum stacks,
+-- they display as `0` until you lose them and gain them again.
 local function handleCappedStacks(event)
     local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
     local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
@@ -449,6 +456,9 @@ local function handleCappedStacks(event)
 
 end
 
+-- Similar to Exsanguinate and Incite Fear, the Roar of Awakening's Essence Corruption stacks stop transmitting at 100
+-- so to determine whether the timer should restart to 30s, I check to see if the player has a Roar equipped when they use 
+-- one of the Magic bleeds (Roar Weapon Special, Combust, or Corruption Blast) and restart the timer.
 local function handleCappedEssenceCorruption(event)
     local essenceCorruption = var.VarPlayer["COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS"].value
     local equippedMainhand = returnEquippedMainhand()
