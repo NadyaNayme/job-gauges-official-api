@@ -102,15 +102,18 @@ local events = {
             upkeep = {
                 blood_tithe = {
                     stacks = 0,
-                    remainingDuration = 0
+                    remainingDuration = 0,
+                    name = 'Blood Tithe'
                 },
                 incite_fear = {
                     stacks = 0,
-                    remainingDuration = 0
+                    remainingDuration = 0,
+                    name = 'Incite Fear'
                 },
                 essence_corruption = {
                     stacks = 0,
-                    remainingDuration = 0
+                    remainingDuration = 0,
+                    name = 'Essence Corruption'
                 }
             }
         },
@@ -205,26 +208,24 @@ local function getDeathsSwiftnessDuration()
     return ULT_NORMAL_DURATION
 end
 
--- New spells may be added in the future and since spells are hard-coded
--- rather than data driven, we need to do a nil check to make sure we have the data
 local function updateActiveSpell(spellId)
+    if spellId == nil then
+        events.playerData.magic.activeSpell.name = nil
+        events.playerData.magic.activeSpell.icon = nil
+        return
+    end
+
     local spell = spells[spellId]
 
-    -- Known Issue: This can result in stale state if a user sets an unsupported spell as active.
-    -- Keeping this bug around means users will report it and I can update spells.lua faster :)
     if not spell then
-        local lastKnownSpell = settings.Get('lastKnownActiveSpell')
-        if lastKnownSpell then
-            local spell = spells[lastKnownSpell]            
-            events.playerData.magic.activeSpell.name = spell.name
-            events.playerData.magic.activeSpell.icon = spell.icon
-        end
+        events.playerData.magic.activeSpell.name = nil
+        events.playerData.magic.activeSpell.icon = nil
         return
     end
 
     events.playerData.magic.activeSpell.name = spell.name
     events.playerData.magic.activeSpell.icon = spell.icon
-    settings.Set('lastKnownActiveSpell', spell)
+    settings.Set('lastKnownActiveSpell', spellId)
 end
 
 local function swapGaugeToCombatStyle(style)

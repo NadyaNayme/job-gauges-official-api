@@ -118,8 +118,27 @@ function M.CreateSprites(parent)
                 inactive = Plugin.resources.sprites.ranged.crystal_rain.inactive,
             }
         },
+        melee = {
+            berserk = {
+                active = Plugin.resources.sprites.melee.berserk.active,
+                inactive = Plugin.resources.sprites.melee.berserk.active,
+            },
+            chaos_roar = {
+                active = Plugin.resources.sprites.melee.chaos_roar.active,
+                inactive = Plugin.resources.sprites.melee.chaos_roar.active,
+            },
+            igneous_strike = {
+                active = Plugin.resources.sprites.melee.igneous_strike.active,
+                inactive = Plugin.resources.sprites.melee.igneous_strike.active,
+            },
+            blackhole = {
+                active = Plugin.resources.sprites.melee.blackhole.active,
+                inactive = Plugin.resources.sprites.melee.blackhole.active,
+            }
+        },
         utility = {
-            shadow = Plugin.resources.sprites.utility.shadow
+            shadow = Plugin.resources.sprites.utility.shadow,
+            bar = Plugin.resources.sprites.utility.bar
         }
     }
 

@@ -43,9 +43,9 @@ local GAUGE_COMPONENT_POSITIONS = {
         instability = { x = 40, y = -34 },
         activeSpell = { x = 88, y = -24 },
         upkeep = {
-            bloodTithe = { x = 0, y = 50 },
-            inciteFear = { x = 0, y = 70 },
-            essenceCorruption = { x = 0, y = 90 },
+            bloodTithe = { x = -55, y = 45 },
+            inciteFear = { x = -55, y = 55 },
+            essenceCorruption = { x = -55, y = 65 },
         },
     },
     
@@ -101,6 +101,10 @@ local ACTIVE_RUNE_COLOUR = Vector4.new(0.3686, 0.9922, 0.5765, 1.0)
 local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
 local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
 local RUNE_SHADOW_OFFSET = 1
+
+local BLOOD_TITHE_COLOUR = Vector4.new(0.980, 0.169, 0.314, 1.0)
+local INCITE_FEAR_COLOUR = Vector4.new(0.227, 0.471, 0.869, 1.0)
+local ESSENCE_CORRUPTION_COLOUR = Vector4.new(0.498, 0.886, 0.251, 1.0)
 
 local function getRuneLayout(perfectEquilibriumActive)
     local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
@@ -312,7 +316,7 @@ local function createAbilityIndicator(parent, position)
     text:SetSize(22, 15)
     text:MoveToFront()
     text.content = ""
-    text.font = id.Font.MUSEO_SANS_13PT_BOLD
+    text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
     text.colour = FONT_COLOUR
     text.isShadowed = true
     text.alignHorizontal = ui.AlignMode.CENTRE
@@ -349,43 +353,39 @@ local function createMagicUpkeepIndicator(parent, position)
     local layer = ui.Layer.new(parent)
     layer:SetSize(90, 24, 1.0, 1.0)
 
-    local timeText = ui.Text.new(layer)
-    timeText:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(position.x + 9 + OFFSET_POSITION_X),
+        math.floor(position.y - 4 + OFFSET_POSITION_Y)
     )
-    timeText:SetSize(28, 16)
-    timeText.content = ""
-    timeText.font = id.Font.MUSEO_SANS_13PT_BOLD
-    timeText.colour = FONT_COLOUR
-    timeText.isShadowed = true
+    text:SetSize(28, 16)
+    text.content = ""
+    text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    -- text.hidden = true
+
+    local shadow = ui.Sprite.new(layer)
+    shadow:SetPos(
+        math.floor(position.x + 59 + OFFSET_POSITION_X),
+        math.floor(position.y + 3 + OFFSET_POSITION_Y)
+    )
+    shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
 
     local sprite = ui.Sprite.new(layer)
     sprite:SetPos(
-        math.floor(position.x + 32 + OFFSET_POSITION_X),
-        math.floor(position.y + OFFSET_POSITION_Y)
-    )
-    sprite:SetSize(scaleToFactor(24), scaleToFactor(21))
-
-    local stacksText = ui.Text.new(layer)
-    stacksText:SetPos(
         math.floor(position.x + 58 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+        math.floor(position.y + 2 + OFFSET_POSITION_Y)
     )
-    stacksText:SetSize(28, 16)
-    stacksText.content = ""
-    stacksText.font = id.Font.MUSEO_SANS_13PT_BOLD
-    stacksText.colour = FONT_COLOUR
-    stacksText.isShadowed = true
+    sprite:SetSize(scaleToFactor(0), scaleToFactor(6))
 
-    table.insert(fontTexts, timeText)
-    table.insert(fontTexts, stacksText)
+    table.insert(fontTexts, text)
 
     return {
         layer = layer,
-        timeText = timeText,
+        text = text,
         sprite = sprite,
-        stacksText = stacksText,
+        shadow = shadow,
     }
 end
 
@@ -414,19 +414,19 @@ local function setSpriteIndicatorPosition(indicator, position)
 end
 
 local function setMagicUpkeepIndicatorPosition(indicator, position)
-    indicator.timeText:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    indicator.text:SetPos(
+        math.floor(position.x + 9 + OFFSET_POSITION_X),
+        math.floor(position.y - 4 + OFFSET_POSITION_Y)
     )
 
     indicator.sprite:SetPos(
-        math.floor(position.x + 32 + OFFSET_POSITION_X),
-        math.floor(position.y + OFFSET_POSITION_Y)
+        math.floor(position.x + 58 + OFFSET_POSITION_X),
+        math.floor(position.y + 2 + OFFSET_POSITION_Y)
     )
 
-    indicator.stacksText:SetPos(
-        math.floor(position.x + 58 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    indicator.shadow:SetPos(
+        math.floor(position.x + 59 + OFFSET_POSITION_X),
+        math.floor(position.y + 3 + OFFSET_POSITION_Y)
     )
 end
 
@@ -798,10 +798,36 @@ local function getLowestConjureDuration(conjures)
     return lowestDuration
 end
 
-local function updateMagicUpkeepIndicator(indicator, upkeep, sprite)
-    indicator.sprite.sprite = sprite
-    indicator.timeText.content = tostring(ticksToSeconds(upkeep.remainingDuration))
-    indicator.stacksText.content = tostring(upkeep.stacks)
+local function updateMagicUpkeepIndicator(indicator, upkeep)
+    indicator.shadow.sprite = overlaySprites.utility.bar
+    indicator.sprite.sprite = overlaySprites.utility.bar
+    indicator.sprite:SetSize(upkeep.remainingDuration * 2.25, 3)
+    indicator.shadow:SetSize(upkeep.remainingDuration * 2.25, 3)
+    indicator.shadow.colour = ABILITY_SHADOW_COLOUR
+    if upkeep.name == "Blood Tithe" then
+        indicator.sprite.colour = BLOOD_TITHE_COLOUR
+    end
+    if upkeep.name == "Incite Fear" then
+        indicator.sprite.colour = INCITE_FEAR_COLOUR
+    end
+    if upkeep.name == "Essence Corruption" then
+        indicator.sprite.colour = ESSENCE_CORRUPTION_COLOUR
+    end
+    indicator.text.content = tostring(ticksToSeconds(upkeep.remainingDuration) .. " (" .. tostring(upkeep.stacks) .. ")")
+    if upkeep.remainingDuration <= 16 and math.floor(upkeep.remainingDuration) % 2 == 0 then
+        indicator.text.colour = Vector4.new(1.0, 0.0, 0.0, 1.0)
+    else 
+        indicator.text.colour = FONT_COLOUR
+    end
+
+    if ticksToSeconds(upkeep.remainingDuration) == 0.0 and upkeep.stacks == 0 then
+        indicator.text.content = ""
+        indicator.sprite.hidden = true
+        indicator.shadow.hidden = true
+    else 
+        indicator.sprite.hidden = false
+        indicator.shadow.hidden = false
+    end
 end
 
 local function updateOverlays()
@@ -849,7 +875,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.conjures.active,
                     overlaySprites.utility.shadow
                 )
-                conjureUndeadArmy.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                conjureUndeadArmy.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 if lowestDuration then
                     conjureUndeadArmy.text.content =
                         tostring(ticksToSeconds(lowestDuration))
@@ -877,7 +903,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.active,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.remainingDuration))
             elseif necromancy.livingDeath.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
@@ -885,7 +911,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.inactive,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.cooldown))
             else
                 setAbilityIndicatorSprite(
@@ -893,7 +919,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.active,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                livingDeath.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 livingDeath.text.content = "Ready"
         end
     else 
@@ -1038,7 +1064,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.sunshine.remainingDuration) == 0.0 then
                     magic.sunshine.active = 0
                 end
-                sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.remainingDuration))
             elseif magic.sunshine.cooldown >= 1 then 
                 if ultimates.greaterSunshineUnlocked == 1 then
@@ -1054,7 +1080,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                sunshine.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.cooldown))
             else
                 if ultimates.greaterSunshineUnlocked == 1 then
@@ -1070,7 +1096,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                sunshine.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                sunshine.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 sunshine.text.content = "Ready"
         end
     else 
@@ -1090,7 +1116,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.tsunami.remainingDuration) == 0.0 then
                     magic.tsunami.active = 0
                 end
-                tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.remainingDuration))
             elseif magic.tsunami.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
@@ -1098,7 +1124,7 @@ local function updateOverlays()
                     overlaySprites.magic.tsunami.inactive,
                     overlaySprites.utility.shadow
                 )
-                tsunami.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.cooldown))
             else
                 setAbilityIndicatorSprite(
@@ -1106,7 +1132,7 @@ local function updateOverlays()
                     overlaySprites.magic.tsunami.active,
                     overlaySprites.utility.shadow
                 )
-                tsunami.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                tsunami.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 tsunami.text.content = "Ready"
         end
     else 
@@ -1126,7 +1152,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.runicCharge.remainingDuration) == 0.0 then
                     magic.runicCharge.active = 0
                 end
-                runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.remainingDuration))
             elseif magic.runicCharge.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
@@ -1134,7 +1160,7 @@ local function updateOverlays()
                     overlaySprites.magic.runicCharge.inactive,
                     overlaySprites.utility.shadow
                 )
-                runicCharge.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.cooldown))
             else
                 setAbilityIndicatorSprite(
@@ -1142,7 +1168,7 @@ local function updateOverlays()
                     overlaySprites.magic.runicCharge.active,
                     overlaySprites.utility.shadow
                 )
-                runicCharge.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                runicCharge.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 runicCharge.text.content = "Ready"
         end
     else 
@@ -1157,15 +1183,15 @@ local function updateOverlays()
                 if ticksToSeconds(magic.soulfire.remainingDuration) == 0.0 then
                     magic.soulfire.active = 0
                 end
-                soulfire.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.remainingDuration))
             elseif magic.soulfire.cooldown >= 1 then 
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.inactive
-                soulfire.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.cooldown))
             else
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
-                soulfire.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                soulfire.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 soulfire.text.content = "Ready"
         end
     else 
@@ -1180,22 +1206,22 @@ local function updateOverlays()
                 if ticksToSeconds(magic.instability.remainingDuration) == 0.0 then
                     magic.instability.active = 0
                 end
-                instability.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 instability.text.content = tostring(ticksToSeconds(magic.instability.remainingDuration))
             elseif magic.instability.cooldown >= 1 then 
                 instability.sprite.sprite = overlaySprites.magic.instability.inactive
-                instability.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 instability.text.content = tostring(ticksToSeconds(magic.instability.cooldown))
             else
                 instability.sprite.sprite = overlaySprites.magic.instability.active
-                instability.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                instability.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 instability.text.content = "Ready"
         end
     else 
         instability.layer.hidden = true
     end
 
-    if magicSettings["show-active-spell"] then 
+    if magicSettings["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
         activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
         activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
@@ -1204,20 +1230,17 @@ local function updateOverlays()
 
     updateMagicUpkeepIndicator(
         bloodTithe,
-        magic.upkeep.blood_tithe,
-        id.Sprite["SPELL_ANCIENT_MAGICKS_ICON_EXSANGUINATE"]
+        magic.upkeep.blood_tithe
     )
 
     updateMagicUpkeepIndicator(
         inciteFear,
-        magic.upkeep.incite_fear,
-        id.Sprite["SPELL_ANCIENT_MAGICKS_ICON_INCITE_FEAR"]
+        magic.upkeep.incite_fear
     )
 
     updateMagicUpkeepIndicator(
         essenceCorruption,
-        magic.upkeep.essence_corruption,
-        id.Sprite["ELIDINIS_BOSS_CORRUPTION"]
+        magic.upkeep.essence_corruption
     )
 
     -- Ranged Gauge
@@ -1242,7 +1265,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.deathsSwiftness.remainingDuration) == 0.0 then
                     ranged.deathsSwiftness.active = 0
                 end
-                deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
             elseif ranged.deathsSwiftness.cooldown >= 1 then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
@@ -1258,7 +1281,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                deathsSwiftness.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
             else
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
@@ -1274,7 +1297,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                deathsSwiftness.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                deathsSwiftness.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 deathsSwiftness.text.content = "Ready"
         end
     else 
@@ -1294,7 +1317,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.searingWinds.remainingDuration) == 0.0 then
                     ranged.searingWinds.active = 0
                 end
-                searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.remainingDuration))
             elseif ranged.searingWinds.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
@@ -1302,7 +1325,7 @@ local function updateOverlays()
                     overlaySprites.ranged.searing_winds.inactive,
                     overlaySprites.utility.shadow
                 )
-                searingWinds.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
             else
                 setAbilityIndicatorSprite(
@@ -1310,7 +1333,7 @@ local function updateOverlays()
                     overlaySprites.ranged.searing_winds.active,
                     overlaySprites.utility.shadow
                 )
-                searingWinds.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                searingWinds.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 searingWinds.text.content = "Ready"
         end
     else 
@@ -1330,7 +1353,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.shadowImbued.remainingDuration) == 0.0 then
                     ranged.shadowImbued.active = 0
                 end
-                shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.remainingDuration))
             elseif ranged.shadowImbued.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
@@ -1338,7 +1361,7 @@ local function updateOverlays()
                     overlaySprites.ranged.shadow_imbued.inactive,
                     overlaySprites.utility.shadow
                 )
-                shadowImbued.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
             else
                 setAbilityIndicatorSprite(
@@ -1346,7 +1369,7 @@ local function updateOverlays()
                     overlaySprites.ranged.shadow_imbued.active,
                     overlaySprites.utility.shadow
                 )
-                shadowImbued.text.font = id.Font.MUSEO_SANS_11PT_REGULAR
+                shadowImbued.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 shadowImbued.text.content = "Ready"
         end
     else 
@@ -1372,7 +1395,7 @@ local function updateOverlays()
                     ranged.perfectEquilibrium.active = 0
                 end
 
-                perfectEquilibrium.text.font = id.Font.MUSEO_SANS_13PT_BOLD
+                perfectEquilibrium.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 perfectEquilibrium.text.content =
                     tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
             else
