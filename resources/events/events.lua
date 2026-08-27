@@ -410,7 +410,7 @@ end
 local function extendShadowImbued(event)
     
     if events.playerData.ranged.shadowImbued.remainingDuration > 0 then
-        events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 12
+        events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
     end
 
 end
@@ -614,7 +614,7 @@ local function updateIncantations()
     incantations.splitSoul.active =
         var.VarPlayer["COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE"].value
 
-    if (incantations.threadsOfFate.active == 1 or incantations.invokeDeath.active == 1 or incantations.splitSoul.active == 1) then
+    if (incantations.threadsOfFate.active == 1 or incantations.splitSoul.active == 1) then
         swapGaugeToCombatStyle('necromancy')
     end
 end
