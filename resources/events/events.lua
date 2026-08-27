@@ -317,7 +317,6 @@ local function returnEquippedAmmo()
             },
             quiver_active_ammo = var.VarPlayer["QUIVER_ACTIVE_AMMO"].value.name or nil
         }
-        log(ammo.quiver_active_ammo)
         return ammo
     end
     return nil
@@ -413,7 +412,7 @@ end
 
 local function extendShadowImbued(event)
     
-    if events.playerData.ranged.shadowImbued.remainingDuration > 0 then
+    if events.playerData.ranged.shadowImbued.remainingDuration > 0 and events.playerData.ranged.shadowImbued.remainingDuration < 47 then
         events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
     end
 
@@ -451,7 +450,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
     COMBATV2_COOLDOWN_RANGED_GALESHOT_START = handleSearingWinds,
     COMBATV2_BUFF_RANGED_SEARING_WINDS_END = pauseSearingWinds,
-    COMBATV2_BUFF_RANGED_IMBUED_SHADOWS_END = handleShadowImbued,
+    COMBATV2_BUFF_RANGED_IMBUED_SHADOWS_ACTIVE = handleShadowImbued,
     COMBATV2_COOLDOWN_RANGED_SHADOW_TENDRILS_START = extendShadowImbued,
     EGWD_ZAMORAK_BOSS_TEMP_2  = handlePerfectEquilibrium,
     COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleBalanceByForce,
