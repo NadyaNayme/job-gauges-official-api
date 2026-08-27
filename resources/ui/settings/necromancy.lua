@@ -39,11 +39,11 @@ function M.Create(page)
             value = "show-invoke-death",
             selected = componentSettings["show-invoke-death"]
         },
-        {
-            text = "Show Darkness",
-            value = "show-darkness",
-            selected = componentSettings["show-darkness"]
-        },
+        -- {
+        --     text = "Show Darkness",
+        --     value = "show-darkness",
+        --     selected = componentSettings["show-darkness"]
+        -- },
         {
             text = "Show Threads of Fate",
             value = "show-threads-of-fate",

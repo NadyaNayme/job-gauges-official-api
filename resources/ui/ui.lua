@@ -29,8 +29,8 @@ local GAUGE_COMPONENT_POSITIONS = {
         bloat = { x = 2, y = 87 },
         necrosisStacks = { x = 2, y = 67 },
 
-        invokeDeath = { x = 84, y = 0 },
-        threadsOfFate = { x = 108, y = 0 },
+        invokeDeath = { x = 96, y = 0 },
+        threadsOfFate = { x = 84, y = 22 },
         darkness = { x = 84, y = 22 },
         splitSoul = { x = 108, y = 22 },
     },
@@ -1005,7 +1005,7 @@ local function updateOverlays()
     end
 
     -- Incantations
-    if necroSettings["show-darkness"] then 
+    if necroSettings["show-darkness"] and false then 
         darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
         if necromancy.incantations.darkness.active == 1 then
             darkness.sprite = overlaySprites.necromancy.incantations.darkness.active
