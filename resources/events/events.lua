@@ -213,6 +213,10 @@ local WEAPON_CATEGORIES = {
     [id.Category.WEAPON_ARMGUARD]   = "necromancy",
 }
 
+local function getRemainingTicks(startVar, endVar)
+    return var.VarPlayer[endVar].value - var.VarPlayer[startVar].value 
+end
+
 -- Used for Sunshine & Death's Swiftness checks
 local function isPlantedFeetEquipped()
     local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
@@ -385,10 +389,14 @@ end
 
 local function handleSearingWinds(event)
     events.playerData.ranged.searingWinds.active = 1
-    events.playerData.ranged.searingWinds.remainingDuration = 10
+    events.playerData.ranged.searingWinds.remainingDuration = getRemainingTicks("COMBATV2_COOLDOWN_RANGED_GALESHOT_START", "COMBATV2_BUFF_RANGED_SEARING_WINDS_END")
     events.playerData.ranged.searingWinds.cooldown = 34
 
     swapGaugeToCombatStyle('ranged')
+end
+
+local function pauseSearingWinds(event)
+    events.playerData.ranged.searingWinds.remainingDuration = events.playerData.ranged.searingWinds.remainingDuration + 1
 end
 
 local function handleShadowImbued(event)
@@ -397,6 +405,14 @@ local function handleShadowImbued(event)
     events.playerData.ranged.shadowImbued.cooldown = 100
 
     swapGaugeToCombatStyle('ranged')
+end
+
+local function extendShadowImbued(event)
+    
+    if events.playerData.ranged.shadowImbued.remainingDuration > 0 then
+        events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 12
+    end
+
 end
 
 local function handlePerfectEquilibrium(event)
@@ -430,7 +446,9 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
     COMBATV2_COOLDOWN_RANGED_GALESHOT_START = handleSearingWinds,
-    COMBATV2_COOLDOWN_RANGED_IMBUE_SHADOWS_START = handleShadowImbued,
+    COMBATV2_BUFF_RANGED_SEARING_WINDS_END = pauseSearingWinds,
+    COMBATV2_BUFF_RANGED_IMBUED_SHADOWS_END = handleShadowImbued,
+    COMBATV2_COOLDOWN_RANGED_SHADOW_TENDRILS_START = extendShadowImbued,
     EGWD_ZAMORAK_BOSS_TEMP_2  = handlePerfectEquilibrium,
     COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleBalanceByForce,
 
@@ -499,10 +517,6 @@ local function decrementTimers(tbl)
             end
         end
     end
-end
-
-local function getRemainingTicks(startVar, endVar)
-    return var.VarPlayer[endVar].value - var.VarPlayer[startVar].value 
 end
 
 local function updateInCombatState()
