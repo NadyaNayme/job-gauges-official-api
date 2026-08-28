@@ -2,7 +2,7 @@ local settings = require("resources/database/settings")
 
 local M = {}
 
-function M.Create(page)
+function M.Create(page, options)
 
     page:AddTitle("Necromancy Gauge Components")
 

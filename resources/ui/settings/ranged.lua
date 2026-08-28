@@ -2,7 +2,7 @@ local settings = require("resources/database/settings")
 
 local M = {}
 
-function M.Create(page)
+function M.Create(page, options)
     page:AddTitle("Ranged Gauge Components")
 
     local rangedComponentSettings = settings.Get("rangedSettings.componentVisibility")
@@ -103,6 +103,12 @@ function M.Create(page)
     page:AddTitle({
         text = "Guthixian Runes Colours",
     })
+    page:AddText({
+        text = "Because the sprites are initially blue, the colors won't accurately reflect your choices."
+    })
+    page:AddText({
+        text = "You're limited to blues and greens."
+    })
     page:AddDivider({
         marginTop = 10,
         marginBottom = 8
@@ -121,7 +127,6 @@ function M.Create(page)
                 "uiColours.runeColours.active",
                 string.format("0x%08X", colour)
             )
-            log(string.format("0x%08X", colour))
         end,
     })
     page:AddColourPicker({
@@ -138,7 +143,6 @@ function M.Create(page)
                 "uiColours.runeColours.activeShadow",
                 string.format("0x%08X", colour)
             )
-            log(string.format("0x%08X", colour))
         end,
     })
     page:AddText({
@@ -162,7 +166,6 @@ function M.Create(page)
                 "uiColours.runeColours.inactive",
                 string.format("0x%08X", colour)
             )
-            log(string.format("0x%08X", colour))
         end,
     })
     page:AddColourPicker({
@@ -179,7 +182,6 @@ function M.Create(page)
                 "uiColours.runeColours.inactiveShadow",
                 string.format("0x%08X", colour)
             )
-            log(string.format("0x%08X", colour))
         end,
     })
     page:AddText({

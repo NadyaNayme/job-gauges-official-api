@@ -179,11 +179,11 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             )
 
             if i <= stacks then
-                sprite.colour = ACTIVE_RUNE_COLOUR
-                shadow.colour = ACTIVE_RUNE_SHADOW_COLOUR
+                sprite.colour = colourToVector4(settings.Get("uiColours.runeColours.active"))
+                shadow.colour = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"))
             else
-                sprite.colour = INACTIVE_RUNE_COLOUR
-                shadow.colour = INACTIVE_RUNE_SHADOW_COLOUR
+                sprite.colour = colourToVector4(settings.Get("uiColours.runeColours.inactive"))
+                shadow.colour = colourToVector4(settings.Get("uiColours.runeColours.inactiveShadow"))
             end
 
         else
@@ -824,7 +824,14 @@ local CreateUI = function()
     necromancySettings.Create(necromancyPage)
     magicSettings.Create(magicPage)
     meleeSettings.Create(meleePage)
-    rangedSettings.Create(rangedPage)
+    rangedSettings.Create(rangedPage, {
+        setActiveRuneColour = function(colour)
+            updateBOLGLetters(
+                events.playerData.ranged.perfectEquilibrium.stacks,
+                events.playerData.ranged.perfectEquilibrium.active == 1
+            )
+        end,
+    })
 
 local function updateGaugeVisibility()
     necromancyGaugeLayer.hidden = true

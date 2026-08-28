@@ -76,7 +76,7 @@ function M.Create(page, options)
 
     page:AddTitle("Colour Settings")
 
-    page:AddText("Text Colour")
+    page:AddText("Duration Text Colour")
     page:AddColourPicker({
         value = settings.Get("fontColours.durationText"),
         alphaSlider = true,
@@ -95,7 +95,7 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("Ability Shadow Colour")
+    page:AddText("Ability Border Colour")
     page:AddColourPicker({
         value = settings.Get("uiColours.shadowColour"),
         alphaSlider = true,

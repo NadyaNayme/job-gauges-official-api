@@ -579,9 +579,9 @@ local function handleMeteorStrike(event)
 end
 
 -- Check for Vestment Robes to extend Berserk's timer
-local function getWornEquipment()
-    local THREE_SET = var.VarPlayer["WORN_SET_BASE_3"].value
-    return (THREE_SET == 196608)
+local function checkForVestmentsSetEffect()
+    local THREE_SET_VESTMENTS = var.VarPlayer["COMBAT_SET_EGWD_ZAM_MELEE"].value
+    return (THREE_SET_VESTMENTS >= 3)
 end
 
 -- Hits of Greater Flurry add +1 tick to Berserk, essentially pausing it similar to Rapid Fire & Imbue Shadows.
@@ -592,17 +592,15 @@ local function pauseBerserk(event)
 end
 
 local function handleBerserk(event)
-    local vestmentCheck = getWornEquipment()
-    events.playerData.melee.berserk.active = 1
+    local wearingVestmentsSet = checkForVestmentsSetEffect()
 
     if event.newValue == 1 then
-        events.playerData.melee.berserk.remainingDuration = 33 -- 3 piece vestments will change this to 43
-        if vestmentCheck then events.playerData.melee.berserk.remainingDuration = 43 end
+        events.playerData.melee.berserk.active = 1
+        events.playerData.melee.berserk.remainingDuration = 33
+        if wearingVestmentsSet then events.playerData.melee.berserk.remainingDuration = 43 end
         events.playerData.melee.berserk.cooldown = 100
     elseif events.playerData.melee.berserk.remainingDuration == 0 then 
         events.playerData.melee.berserk.active = 0
-        events.playerData.melee.berserk.remainingDuration = 0
-    else
         events.playerData.melee.berserk.remainingDuration = 0
     end
 
@@ -691,10 +689,10 @@ local COOLDOWN_RESET_MAP  = {
     COMBATV2_COOLDOWN_STRENGTH_CHAOS_ROAR_END =
         events.playerData.melee.chaosRoar,
 
-    COMBATV2_BUFF_MELEE_METEOR_STRIKE_ADRENALINE_EFFECT =
+    COMBATV2_COOLDOWN_ATTACK_METEOR_STRIKE_END =
         events.playerData.melee.meteorStrike,
 
-    COMBATV2_BUFF_MELEE_BERSERK_ACTIVE =
+    COMBATV2_COOLDOWN_STRENGTH_BERSERK_END =
         events.playerData.melee.berserk,
 }
 

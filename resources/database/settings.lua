@@ -16,10 +16,10 @@ local defaults = {
     uiColours = {
         shadowColour = "0xFFFFFFFF",
         runeColours = {
-            active = "0x00E37DFF",
-            activeShadow = "0x160202FF",
-            inactive = "0X0D1403FF",
-            inactiveShadow = "0x040000FF",
+            active = "0x70FF00FF",
+            activeShadow = "0x100101FF",
+            inactive = "0x050012FF",
+            inactiveShadow = "0xC1BDAC89",
         },
         barColours = {
             bloodTitheBar = "0xFFFFFFFF",
