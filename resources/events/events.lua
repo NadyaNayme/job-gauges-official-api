@@ -878,6 +878,10 @@ local function checkGreaterUnlocks()
         var.VarPlayer["COMBATV2_ABILITY_RANGED_GREATER_DEATHS_SWIFTNESS_UNLOCKED"].value
 end
 
+local function updateBloodlustStacks(value)
+    events.playerData.melee.bloodlust.stacks = value
+end
+
 local checkOnce = false
 
 local function updatePlayerData()
@@ -888,6 +892,7 @@ local function updatePlayerData()
     if (not checkOnce) then
         checkGreaterUnlocks()
         updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
+        updateBloodlustStacks(var.VarPlayer["COMBATV2_BUFF_MELEE_BLOODLUST_STACKS"].value)
         swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
         checkOnce = true
     end
