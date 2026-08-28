@@ -463,6 +463,24 @@ local function setAbilityIndicatorPosition(indicator, position)
 
 end
 
+local function setAbilitySpriteIndicatorPosition(indicator, position)
+    indicator.shadow:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
+        math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
+    )
+
+    indicator.sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
+    indicator.text:SetPos(
+        math.floor(position.x + 16 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+
+end
+
 local function setSpriteIndicatorPosition(indicator, position)
     indicator:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
@@ -810,7 +828,7 @@ local CreateUI = function()
             positions.melee.igneousShowdown
         )
 
-        setAbilityIndicatorPosition(
+        setAbilitySpriteIndicatorPosition(
             bloodlust,
             positions.melee.bloodlust
         )

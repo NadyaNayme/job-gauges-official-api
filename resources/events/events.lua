@@ -580,6 +580,8 @@ end
 
 -- Check for Vestment Robes to extend Berserk's timer
 local function getWornEquipment()
+    local THREE_SET = var.VarPlayer["WORN_SET_BASE_3"].value
+    return (THREE_SET == 196608)
 end
 
 -- Hits of Greater Flurry add +1 tick to Berserk, essentially pausing it similar to Rapid Fire & Imbue Shadows.
@@ -595,9 +597,12 @@ local function handleBerserk(event)
 
     if event.newValue == 1 then
         events.playerData.melee.berserk.remainingDuration = 33 -- 3 piece vestments will change this to 43
+        if vestmentCheck then events.playerData.melee.berserk.remainingDuration = 43 end
         events.playerData.melee.berserk.cooldown = 100
-    else 
+    elseif events.playerData.melee.berserk.remainingDuration == 0 then 
         events.playerData.melee.berserk.active = 0
+        events.playerData.melee.berserk.remainingDuration = 0
+    else
         events.playerData.melee.berserk.remainingDuration = 0
     end
 
