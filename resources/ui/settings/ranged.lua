@@ -5,7 +5,7 @@ local M = {}
 function M.Create(page)
     page:AddTitle("Ranged Gauge Components")
 
-    local rangedComponentSettings = settings.Get("rangedVisibleGaugeComponents")
+    local rangedComponentSettings = settings.Get("rangedSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
@@ -39,17 +39,12 @@ function M.Create(page)
             selected = rangedComponentSettings["show-crystal-rain"]
         },
     }, {
-        onChange = function(_, _, changedValue, selected)
-            local current =
-                settings.Get("rangedVisibleGaugeComponents")
-
-            current[changedValue] = selected
-
-            settings.Set(
-                "rangedVisibleGaugeComponents",
-                current
-            )
-        end,
+    onChange = function(_, _, changedValue, selected)
+        settings.Set(
+            "rangedSettings.componentVisibility." .. changedValue,
+            selected
+        )
+    end,
     })
 
     page:AddText("Guthixian Rune for Perfect Equilibrium Stacks")
@@ -84,26 +79,113 @@ function M.Create(page)
         { label = "Z", id = 26 },
         { label = "???", id = 27 },
     },
-    selectedID = settings.Get("selectedGuthixianRuneId") or 27,
+    selectedID = settings.Get("rangedSettings.selectedGuthixianRuneId") or 27,
     onChange = function(_, id, label)
 
         if id < 27 then
         settings.Set(
-            "selectedGuthixianRune",
+            "rangedSettings.selectedGuthixianRune",
             label
         )
         else 
         settings.Set(
-            "selectedGuthixianRune",
+            "rangedSettings.selectedGuthixianRune",
             "lore"
         )
         end
         settings.Set(
-            "selectedGuthixianRuneId",
+            "rangedSettings.selectedGuthixianRuneId",
             id
         )    
     end,
 })
+
+    page:AddTitle({
+        text = "Guthixian Runes Colours",
+    })
+    page:AddDivider({
+        marginTop = 10,
+        marginBottom = 8
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.runeColours.active"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Guthixian Runes Colour",
+        tooltip = "Choose the colour",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.runeColours.active",
+                string.format("0x%08X", colour)
+            )
+            log(string.format("0x%08X", colour))
+        end,
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.runeColours.activeShadow"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Guthixian Runes Colour",
+        tooltip = "Choose the shadow colour",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.runeColours.activeShadow",
+                string.format("0x%08X", colour)
+            )
+            log(string.format("0x%08X", colour))
+        end,
+    })
+    page:AddText({
+        inline = true,
+        text = "Active Color & Active Shadow",
+    })    
+    page:AddDivider({
+        marginTop = 0
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.runeColours.inactive"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Guthixian Runes Colour",
+        tooltip = "Choose the colour",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.runeColours.inactive",
+                string.format("0x%08X", colour)
+            )
+            log(string.format("0x%08X", colour))
+        end,
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.runeColours.inactiveShadow"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Guthixian Runes Colour",
+        tooltip = "Choose the shadow colour",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.runeColours.inactiveShadow",
+                string.format("0x%08X", colour)
+            )
+            log(string.format("0x%08X", colour))
+        end,
+    })
+    page:AddText({
+        inline = true,
+        text = "Inactive Color & Inactive Shadow",
+    })
     
 end
 

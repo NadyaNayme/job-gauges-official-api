@@ -6,7 +6,7 @@ function M.Create(page)
 
     page:AddTitle("Necromancy Gauge Components")
 
-    local componentSettings = settings.Get("necroVisibleGaugeComponents")
+    local componentSettings = settings.Get("necromancySettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
@@ -39,11 +39,6 @@ function M.Create(page)
             value = "show-invoke-death",
             selected = componentSettings["show-invoke-death"]
         },
-        -- {
-        --     text = "Show Darkness",
-        --     value = "show-darkness",
-        --     selected = componentSettings["show-darkness"]
-        -- },
         {
             text = "Show Threads of Fate",
             value = "show-threads-of-fate",
@@ -56,38 +51,12 @@ function M.Create(page)
         },
     }, {
         onChange = function(_, _, changedValue, selected)
-            local current =
-                settings.Get("necroVisibleGaugeComponents")
-
-            current[changedValue] = selected
-
             settings.Set(
-                "necroVisibleGaugeComponents",
-                current
+                "necromancySettings.componentVisibility." .. changedValue,
+                selected
             )
         end,
-    })
-
-
-    -- page:AddTitle("UI Settings")
-
-    -- local uiSettings = settings.Get("necroUISettings")
-
-    -- page:AddCheckboxButton({
-    --     {
-    --         text = "Hide Native Residual Souls",
-    --         value = "hide-residual-souls",
-    --         selected = uiSettings["hide-residual-souls"]
-    --     }
-    -- }, {
-    --     onChange = function(_, _, changedValue, selected)
-    --         local current = settings.Get("necroUISettings")
-
-    --         current[changedValue] = selected
-
-    --         settings.Set("necroUISettings", current)
-    --     end,
-    -- })
+        })
 
 end
 

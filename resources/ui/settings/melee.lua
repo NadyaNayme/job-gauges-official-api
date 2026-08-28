@@ -5,7 +5,7 @@ local M = {}
 function M.Create(page)
     page:AddTitle("Melee Gauge Components")
 
-    local meleeComponentSettings = settings.Get("meleeVisibleGaugeComponents")
+    local meleeComponentSettings = settings.Get("meleeSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
@@ -40,14 +40,9 @@ function M.Create(page)
         },
     }, {
         onChange = function(_, _, changedValue, selected)
-            local current =
-                settings.Get("meleeVisibleGaugeComponents")
-
-            current[changedValue] = selected
-
             settings.Set(
-                "meleeVisibleGaugeComponents",
-                current
+                "meleeSettings.componentVisibility." .. changedValue,
+                selected
             )
         end,
     })

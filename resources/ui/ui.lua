@@ -11,114 +11,55 @@ local rangedSettings = require("resources/ui/settings/ranged")
 
 local M = {}
 
--- ============================================================
+local function colourToVector4(colour)
+    local colour = tonumber(colour)
+    local r = math.floor(colour / 0x1000000) % 0x100
+    local g = math.floor(colour / 0x10000) % 0x100
+    local b = math.floor(colour / 0x100) % 0x100
+    local a = colour % 0x100
+
+    return Vector4.new(
+        r / 255,
+        g / 255,
+        b / 255,
+        a / 255
+    )
+end
+
+-- ============================================================ You excited for school tomorrow school today, I mean school today what's a little coffeein this friend fashion before being cheap and funny. This is one of those popular places to cruise them. She's on this space. I shall she goes proved and what would you do anything and make you feel like my bus on your sideshifts at all and I'm sure you feel that way I'm feeling from workers free legs are in I appreciate and I've took a lot here to say that now I think what's in right now for minutes to couple don't forget to meet pressure so you can keep it still a very small life and I was to choose one and vice versa I would probably do for funding prize is machines like subrays to get money to kill it before you go to that thought the works that we had was when the air conditioning went out that was by far like the one worst night we had than last year
 -- Constants / Configuration
 -- ============================================================
 
 -- Globals
-local UI_GAUGE_SCALE = 1
-local OFFSET_POSITION_X = settings.Get("gaugeOffsetX")
-local OFFSET_POSITION_Y = settings.Get("gaugeOffsetY")
+local OFFSET_POSITION_X = settings.Get("generalSettings.offsetPosition.x")
+local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
 local isDraggingOverlay = false
 
 local GAUGE_COMPONENT_POSITIONS = {
-    necromancy = {
-        conjureUndeadArmy = { x = 0, y = 0 },
-        livingDeath = { x = 40, y = 0 },
-        residualSoulsStacks = { x = 2, y = 44 },
-        bloat = { x = 2, y = 87 },
-        necrosisStacks = { x = 2, y = 67 },
-
-        invokeDeath = { x = 96, y = 0 },
-        threadsOfFate = { x = 84, y = 22 },
-        darkness = { x = 84, y = 22 },
-        splitSoul = { x = 108, y = 22 },
-    },
-
-    magic = {
-        soulfire = { x = 0, y = -34 },
-        instability = { x = 40, y = -34 },
-        activeSpell = { x = 88, y = -24 },
-        runicCharge = { x = 0, y = 0 },
-        tsunami = { x = 40, y = 0 },
-        sunshine = { x = 80, y = 0 },
-        upkeep = {
-            bloodTithe = { x = -55, y = 45 },
-            inciteFear = { x = -55, y = 55 },
-            essenceCorruption = { x = -55, y = 65 },
-        },
-    },
-    
-    ranged = {
-        crystalRain = { x = 0, y = -34 },
-        splitSoul = { x = 40, y = -34 },
-        searingWinds = { x = 0, y = 0 },
-        shadowImbued = { x = 40, y = 0 },
-        deathsSwiftness = { x = 80, y = 0 },
-        perfectEquilibrium = { x = -20, y = 40 },
-        guthixianRunes = { x = 20, y = 50 }
-    },
-
-    melee = {
-        blackhole = { x = 0, y = -34 },
-        igneousShowdown = { x = 40, y = -34 },
-        bloodlust = { x = 88, y = -24 },
-        chaosRoar = { x = 0, y = 0 },
-        meteorStrike = { x = 40, y = 0 },
-        berserk = { x = 80, y = 0 },
-    }
+    necromancy = settings.Get("necromancySettings.componentPositions"),
+    magic = settings.Get("magicSettings.componentPositions"),
+    ranged = settings.Get("rangedSettings.componentPositions"),
+    melee = settings.Get("meleeSettings.componentPositions"),
 }
 
-local RUNE_LAYOUT = {
-    BALANCE = {
-        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
-        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
-        [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
-        [4] = { x_offset = 36,  size = { width = 24, height = 24 } },
-        [5] = { x_offset = 50,  size = { width = 24, height = 24 } },
-        [6] = { x_offset = 66,  size = { width = 24, height = 24 } },
-        [7] = { x_offset = 82,  size = { width = 24, height = 24 } },
-        stacksText = { x = 120, y = 50},
-    },
+local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT")
 
-    NYU = {
-        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
-        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
-        [3] = { x_offset = 28,  size = { width = 24, height = 24 } },
-        stacksText = { x = 67, y = 50},
-    },
+local FONT_COLOUR = colourToVector4(settings.Get("fontColours.durationText"))
+local EXPIRING_COLOUR = colourToVector4(settings.Get("fontColours.expiringText"))
 
-    SEVEN = {
-        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
-        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
-        [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
-        [4] = { x_offset = 36,  size = { width = 24, height = 24 } },
-        [5] = { x_offset = 48,  size = { width = 24, height = 24 } },
-        [6] = { x_offset = 60,  size = { width = 24, height = 24 } },
-        [7] = { x_offset = 72,  size = { width = 24, height = 24 } },
-        stacksText = { x = 120, y = 50},
-    },
+local ACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.active"))
+local ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"))
+local INACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactive"))
+local INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactiveShadow"))
 
-    THREE = {
-        [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
-        [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
-        [3] = { x_offset = 24,  size = { width = 24, height = 24 } },
-        stacksText = { x = 67, y = 50},
-    },
-}
-
-local INACTIVE_RUNE_COLOUR = Vector4.new(1.0, 0.1, 0.1, 1.0)
-local ACTIVE_RUNE_COLOUR = Vector4.new(0.3686, 0.9922, 0.5765, 1.0)
-local ACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.1, 0.1, 0.1, 1.0)
-local INACTIVE_RUNE_SHADOW_COLOUR = Vector4.new(0.8, 0.8, 0.8, 0.25)
 local RUNE_SHADOW_OFFSET = 1
 
-local BLOOD_TITHE_COLOUR = Vector4.new(0.980, 0.169, 0.314, 1.0)
-local INCITE_FEAR_COLOUR = Vector4.new(0.227, 0.471, 0.869, 1.0)
-local ESSENCE_CORRUPTION_COLOUR = Vector4.new(0.498, 0.886, 0.251, 1.0)
+local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
+local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
+local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
 
 local function getRuneLayout(perfectEquilibriumActive)
-    local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
+    local selectedGuthixianRune = settings.Get("rangedSettings.selectedGuthixianRune")
 
     if selectedGuthixianRune == "lore" then
         if perfectEquilibriumActive then
@@ -158,7 +99,7 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 
     local word
 
-    local selectedGuthixianRune = settings.Get("selectedGuthixianRune") or "lore"
+    local selectedGuthixianRune = settings.Get("rangedSettings.selectedGuthixianRune")
 
     if selectedGuthixianRune == "lore" then
         if perfectEquilibriumActive then
@@ -252,27 +193,12 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
     end
 end
 
-local function hexToVector4(hex)
-    if hex == nil then return end
-    local r = math.floor(hex / 16777216) % 256
-    local g = math.floor(hex / 65536) % 256
-    local b = math.floor(hex / 256) % 256
-    local a = hex % 256
 
-    return Vector4.new(
-        r / 255,
-        g / 255,
-        b / 255,
-        a / 255
-    )
-end
-
-local ABILITY_SHADOW_COLOUR = hexToVector4(settings.Get("abilityShadowColour"))
+local ABILITY_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.shadowColour"))
 local ABILITY_SHADOW_SIZE = 42
 local ABILITY_SHADOW_OFFSET = -1
 local abilityShadows = {}
 
-local FONT_COLOUR = hexToVector4(settings.Get('fontColour'))
 local fontTexts = {}
 
 local function ticksToSeconds(ticks)
@@ -285,7 +211,7 @@ local function ticksToSeconds(ticks)
 end
 
 local function scaleToFactor(number)
-    return math.floor(number * UI_GAUGE_SCALE)
+    return math.floor(number * settings.Get("generalSettings.scale"))
 end
 
 local function createGaugeLayer(parent)
@@ -555,13 +481,6 @@ local CreateUI = function()
         21
     )
 
-    local darkness = createSpriteIndicator(
-        necromancyGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.necromancy.darkness,
-        24,
-        21
-    )
-
     local splitSoul = createSpriteIndicator(
         necromancyGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.necromancy.splitSoul,
@@ -605,17 +524,17 @@ local CreateUI = function()
 
     local bloodTithe = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.upkeep.bloodTithe
+        GAUGE_COMPONENT_POSITIONS.magic.bloodTithe
     )
 
     local inciteFear = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.upkeep.inciteFear
+        GAUGE_COMPONENT_POSITIONS.magic.inciteFear
     )
 
     local essenceCorruption = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.upkeep.essenceCorruption
+        GAUGE_COMPONENT_POSITIONS.magic.essenceCorruption
     )
 
     -- Ranged Overlay
@@ -734,11 +653,6 @@ local CreateUI = function()
         )
 
         setSpriteIndicatorPosition(
-            darkness,
-            positions.necromancy.darkness
-        )
-
-        setSpriteIndicatorPosition(
             splitSoul,
             positions.necromancy.splitSoul
         )
@@ -775,17 +689,17 @@ local CreateUI = function()
 
         setMagicUpkeepIndicatorPosition(
             bloodTithe,
-            positions.magic.upkeep.bloodTithe
+            positions.magic.bloodTithe
         )
 
         setMagicUpkeepIndicatorPosition(
             inciteFear,
-            positions.magic.upkeep.inciteFear
+            positions.magic.inciteFear
         )
 
         setMagicUpkeepIndicatorPosition(
             essenceCorruption,
-            positions.magic.upkeep.essenceCorruption
+            positions.magic.essenceCorruption
         )
 
         setAbilityIndicatorPosition(
@@ -885,17 +799,14 @@ local CreateUI = function()
   -- Page: General
     generalSettings.Create(generalPage, {
         setFontColour = function(colour)
-            FONT_COLOUR = hexToVector4(colour)
-
             for _, text in ipairs(fontTexts) do
-                text.colour = FONT_COLOUR
+                text.colour = colourToVector4(colour)
             end
         end,
 
         setAbilityShadowColour = function(colour)
-            ABILITY_SHADOW_COLOUR = hexToVector4(colour)
             for _, ability in ipairs(abilityShadows) do
-                ability.colour = ABILITY_SHADOW_COLOUR
+                ability.colour = colourToVector4(colour)
             end
         end,
 
@@ -954,6 +865,7 @@ local function getLowestConjureDuration(conjures)
 end
 
 local function updateMagicUpkeepIndicator(indicator, upkeep)
+    local visibilitySettings = settings.Get("magicSettings.componentVisibility")
     indicator.shadow.sprite = overlaySprites.utility.bar
     indicator.sprite.sprite = overlaySprites.utility.bar
     indicator.sprite:SetSize(upkeep.remainingDuration * 2.25, 3)
@@ -970,7 +882,7 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
     end
     indicator.text.content = tostring(ticksToSeconds(upkeep.remainingDuration) .. " (" .. tostring(upkeep.stacks) .. ")")
     if upkeep.remainingDuration <= 16 and math.floor(upkeep.remainingDuration) % 2 == 0 then
-        indicator.text.colour = Vector4.new(1.0, 0.0, 0.0, 1.0)
+        indicator.text.colour = EXPIRING_COLOUR
     else 
         indicator.text.colour = FONT_COLOUR
     end
@@ -983,16 +895,23 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
         indicator.sprite.hidden = false
         indicator.shadow.hidden = false
     end
+    if not visibilitySettings["show-blood-tithe"] and upkeep.name == "Blood Tithe" then
+        indicator.text.hidden = true
+    elseif not visibilitySettings["show-blood-tithe"] and upkeep.name == "Incite Fear" then
+        indicator.text.hidden = true
+    elseif  not visibilitySettings["show-blood-tithe"] and upkeep.name == "Essence Corruption" then
+        indicator.text.hidden = true
+    end
 end
 
 local function updateOverlays()
 
     if overlaySprites == nil then return end
 
-    local necroSettings = settings.Get("necroVisibleGaugeComponents")
-    local magicSettings = settings.Get("magicVisibleGaugeComponents")
-    local rangedSettings = settings.Get("rangedVisibleGaugeComponents")
-    local meleeSettings = settings.Get("meleeVisibleGaugeComponents")
+    local necromancySettings = settings.Get("necromancySettings")
+    local magicSettings = settings.Get("magicSettings")
+    local rangedSettings = settings.Get("rangedSettings")
+    local meleeSettings = settings.Get("meleeSettings")
 
     local playerData = events.playerData
     local necromancy = playerData.necromancy
@@ -1002,12 +921,12 @@ local function updateOverlays()
     local ultimates = playerData.ultimates
 
     if playerData.combatStyle == nil then
-        playerData.combatStyle = settings.Get('lastKnownCombatStyle')
+        playerData.combatStyle = settings.Get('playerState.combatStyle')
     end
 
     updateGaugeVisibility()
     
-    if playerData.inCombat ~= true and settings.Get("hideGaugeOutOfCombat") == "combat-visible" then
+    if playerData.inCombat ~= true and settings.Get("generalSettings.hideOutOfCombat") == "combat-visible" then
         necromancyGaugeLayer.hidden = true
         magicGaugeLayer.hidden = true
         rangedGaugeLayer.hidden = true
@@ -1015,7 +934,7 @@ local function updateOverlays()
      end
 
     -- Conjure Undead Army
-    if necroSettings["show-conjures"] then 
+    if necromancySettings.componentVisibility["show-conjures"] then 
         conjureUndeadArmy.layer.hidden = false
 
         local conjures = necromancy.conjures
@@ -1050,7 +969,7 @@ local function updateOverlays()
         conjureUndeadArmy.layer.hidden = true
     end
 
-    if necroSettings["show-living-death"] then 
+    if necromancySettings.componentVisibility["show-living-death"] then 
         livingDeath.layer.hidden = false
         if necromancy.livingDeath.active == 1
             then 
@@ -1083,7 +1002,7 @@ local function updateOverlays()
     end
     
     -- Residual Soul Stacks
-    if necroSettings["show-residual-souls"] then 
+    if necromancySettings.componentVisibility["show-residual-souls"] then 
         residualSoulsStacks:SetSize(scaleToFactor(132), scaleToFactor(24))
         if necromancy.residualSoulStacks == 0 then
                 residualSoulsStacks.sprite = overlaySprites.necromancy.souls.zero
@@ -1103,7 +1022,7 @@ local function updateOverlays()
     end
 
     -- Necrosis Stacks
-    if necroSettings["show-necrosis-stacks"] then 
+    if necromancySettings.componentVisibility["show-necrosis-stacks"] then 
         necrosisStacks:SetSize(scaleToFactor(132), scaleToFactor(20))
         if necromancy.necrosisStacks == 0 then
                 necrosisStacks.sprite = overlaySprites.necromancy.necrosis.zero
@@ -1124,7 +1043,7 @@ local function updateOverlays()
         necrosisStacks:SetSize(0, 0)
     end
 
-    if necroSettings["show-bloat"] then
+    if necromancySettings.componentVisibility["show-bloat"] then
         bloat:SetSize(scaleToFactor(132), scaleToFactor(24))
 
         if necromancy.bloat.active then
@@ -1161,16 +1080,7 @@ local function updateOverlays()
     end
 
     -- Incantations
-    if necroSettings["show-darkness"] and false then 
-        darkness:SetSize(scaleToFactor(24), scaleToFactor(21))
-        if necromancy.incantations.darkness.active == 1 then
-            darkness.sprite = overlaySprites.necromancy.incantations.darkness.active
-            else darkness.sprite = overlaySprites.necromancy.incantations.darkness.inactive
-        end
-    else
-        darkness:SetSize(0, 0)
-    end
-    if necroSettings["show-threads-of-fate"] then 
+    if necromancySettings.componentVisibility["show-threads-of-fate"] then 
         threadsOfFate:SetSize(scaleToFactor(24), scaleToFactor(21))
     if necromancy.incantations.threadsOfFate.active == 1 then
         threadsOfFate.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
@@ -1179,7 +1089,7 @@ local function updateOverlays()
     else
         threadsOfFate:SetSize(0, 0)
     end
-    if necroSettings["show-split-soul"] then 
+    if necromancySettings.componentVisibility["show-split-soul"] then 
         splitSoul:SetSize(scaleToFactor(24), scaleToFactor(21))
     if necromancy.incantations.splitSoul.active == 1 then
         splitSoul.sprite = overlaySprites.necromancy.incantations.splitSoul.active
@@ -1188,7 +1098,7 @@ local function updateOverlays()
     else
         splitSoul:SetSize(0, 0)
     end
-    if necroSettings["show-invoke-death"] then 
+    if necromancySettings.componentVisibility["show-invoke-death"] then 
         invokeDeath:SetSize(scaleToFactor(24), scaleToFactor(21))
     if necromancy.incantations.invokeDeath.active == 1 then
         invokeDeath.sprite = overlaySprites.necromancy.incantations.invokeDeath.active
@@ -1200,7 +1110,7 @@ local function updateOverlays()
 
     -- Magic Gauge
     -- Sunshine
-    if magicSettings["show-sunshine"] then 
+    if magicSettings.componentVisibility["show-sunshine"] then 
         sunshine.layer.hidden = false
         if magic.sunshine.active == 1
             then 
@@ -1260,7 +1170,7 @@ local function updateOverlays()
     end
 
     -- Tsunami
-    if magicSettings["show-tsunami"] then 
+    if magicSettings.componentVisibility["show-tsunami"] then 
         tsunami.layer.hidden = false
         if magic.tsunami.active == 1
             then 
@@ -1296,7 +1206,7 @@ local function updateOverlays()
     end
 
     -- Runic Charge
-    if magicSettings["show-runic-charge"] then 
+    if magicSettings.componentVisibility["show-runic-charge"] then 
         runicCharge.layer.hidden = false
         if magic.runicCharge.active == 1
             then 
@@ -1331,7 +1241,7 @@ local function updateOverlays()
         runicCharge.layer.hidden = true
     end
 
-    if magicSettings["show-soulfire"] then 
+    if magicSettings.componentVisibility["show-soulfire"] then 
         soulfire.layer.hidden = false
         if magic.soulfire.active == 1
             then 
@@ -1354,7 +1264,7 @@ local function updateOverlays()
         soulfire.layer.hidden = true
     end
 
-    if magicSettings["show-instability"] then 
+    if magicSettings.componentVisibility["show-instability"] then 
         instability.layer.hidden = false
         if magic.instability.active == 1
             then 
@@ -1377,31 +1287,37 @@ local function updateOverlays()
         instability.layer.hidden = true
     end
 
-    if magicSettings["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
+    if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
         activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
         activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
         activeSpellSprite:SetSize(0, 0)
     end
 
-    updateMagicUpkeepIndicator(
-        bloodTithe,
-        magic.upkeep.blood_tithe
-    )
+    if magicSettings.componentVisibility["show-blood-tithe"] then
+        updateMagicUpkeepIndicator(
+            bloodTithe,
+            magic.upkeep.blood_tithe
+        )
+    end
 
-    updateMagicUpkeepIndicator(
-        inciteFear,
-        magic.upkeep.incite_fear
-    )
+    if magicSettings.componentVisibility["show-incite-fear"] then
+        updateMagicUpkeepIndicator(
+            inciteFear,
+            magic.upkeep.incite_fear
+        )
+    end
 
-    updateMagicUpkeepIndicator(
-        essenceCorruption,
-        magic.upkeep.essence_corruption
-    )
+    if magicSettings.componentVisibility["show-essence-corruption"] then
+        updateMagicUpkeepIndicator(
+            essenceCorruption,
+            magic.upkeep.essence_corruption
+        )
+    end
 
     -- Ranged Gauge
 
-    if rangedSettings["show-crystal-rain"] then 
+    if rangedSettings.componentVisibility["show-crystal-rain"] then 
         crystalRain.layer.hidden = false
         if ranged.crystalRain.active == 1
             then 
@@ -1424,7 +1340,7 @@ local function updateOverlays()
         crystalRain.layer.hidden = true
     end
 
-    if rangedSettings["show-split-soul"] then 
+    if rangedSettings.componentVisibility["show-split-soul"] then 
         splitSoul_ecb.layer.hidden = false
         if ranged.splitSoul.active == 1
             then 
@@ -1448,7 +1364,7 @@ local function updateOverlays()
     end
 
     -- Death's Swiftness
-    if rangedSettings["show-deaths-swiftness"] then 
+    if rangedSettings.componentVisibility["show-deaths-swiftness"] then 
         deathsSwiftness.layer.hidden = false
         if ranged.deathsSwiftness.active == 1
             then 
@@ -1508,7 +1424,7 @@ local function updateOverlays()
     end
 
     -- Searing Winds
-    if rangedSettings["show-searing-winds"] then 
+    if rangedSettings.componentVisibility["show-searing-winds"] then 
         searingWinds.layer.hidden = false
         if ranged.searingWinds.active == 1
             then 
@@ -1544,7 +1460,7 @@ local function updateOverlays()
     end
 
     -- Shadow Imbued
-    if rangedSettings["show-shadow-imbued"] then 
+    if rangedSettings.componentVisibility["show-shadow-imbued"] then 
         shadowImbued.layer.hidden = false
         if ranged.shadowImbued.active == 1
             then 
@@ -1580,7 +1496,7 @@ local function updateOverlays()
     end
 
     -- Perfect Equilibrium
-    if rangedSettings["show-perfect-equilibrium"] then 
+    if rangedSettings.componentVisibility["show-perfect-equilibrium"] then 
         perfectEquilibrium.layer.hidden = false
         updateBOLGLetters(
             ranged.perfectEquilibrium.stacks,
@@ -1626,7 +1542,7 @@ local function updateOverlays()
 
 
     -- MELEE COMPONENTS
-    if meleeSettings["show-blackhole"] then 
+    if meleeSettings.componentVisibility["show-blackhole"] then 
         blackhole.layer.hidden = false
         if melee.blackhole.active == 1
             then 
@@ -1649,7 +1565,7 @@ local function updateOverlays()
         blackhole.layer.hidden = true
     end
 
-    if meleeSettings["show-igneous-showdown"] then 
+    if meleeSettings.componentVisibility["show-igneous-showdown"] then 
         igneousShowdown.layer.hidden = false
         if melee.igneousShowdown.active == 1
             then 
@@ -1672,7 +1588,7 @@ local function updateOverlays()
         igneousShowdown.layer.hidden = true
     end
 
-    if meleeSettings["show-bloodlust"] then 
+    if meleeSettings.componentVisibility["show-bloodlust"] then 
         bloodlust.layer.hidden = false
         if melee.bloodlust.stacks > 3
             then 
@@ -1690,7 +1606,7 @@ local function updateOverlays()
         bloodlust.layer.hidden = true
     end
 
-    if meleeSettings["show-chaos-roar"] then 
+    if meleeSettings.componentVisibility["show-chaos-roar"] then 
         chaosRoar.layer.hidden = false
         if melee.chaosRoar.active == 1
             then 
@@ -1713,7 +1629,7 @@ local function updateOverlays()
         chaosRoar.layer.hidden = true
     end
 
-    if meleeSettings["show-meteor-strike"] then 
+    if meleeSettings.componentVisibility["show-meteor-strike"] then 
         meteorStrike.layer.hidden = false
         if melee.meteorStrike.active == 1
             then 
@@ -1736,7 +1652,7 @@ local function updateOverlays()
         meteorStrike.layer.hidden = true
     end
 
-    if meleeSettings["show-berserk"] then 
+    if meleeSettings.componentVisibility["show-berserk"] then 
         berserk.layer.hidden = false
         if melee.berserk.active == 1
             then 
@@ -1787,8 +1703,8 @@ local function updateOverlays()
             if isDraggingOverlay then
                 isDraggingOverlay = false
                 
-                settings.Set("gaugeOffsetX", OFFSET_POSITION_X)
-                settings.Set("gaugeOffsetY", OFFSET_POSITION_Y)
+                settings.Set("generalSettings.offsetPosition.x", OFFSET_POSITION_X)
+                settings.Set("generalSettings.offsetPosition.y", OFFSET_POSITION_Y)
             end
         end
     end

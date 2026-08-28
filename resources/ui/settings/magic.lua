@@ -5,7 +5,7 @@ local M = {}
 function M.Create(page)
     page:AddTitle("Magic Gauge Components")
 
-    local magicComponentSettings = settings.Get("magicVisibleGaugeComponents")
+    local magicComponentSettings = settings.Get("magicSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
@@ -40,14 +40,9 @@ function M.Create(page)
         },
     }, {
         onChange = function(_, _, changedValue, selected)
-            local current =
-                settings.Get("magicVisibleGaugeComponents")
-
-            current[changedValue] = selected
-
             settings.Set(
-                "magicVisibleGaugeComponents",
-                current
+                "magicSettings.componentVisibility." .. changedValue,
+                selected
             )
         end,
     })

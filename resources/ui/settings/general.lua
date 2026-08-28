@@ -14,10 +14,10 @@ function M.Create(page, options)
         { text = "Mainhand Weapon", value = "mainhand" },
         { text = "I'll set it myself", value = "static" },
     }, {
-        selectedValue = settings.Get("automaticallySwapGauge"),
+        selectedValue = settings.Get("generalSettings.automaticSwapping"),
 
         onChange = function(_, value)
-            settings.Set("automaticallySwapGauge", value)
+            settings.Set("generalSettings.automaticSwapping", value)
         end,
     })
 
@@ -29,30 +29,31 @@ function M.Create(page, options)
     })
     page:AddSimpleButton("Necromancy", function(self, _)
         events.playerData.combatStyle = 'necromancy'
-        settings.Set('lastKnownCombatStyle', 'necromancy')
+        settings.Set('playerState.combatStyle', 'necromancy')
     end, { inline = true})
     page:AddSimpleButton("Magic", function(self, _)
         events.playerData.combatStyle = 'magic'
-        settings.Set('lastKnownCombatStyle', 'magic')
+        settings.Set('playerState.combatStyle', 'magic')
     end, { inline = true})
     page:AddSimpleButton("Ranged", function(self, _)
         events.playerData.combatStyle = 'ranged'
-        settings.Set('lastKnownCombatStyle', 'ranged')
+        settings.Set('playerState.combatStyle', 'ranged')
     end, { inline = true})
     page:AddSimpleButton("Melee", function(self, _)
         events.playerData.combatStyle = 'melee'
-        settings.Set('lastKnownCombatStyle', 'melee')
+        settings.Set('playerState.combatStyle', 'melee')
     end, { inline = true})
 
     page:AddText("Hide the combat style gauge while out of combat")
     page:AddRadioButton({
         { text = "Yes", value = "combat-visible" },
         { text = "No", value = "always-visible" },
+        
     }, {
-        selectedValue = settings.Get("hideGaugeOutOfCombat"),
+        selectedValue = settings.Get("generalSettings.hideOutOfCombat"),
 
         onChange = function(group, value)
-            settings.Set("hideGaugeOutOfCombat", value)
+            settings.Set("generalSettings.hideOutOfCombat", value)
         end,
     })
 
@@ -61,20 +62,23 @@ function M.Create(page, options)
         { text = "Precise Ticks", value = "precise-ticks" },
         { text = "Nearest Second", value = "nearest-second" },
     }, {
-        selectedValue = settings.Get("showPreciseDurations"),
+        selectedValue = settings.Get("generalSettings.displayTimeAs"),
 
         onChange = function(group, value)
-            settings.Set("showPreciseDurations", value)
+            settings.Set("generalSettings.displayTimeAs", value)
         end,
     })
 
-    page:AddDivider()
+    page:AddDivider({
+        marginTop = 5,
+        marginBottom = 5
+    })
 
     page:AddTitle("Colour Settings")
 
     page:AddText("Text Colour")
     page:AddColourPicker({
-        value = settings.Get("fontColour"),
+        value = settings.Get("fontColours.durationText"),
         alphaSlider = true,
         buttonSize = 48,
         windowTitle = "Font Colour",
@@ -83,17 +87,17 @@ function M.Create(page, options)
 
         onChange = function(_, colour)
             settings.Set(
-                "fontColour",
+                "fontColours.durationText",
                 string.format("0x%08X", colour)
             )
-
             options.setFontColour(colour)
+            log(string.format("0x%08X", colour))
         end,
     })
 
     page:AddText("Ability Shadow Colour")
     page:AddColourPicker({
-        value = settings.Get("abilityShadowColour"),
+        value = settings.Get("uiColours.shadowColour"),
         alphaSlider = true,
         buttonSize = 48,
         windowTitle = "Ability Shadow Colour",
@@ -102,10 +106,9 @@ function M.Create(page, options)
 
         onChange = function(_, colour)
             settings.Set(
-                "abilityShadowColour",
+                "uiColours.shadowColour",
                 string.format("0x%08X", colour)
             )
-
             options.setAbilityShadowColour(colour)
         end,
     })

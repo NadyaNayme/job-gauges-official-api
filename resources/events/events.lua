@@ -11,7 +11,7 @@ local events = {
             greaterSunshineUnlocked = nil,
             greaterDeathsSwiftnessUnlocked = nil
         },
-        necromancy = {
+        necromancy = { 
             necrosisStacks = 0,
             residualSoulStacks = 0,
             livingDeath = {
@@ -255,21 +255,21 @@ local function updateActiveSpell(spellId)
 
     events.playerData.magic.activeSpell.name = spell.name
     events.playerData.magic.activeSpell.icon = spell.icon
-    settings.Set('lastKnownActiveSpell', spellId)
+    settings.Set('playerState.activeSpell', spellId)
 end
 
 local function swapGaugeToCombatStyle(style)
-    if settings.Get('automaticallySwapGauge') == 'dynamic' then
+    if settings.Get('generalSettings.automaticSwapping') == 'dynamic' then
         events.playerData.combatStyle = style
     end
 
-    if settings.Get('lastKnownCombatStyle') ~= style then
-        settings.Set('lastKnownCombatStyle', style)
+    if settings.Get('playerState.combatStyle') ~= style then
+        settings.Set('playerState.combatStyle', style)
     end
 end
 
 local function checkEquippedMainhand()
-    if settings.Get('automaticallySwapGauge') ~= 'mainhand' then return end
+    if settings.Get('generalSettings.automaticSwapping') ~= 'mainhand' then return end
 
     local worn = Inventory.Find(config.Inv.WORN)
     local wornObj = worn:GetSlot(4)
@@ -282,7 +282,7 @@ local function checkEquippedMainhand()
 
         if combatStyle then
             events.playerData.combatStyle = combatStyle
-            settings.Set("lastKnownCombatStyle", combatStyle)
+            settings.Set("playerState.combatStyle", combatStyle)
         end
     end
 end
@@ -898,7 +898,7 @@ local function updatePlayerData()
         checkGreaterUnlocks()
         updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
         updateBloodlustStacks(var.VarPlayer["COMBATV2_BUFF_MELEE_BLOODLUST_STACKS"].value)
-        swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
+        swapGaugeToCombatStyle(settings.Get('playerState.combatStyle'))
         checkOnce = true
     end
 
