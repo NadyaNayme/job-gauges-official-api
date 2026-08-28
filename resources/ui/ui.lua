@@ -57,6 +57,15 @@ local GAUGE_COMPONENT_POSITIONS = {
         deathsSwiftness = { x = 80, y = 0 },
         perfectEquilibrium = { x = -20, y = 40 },
         guthixianRunes = { x = 20, y = 50 }
+    },
+
+    melee = {
+        blackhole = { x = 0, y = -34 },
+        igneousShowdown = { x = 40, y = -34 },
+        bloodlust = { x = 88, y = -24 },
+        chaosRoar = { x = 0, y = 0 },
+        meteorStrike = { x = 40, y = 0 },
+        berserk = { x = 80, y = 0 },
     }
 }
 
@@ -335,6 +344,51 @@ local function createAbilityIndicator(parent, position)
     }
 end
 
+local function createAbilitySpriteIndicator(parent, position)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(20, 20, 1.0, 1.0)
+
+    local shadow = ui.Sprite.new(layer)
+    shadow:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
+        math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
+    )
+    shadow:SetSize(scaleToFactor(ABILITY_SHADOW_SIZE), scaleToFactor(ABILITY_SHADOW_SIZE))
+    shadow.colour = ABILITY_SHADOW_COLOUR
+
+    local sprite = ui.Sprite.new(layer)
+    sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    sprite:SetSize(scaleToFactor(20), scaleToFactor(20))
+    sprite:MoveToFront()
+
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(position.x + 16 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+    text:SetSize(22, 15)
+    text:MoveToFront()
+    text.content = ""
+    text.font = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    text.alignHorizontal = ui.AlignMode.CENTRE
+    text.alignVertical = ui.AlignMode.CENTRE
+
+    table.insert(fontTexts, text)
+    table.insert(abilityShadows, shadow)
+
+    return {
+        layer = layer,
+        shadow = shadow,
+        sprite = sprite,
+        text = text,
+    }
+end
+
 local function createSpriteIndicator(parent, position, width, height)
     local sprite = ui.Sprite.new(parent)
 
@@ -546,6 +600,7 @@ local CreateUI = function()
         GAUGE_COMPONENT_POSITIONS.magic.upkeep.essenceCorruption
     )
 
+    -- Ranged Overlay
     local rangedGaugeLayer = createGaugeLayer(jobGaugeLayer)
     local deathsSwiftness = createAbilityIndicator(
         rangedGaugeLayer,
@@ -590,9 +645,38 @@ local CreateUI = function()
     perfectEquilibriumStacksText.alignVertical = ui.AlignMode.CENTRE
 
     table.insert(fontTexts, perfectEquilibriumStacksText)
-    
 
-    local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)  
+    -- Melee Overlay
+    local meleeGaugeLayer = createGaugeLayer(jobGaugeLayer)
+    local blackhole = createAbilityIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.blackhole
+    )
+
+    local igneousShowdown = createAbilityIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.igneousShowdown
+    )
+
+    local bloodlust = createAbilitySpriteIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.bloodlust
+    )
+
+    local chaosRoar = createAbilityIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.chaosRoar
+    )
+
+    local meteorStrike = createAbilityIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.meteorStrike
+    )
+
+    local berserk = createAbilityIndicator(
+        meleeGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.melee.berserk
+    )
 
     local function updateOverlayPositions()
         local positions = GAUGE_COMPONENT_POSITIONS
@@ -716,13 +800,43 @@ local CreateUI = function()
             positions.ranged.perfectEquilibrium
         )
 
-    local perfectEquilibriumActive = events.playerData.ranged.perfectEquilibrium.active == 1
-    local layout = getRuneLayout(perfectEquilibriumActive)
+        setAbilityIndicatorPosition(
+            blackhole,
+            positions.melee.blackhole
+        )
 
-    perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
-    )
+        setAbilityIndicatorPosition(
+            igneousShowdown,
+            positions.melee.igneousShowdown
+        )
+
+        setAbilityIndicatorPosition(
+            bloodlust,
+            positions.melee.bloodlust
+        )
+
+        setAbilityIndicatorPosition(
+            chaosRoar,
+            positions.melee.chaosRoar
+        )
+
+        setAbilityIndicatorPosition(
+            meteorStrike,
+            positions.melee.meteorStrike
+        )
+
+        setAbilityIndicatorPosition(
+            berserk,
+            positions.melee.berserk
+        )
+
+        local perfectEquilibriumActive = events.playerData.ranged.perfectEquilibrium.active == 1
+        local layout = getRuneLayout(perfectEquilibriumActive)
+
+        perfectEquilibriumStacksText:SetPos(
+            math.floor(layout.stacksText.x + OFFSET_POSITION_X),
+            math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
+        )
 
     end
 
@@ -780,7 +894,7 @@ local CreateUI = function()
         
     necromancySettings.Create(necromancyPage)
     magicSettings.Create(magicPage)
-    -- meleeSettings.Create(meleePage)
+    meleeSettings.Create(meleePage)
     rangedSettings.Create(rangedPage)
 
 local function updateGaugeVisibility()
@@ -860,12 +974,13 @@ local function updateOverlays()
     local necroSettings = settings.Get("necroVisibleGaugeComponents")
     local magicSettings = settings.Get("magicVisibleGaugeComponents")
     local rangedSettings = settings.Get("rangedVisibleGaugeComponents")
+    local meleeSettings = settings.Get("meleeVisibleGaugeComponents")
 
     local playerData = events.playerData
     local necromancy = playerData.necromancy
     local magic = playerData.magic
     local ranged = playerData.ranged
-    -- local melee = playerData.melee
+    local melee = playerData.melee
     local ultimates = playerData.ultimates
 
     if playerData.combatStyle == nil then
@@ -1490,6 +1605,154 @@ local function updateOverlays()
         math.floor(layout.stacksText.x + OFFSET_POSITION_X),
         math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
     )
+
+
+    -- MELEE COMPONENTS
+    if meleeSettings["show-blackhole"] then 
+        blackhole.layer.hidden = false
+        if melee.blackhole.active == 1
+            then 
+                blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
+                if ticksToSeconds(melee.blackhole.remainingDuration) == 0.0 then
+                    melee.blackhole.active = 0
+                end
+                blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.remainingDuration))
+            elseif melee.blackhole.cooldown >= 1 then 
+                blackhole.sprite.sprite = overlaySprites.melee.blackhole.inactive
+                blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.cooldown))
+            else
+                blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
+                blackhole.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                blackhole.text.content = "Ready"
+        end
+    else 
+        blackhole.layer.hidden = true
+    end
+
+    if meleeSettings["show-igneous-showdown"] then 
+        igneousShowdown.layer.hidden = false
+        if melee.igneousShowdown.active == 1
+            then 
+                igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
+                if ticksToSeconds(melee.igneousShowdown.remainingDuration) == 0.0 then
+                    melee.igneousShowdown.active = 0
+                end
+                igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.remainingDuration))
+            elseif melee.igneousShowdown.cooldown >= 1 then 
+                igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.inactive
+                igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.cooldown))
+            else
+                igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
+                igneousShowdown.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                igneousShowdown.text.content = "Ready"
+        end
+    else 
+        igneousShowdown.layer.hidden = true
+    end
+
+    if meleeSettings["show-bloodlust"] then 
+        bloodlust.layer.hidden = false
+        if melee.bloodlust.stacks > 3
+            then 
+                bloodlust.sprite.sprite = id.Sprite["BUFF_ICON_MELEE_BLOODLUST"]
+                bloodlust.text.content = tostring(melee.bloodlust.stacks)
+        elseif melee.bloodlust.stacks > 0
+            then
+                bloodlust.sprite.sprite = id.Sprite["BUFF_ICON_MELEE_BLOODLUST_INACTIVE"]
+                bloodlust.text.content = tostring(melee.bloodlust.stacks)
+            else
+                bloodlust.sprite.sprite = id.Sprite["BUFF_ICON_MELEE_BLOODLUST_INACTIVE"]
+                bloodlust.text.content = "0"
+        end
+    else 
+        bloodlust.layer.hidden = true
+    end
+
+    if meleeSettings["show-chaos-roar"] then 
+        chaosRoar.layer.hidden = false
+        if melee.chaosRoar.active == 1
+            then 
+                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
+                if ticksToSeconds(melee.chaosRoar.remainingDuration) == 0.0 then
+                    melee.chaosRoar.active = 0
+                end
+                chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.remainingDuration))
+            elseif melee.chaosRoar.cooldown >= 1 then 
+                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.inactive
+                chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.cooldown))
+            else
+                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
+                chaosRoar.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                chaosRoar.text.content = "Ready"
+        end
+    else 
+        chaosRoar.layer.hidden = true
+    end
+
+    if meleeSettings["show-meteor-strike"] then 
+        meteorStrike.layer.hidden = false
+        if melee.meteorStrike.active == 1
+            then 
+                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
+                if ticksToSeconds(melee.meteorStrike.remainingDuration) == 0.0 then
+                    melee.meteorStrike.active = 0
+                end
+                meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.remainingDuration))
+            elseif melee.meteorStrike.cooldown >= 1 then 
+                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.inactive
+                meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.cooldown))
+            else
+                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
+                meteorStrike.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                meteorStrike.text.content = "Ready"
+        end
+    else 
+        meteorStrike.layer.hidden = true
+    end
+
+    if meleeSettings["show-berserk"] then 
+        berserk.layer.hidden = false
+        if melee.berserk.active == 1
+            then 
+                setAbilityIndicatorSprite(
+                    berserk,
+                    overlaySprites.melee.berserk.active,
+                    overlaySprites.utility.shadow
+                )
+                if ticksToSeconds(melee.berserk.remainingDuration) == 0.0 then
+                    melee.berserk.active = 0
+                end
+                berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                berserk.text.content = tostring(ticksToSeconds(melee.berserk.remainingDuration))
+            elseif melee.berserk.cooldown >= 1 then 
+                setAbilityIndicatorSprite(
+                    berserk,
+                    overlaySprites.melee.berserk.inactive,
+                    overlaySprites.utility.shadow
+                )
+                berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                berserk.text.content = tostring(ticksToSeconds(melee.berserk.cooldown))
+            else
+                setAbilityIndicatorSprite(
+                    berserk,
+                    overlaySprites.melee.berserk.active,
+                    overlaySprites.utility.shadow
+                )
+                berserk.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                berserk.text.content = "Ready"
+        end
+    else 
+        berserk.layer.hidden = true
+    end
+
 
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then
         local shiftDown = Keyboard.IsShiftDown()

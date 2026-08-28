@@ -171,6 +171,36 @@ local events = {
                 cooldown = 0,
                 stacks = 0,
             }
+        },
+        melee = {
+            blackhole = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            igneousShowdown = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            bloodlust = {
+                stacks = 0
+            },
+            chaosRoar = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            meteorStrike = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            berserk = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            }
         }
     }
 }
@@ -491,6 +521,89 @@ local function handleCappedEssenceCorruption(event)
     end
 end
 
+-- Melee Events
+
+local function handleBlackhole(event)
+    events.playerData.melee.blackhole.active = 1
+    events.playerData.melee.blackhole.remainingDuration = 35
+    events.playerData.melee.blackhole.cooldown = 100
+
+    swapGaugeToCombatStyle('melee')
+end
+
+local function handleIgneousShowdown(event)
+    events.playerData.melee.igneousShowdown.active = 1
+    events.playerData.melee.igneousShowdown.remainingDuration = 0
+    events.playerData.melee.igneousShowdown.cooldown = 100
+
+    swapGaugeToCombatStyle('melee')
+end
+
+local function handleBloodlust(event)
+    events.playerData.melee.bloodlust.stacks = event.newValue
+
+    swapGaugeToCombatStyle('melee')
+end
+
+local function handleChaosRoar(event)
+    if event.newValue == 0 then 
+        events.playerData.melee.chaosRoar.active = 0
+        events.playerData.melee.chaosRoar.remainingDuration = 0
+    else 
+        events.playerData.melee.chaosRoar.active = 1
+        events.playerData.melee.chaosRoar.remainingDuration = 10
+        events.playerData.melee.chaosRoar.cooldown = 100
+
+    swapGaugeToCombatStyle('melee')
+    end
+end
+
+local function handleChaosRoarUse(event)
+    if event.oldValue == 46279 then
+        events.playerData.melee.chaosRoar.active = 0
+        events.playerData.melee.chaosRoar.remainingDuration = 0
+    end
+end
+
+local function handleMeteorStrike(event)
+    if event.newValue == 0 then 
+        events.playerData.melee.meteorStrike.active = 0
+        events.playerData.melee.meteorStrike.remainingDuration = 0
+    else
+        events.playerData.melee.meteorStrike.active = 1
+        events.playerData.melee.meteorStrike.remainingDuration = 50
+        events.playerData.melee.meteorStrike.cooldown = 100
+
+        swapGaugeToCombatStyle('melee')
+    end
+end
+
+-- Check for Vestment Robes to extend Berserk's timer
+local function getWornEquipment()
+end
+
+-- Hits of Greater Flurry add +1 tick to Berserk, essentially pausing it similar to Rapid Fire & Imbue Shadows.
+local function pauseBerserk(event)
+    if event.newValue - event.oldValue == 1 then
+        events.playerData.melee.berserk.remainingDuration = events.playerData.melee.berserk.remainingDuration + 1
+    end
+end
+
+local function handleBerserk(event)
+    local vestmentCheck = getWornEquipment()
+    events.playerData.melee.berserk.active = 1
+
+    if event.newValue == 1 then
+        events.playerData.melee.berserk.remainingDuration = 33 -- 3 piece vestments will change this to 43
+        events.playerData.melee.berserk.cooldown = 100
+    else 
+        events.playerData.melee.berserk.active = 0
+        events.playerData.melee.berserk.remainingDuration = 0
+    end
+
+    swapGaugeToCombatStyle('melee')
+end
+
 -- Treats the player as 'Out of Combat' if they bank, so the gauge doesn't block the bank UI
 local function handleBank()
     events.playerData.inCombat = false
@@ -522,6 +635,15 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_COOLDOWN_MAGIC_COMBUST_START = handleCappedEssenceCorruption,
     COMBATV2_COOLDOWN_MAGIC_CORRUPTION_START = handleCappedEssenceCorruption,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END = handleCrystalRain,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_BLACK_HOLE_START = handleBlackhole,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_IGNEOUS_SHOWDOWN_START = handleIgneousShowdown,
+    COMBATV2_BUFF_MELEE_BLOODLUST_STACKS = handleBloodlust,
+    COMBATV2_COOLDOWN_STRENGTH_CHAOS_ROAR_START = handleChaosRoar,
+    COMBATV2_BUFF_MELEE_METEOR_STRIKE_ADRENALINE_EFFECT = handleMeteorStrike,
+    COMBATV2_BUFF_MELEE_BERSERK_ACTIVE = handleBerserk,
+    COMBATV2_BUFF_MELEE_BERSERK_END = pauseBerserk,
+    COMBATV2_JUST_USED_ABILITY = handleChaosRoarUse,
+
 
     BANK_TEMP = handleBank,
     LASTCASTSPELL = handleLastCastSpell,
@@ -554,6 +676,21 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END =
         events.playerData.ranged.crystalRain,
+
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_BLACK_HOLE_END =
+        events.playerData.melee.blackhole,
+
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_IGNEOUS_SHOWDOWN_END =
+        events.playerData.melee.igneousShowdown,
+
+    COMBATV2_COOLDOWN_STRENGTH_CHAOS_ROAR_END =
+        events.playerData.melee.chaosRoar,
+
+    COMBATV2_BUFF_MELEE_METEOR_STRIKE_ADRENALINE_EFFECT =
+        events.playerData.melee.meteorStrike,
+
+    COMBATV2_BUFF_MELEE_BERSERK_ACTIVE =
+        events.playerData.melee.berserk,
 }
 
 -- The user can reset their cooldowns at the Altar of War. The altar does this
@@ -756,15 +893,6 @@ local function updatePlayerData()
     end
 
 end
-
--- Not sure this even does anything since I do the checkOnce above
--- Event.GameStateChanged.Subscribe("dataInitialization", function()
---     if GameState.FromID(gameStateChangedEvent.newState) == 30 then
---         checkGreaterUnlocks()
---         updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
---         swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
---     end
--- end)
 
 Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     -- Ignore anything that hasn't changed value

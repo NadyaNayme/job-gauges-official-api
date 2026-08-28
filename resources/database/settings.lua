@@ -46,6 +46,15 @@ local defaults = {
         ["show-split-soul"] = true,
         ["show-crystal-rain"] = true,
     },
+
+    meleeVisibleGaugeComponents = {
+        ["show-blackhole"] = true,
+        ["show-igneous-showdown"] = true,
+        ["show-bloodlist"] = true,
+        ["show-chaos-roar"] = true,
+        ["show-meteor-strike"] = true,
+        ["show-berserk"] = true
+    }
 }
 
 
