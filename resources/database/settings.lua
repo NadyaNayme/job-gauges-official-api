@@ -30,12 +30,12 @@ local defaults = {
     },
 
     magicVisibleGaugeComponents = {
-        ["show-sunshine"] = true,
-        ["show-tsunami"] = true,
-        ["show-runic-charge"] = true,
-        ["show-instability"] = true,
         ["show-soulfire"] = true,
-        ["show-active-spell"] = true
+        ["show-instability"] = true,
+        ["show-active-spell"] = true,
+        ["show-runic-charge"] = true,
+        ["show-tsunami"] = true,
+        ["show-sunshine"] = true,
     },
 
     rangedVisibleGaugeComponents = {

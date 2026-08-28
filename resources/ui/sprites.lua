@@ -112,6 +112,7 @@ function M.CreateSprites(parent)
             split_soul = {
                 active = Plugin.resources.sprites.ranged.split_soul.active,
                 inactive = Plugin.resources.sprites.ranged.split_soul.inactive,
+                splitsoul = Plugin.resources.sprites.ranged.split_soul.splitsoul
             },
             crystal_rain = {
                 active = Plugin.resources.sprites.ranged.crystal_rain.active,

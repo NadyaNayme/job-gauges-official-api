@@ -352,6 +352,21 @@ local function handleTsunami(event)
     end
 end
 
+local function handleCrystalRain(event)
+    events.playerData.ranged.crystalRain.remainingDuration = 0
+    events.playerData.ranged.crystalRain.cooldown = 50
+
+    swapGaugeToCombatStyle('ranged')
+end
+
+local function handleSplitSoul(event)
+    events.playerData.ranged.splitSoul.active = 1
+    events.playerData.ranged.splitSoul.remainingDuration = 25
+    events.playerData.ranged.splitSoul.cooldown = 0 -- ECB has no Cooldown
+
+    swapGaugeToCombatStyle('ranged')
+end
+
 local function handleDeathsSwiftness(event)
     events.playerData.ranged.deathsSwiftness.active = 1
     events.playerData.ranged.deathsSwiftness.remainingDuration = getDeathsSwiftnessDuration()
@@ -398,9 +413,15 @@ local function handlePerfectEquilibrium(event)
     swapGaugeToCombatStyle('ranged')
 end
 
-local function handleBalanceByForce(event)
+local function handleSpecialAttacks(event)
+    -- BOLG
     if returnEquippedMainhand():find("EGWD_ZAMORAK_BOSS_RANGED_WEAPON", 1, true) then
         events.playerData.ranged.perfectEquilibrium.remainingDuration = 50
+    end
+
+    -- ECB
+    if returnEquippedMainhand():find("DUNGEON_ULTHVEN_2H_RANGED", 1, true) then
+        handleSplitSoul(event)
     end
 end
 
@@ -437,7 +458,7 @@ local function handleEssenceCorruption(event)
     end
 end
 
--- When the player has maximum stacks for Exanguinate or Incite Fear the VarTransmit stops transmitting the Stacks value
+-- When the player has maximum stacks for Exsanguinate or Incite Fear the VarTransmit stops transmitting the Stacks value
 -- So to determine if the Timer should reset for the player's Stacks to be maintained - the activeSpell is checked and
 -- the appropriate spell timer is reinitialized. The stacks are set because if the plugin is started when already at maximum stacks,
 -- they display as `0` until you lose them and gain them again.
@@ -492,7 +513,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_RANGED_IMBUED_SHADOWS_ACTIVE = handleShadowImbued,
     COMBATV2_COOLDOWN_RANGED_SHADOW_TENDRILS_START = extendShadowImbued,
     EGWD_ZAMORAK_BOSS_TEMP_2  = handlePerfectEquilibrium,
-    COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleBalanceByForce,
+    COMBATV2_COOLDOWN_CONSTITUTION_SPECIAL_ATTACK_END = handleSpecialAttacks,
     COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS = handleInciteFear,
     COMBATV2_BUFF_BLOOD_TITHE_STACKS = handleBloodTithe,
     COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS = handleEssenceCorruption,
@@ -500,6 +521,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleCappedEssenceCorruption,
     COMBATV2_COOLDOWN_MAGIC_COMBUST_START = handleCappedEssenceCorruption,
     COMBATV2_COOLDOWN_MAGIC_CORRUPTION_START = handleCappedEssenceCorruption,
+    COMBATV2_ABILITY_WEAPON_COOLDOWN_CRYSTAL_RAIN_END = handleCrystalRain,
 
     BANK_TEMP = handleBank,
     LASTCASTSPELL = handleLastCastSpell,
@@ -735,13 +757,14 @@ local function updatePlayerData()
 
 end
 
-Event.GameStateChanged.Subscribe("dataInitialization", function()
-    if GameState.FromID(gameStateChangedEvent.newState) == 30 then
-        checkGreaterUnlocks()
-        updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
-        swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
-    end
-end)
+-- Not sure this even does anything since I do the checkOnce above
+-- Event.GameStateChanged.Subscribe("dataInitialization", function()
+--     if GameState.FromID(gameStateChangedEvent.newState) == 30 then
+--         checkGreaterUnlocks()
+--         updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
+--         swapGaugeToCombatStyle(settings.Get('lastKnownCombatStyle'))
+--     end
+-- end)
 
 Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     -- Ignore anything that hasn't changed value

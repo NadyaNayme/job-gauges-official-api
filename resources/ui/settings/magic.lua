@@ -9,19 +9,9 @@ function M.Create(page)
 
     page:AddCheckboxButton({
         {
-            text = "Show Sunshine",
-            value = "show-sunshine",
-            selected = magicComponentSettings["show-sunshine"]
-        },
-        {
-            text = "Show Tsunami",
-            value = "show-tsunami",
-            selected = magicComponentSettings["show-tsunami"]
-        },
-        {
-            text = "Show Runic Charge",
-            value = "show-runic-charge",
-            selected = magicComponentSettings["show-runic-charge"]
+            text = "Show Soulfire (Roar of Awakening Special Attack)",
+            value = "show-soulfire",
+            selected = magicComponentSettings["show-soulfire"]
         },
         {
             text = "Show Instability (Fractured Staff of Armadyl Special Attack)",
@@ -29,14 +19,24 @@ function M.Create(page)
             selected = magicComponentSettings["show-instability"]
         },
         {
-            text = "Show Soulfire (Roar of Awakening Special Attack)",
-            value = "show-soulfire",
-            selected = magicComponentSettings["show-soulfire"]
-        },
-        {
             text = "Show Active Spell",
             value = "show-active-spell",
             selected = magicComponentSettings["show-active-spell"]
+        },
+        {
+            text = "Show Runic Charge",
+            value = "show-runic-charge",
+            selected = magicComponentSettings["show-runic-charge"]
+        },
+        {
+            text = "Show Tsunami",
+            value = "show-tsunami",
+            selected = magicComponentSettings["show-tsunami"]
+        },
+        {
+            text = "Show Sunshine",
+            value = "show-sunshine",
+            selected = magicComponentSettings["show-sunshine"]
         },
     }, {
         onChange = function(_, _, changedValue, selected)

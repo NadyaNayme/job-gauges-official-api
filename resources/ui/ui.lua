@@ -36,12 +36,12 @@ local GAUGE_COMPONENT_POSITIONS = {
     },
 
     magic = {
-        runicCharge = { x = 0, y = 0 },
-        tsunami = { x = 40, y = 0 },
-        sunshine = { x = 80, y = 0 },
         soulfire = { x = 0, y = -34 },
         instability = { x = 40, y = -34 },
         activeSpell = { x = 88, y = -24 },
+        runicCharge = { x = 0, y = 0 },
+        tsunami = { x = 40, y = 0 },
+        sunshine = { x = 80, y = 0 },
         upkeep = {
             bloodTithe = { x = -55, y = 45 },
             inciteFear = { x = -55, y = 55 },
@@ -50,9 +50,11 @@ local GAUGE_COMPONENT_POSITIONS = {
     },
     
     ranged = {
-        deathsSwiftness = { x = 80, y = 0 },
+        crystalRain = { x = 0, y = -34 },
+        splitSoul = { x = 40, y = -34 },
         searingWinds = { x = 0, y = 0 },
         shadowImbued = { x = 40, y = 0 },
+        deathsSwiftness = { x = 80, y = 0 },
         perfectEquilibrium = { x = -20, y = 40 },
         guthixianRunes = { x = 20, y = 50 }
     }
@@ -404,6 +406,7 @@ local function setAbilityIndicatorPosition(indicator, position)
         math.floor(position.x + 8 + OFFSET_POSITION_X),
         math.floor(position.y + 14 + OFFSET_POSITION_Y)
     )
+
 end
 
 local function setSpriteIndicatorPosition(indicator, position)
@@ -549,6 +552,16 @@ local CreateUI = function()
         GAUGE_COMPONENT_POSITIONS.ranged.deathsSwiftness
     )
 
+    local crystalRain = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.crystalRain
+    )
+
+    local splitSoul_ecb = createAbilityIndicator(
+        rangedGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.ranged.splitSoul
+    )
+
     local searingWinds = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.searingWinds
@@ -671,6 +684,16 @@ local CreateUI = function()
         setMagicUpkeepIndicatorPosition(
             essenceCorruption,
             positions.magic.upkeep.essenceCorruption
+        )
+
+        setAbilityIndicatorPosition(
+            crystalRain,
+            positions.ranged.crystalRain
+        )
+
+        setAbilityIndicatorPosition(
+            splitSoul_ecb,
+            positions.ranged.splitSoul
         )
 
         setAbilityIndicatorPosition(
@@ -1244,6 +1267,53 @@ local function updateOverlays()
     )
 
     -- Ranged Gauge
+
+    if rangedSettings["show-crystal-rain"] then 
+        crystalRain.layer.hidden = false
+        if ranged.crystalRain.active == 1
+            then 
+                crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
+                if ticksToSeconds(ranged.crystalRain.remainingDuration) == 0.0 then
+                    ranged.crystalRain.active = 0
+                end
+                crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.remainingDuration))
+            elseif ranged.crystalRain.cooldown >= 1 then 
+                crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.inactive
+                crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.cooldown))
+            else
+                crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
+                crystalRain.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                crystalRain.text.content = "Ready"
+        end
+    else 
+        crystalRain.layer.hidden = true
+    end
+
+    if rangedSettings["show-split-soul"] then 
+        splitSoul_ecb.layer.hidden = false
+        if ranged.splitSoul.active == 1
+            then 
+                splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.splitsoul
+                if ticksToSeconds(ranged.splitSoul.remainingDuration) == 0.0 then
+                    ranged.splitSoul.active = 0
+                end
+                splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.remainingDuration))
+            elseif ranged.splitSoul.cooldown >= 1 then 
+                splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.inactive
+                splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.cooldown))
+            else
+                splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.active
+                splitSoul_ecb.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                splitSoul_ecb.text.content = "Ready"
+        end
+    else 
+        splitSoul_ecb.layer.hidden = true
+    end
+
     -- Death's Swiftness
     if rangedSettings["show-deaths-swiftness"] then 
         deathsSwiftness.layer.hidden = false
