@@ -32,13 +32,13 @@ function M.Create(page, options)
         events.playerData.combatStyle = 'magic'
         settings.Set('playerState.combatStyle', 'magic')
     end, { inline = true})
-    page:AddSimpleButton("Ranged", function(self, _)
-        events.playerData.combatStyle = 'ranged'
-        settings.Set('playerState.combatStyle', 'ranged')
-    end, { inline = true})
     page:AddSimpleButton("Melee", function(self, _)
         events.playerData.combatStyle = 'melee'
         settings.Set('playerState.combatStyle', 'melee')
+    end, { inline = true})
+    page:AddSimpleButton("Ranged", function(self, _)
+        events.playerData.combatStyle = 'ranged'
+        settings.Set('playerState.combatStyle', 'ranged')
     end, { inline = true})
 
     page:AddTitle("Display Settings")
