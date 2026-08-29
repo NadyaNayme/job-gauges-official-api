@@ -188,11 +188,11 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             )
 
             if i <= stacks then
-                sprite.colour = colourToVector4(settings.Get("uiColours.runeColours.active"))
-                shadow.colour = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"))
+                sprite.colour = ACTIVE_RUNE_COLOUR
+                shadow.colour = ACTIVE_RUNE_SHADOW_COLOUR
             else
-                sprite.colour = colourToVector4(settings.Get("uiColours.runeColours.inactive"))
-                shadow.colour = colourToVector4(settings.Get("uiColours.runeColours.inactiveShadow"))
+                sprite.colour = INACTIVE_RUNE_COLOUR
+                shadow.colour = INACTIVE_RUNE_SHADOW_COLOUR
             end
 
         else
@@ -340,7 +340,8 @@ local function createSpriteIndicator(parent, position, width, height)
     return sprite
 end
 
-local function createMagicUpkeepIndicator(parent, position)
+local magicUpkeepBars = {}
+local function createMagicUpkeepIndicator(parent, position, name)
     local layer = ui.Layer.new(parent)
     layer:SetSize(90, 24, 1.0, 1.0)
 
@@ -354,7 +355,6 @@ local function createMagicUpkeepIndicator(parent, position)
     text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     text.colour = FONT_COLOUR
     text.isShadowed = true
-    -- text.hidden = true
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
@@ -372,12 +372,14 @@ local function createMagicUpkeepIndicator(parent, position)
 
     table.insert(fontTexts, text)
 
-    return {
+    magicUpkeepBars[name] = {
         layer = layer,
         text = text,
         sprite = sprite,
         shadow = shadow,
     }
+
+    return magicUpkeepBars[name]
 end
 
 local function setAbilityIndicatorPosition(indicator, position)
@@ -549,17 +551,20 @@ local CreateUI = function()
 
     local bloodTithe = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.bloodTithe
+        GAUGE_COMPONENT_POSITIONS.magic.bloodTithe,
+        "bloodTithe"
     )
 
     local inciteFear = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.inciteFear
+        GAUGE_COMPONENT_POSITIONS.magic.inciteFear,
+        "inciteFear"
     )
 
     local essenceCorruption = createMagicUpkeepIndicator(
         magicGaugeLayer,
-        GAUGE_COMPONENT_POSITIONS.magic.essenceCorruption
+        GAUGE_COMPONENT_POSITIONS.magic.essenceCorruption,
+        "essenceCorruption"
     )
 
     -- Ranged Overlay
@@ -907,13 +912,13 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
     indicator.shadow:SetSize(upkeep.remainingDuration * 2.25, 3)
     indicator.shadow.colour = ABILITY_SHADOW_COLOUR
     if upkeep.name == "Blood Tithe" then
-        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
+        indicator.sprite.colour = BLOOD_TITHE_COLOUR
     end
     if upkeep.name == "Incite Fear" then
-        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
+        indicator.sprite.colour = INCITE_FEAR_COLOUR
     end
     if upkeep.name == "Essence Corruption" then
-        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
+        indicator.sprite.colour = ESSENCE_CORRUPTION_COLOUR
     end
     indicator.text.content = tostring(ticksToSeconds(upkeep.remainingDuration) .. " (" .. tostring(upkeep.stacks) .. ")")
     indicator.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
@@ -1887,6 +1892,61 @@ settings.Subscribe(
         for _, shadow in ipairs(abilityShadows) do
             shadow.colour = ABILITY_SHADOW_COLOUR
         end
+    end
+)
+
+settings.Subscribe(
+    "uiColours.barColours.bloodTitheBar",
+    function(colour)
+        local vector4Color = colourToVector4(colour)
+        BLOOD_TITHE_COLOUR = vector4Color
+        magicUpkeepBars.bloodTithe.sprite.colour = vector4Color
+    end
+)
+
+settings.Subscribe(
+    "uiColours.barColours.glacialEmbraceBar",
+    function(colour)
+        local vector4Color = colourToVector4(colour)
+        INCITE_FEAR_COLOUR = vector4Color
+        magicUpkeepBars.glacialEmbrace.sprite.colour = vector4Color
+    end
+)
+
+settings.Subscribe(
+    "uiColours.barColours.essenceCorruptionBar",
+    function(colour)
+        local vector4Color = colourToVector4(colour)
+        ESSENCE_CORRUPTION_COLOUR = vector4Color
+        magicUpkeepBars.essenceCorruption.sprite.colour = vector4Color
+    end
+)
+
+settings.Subscribe(
+    "uiColours.runeColours.active",
+    function(colour)
+        ACTIVE_RUNE_COLOUR = colourToVector4(colour)       
+    end
+)
+
+settings.Subscribe(
+    "uiColours.runeColours.activeShadow",
+    function(colour)
+        ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour)
+    end
+)
+
+settings.Subscribe(
+    "uiColours.runeColours.inactive",
+    function(colour)
+        INACTIVE_RUNE_COLOUR = colourToVector4(colour)
+    end
+)
+
+settings.Subscribe(
+    "uiColours.runeColours.inactiveShadow",
+    function(colour)
+        INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour)
     end
 )
 
