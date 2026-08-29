@@ -101,7 +101,6 @@ function M.Create(page, options)
                 "fontColours.durationText",
                 string.format("0x%08X", colour)
             )
-            options.setFontColour(colour)
         end,
     })
 
@@ -156,11 +155,10 @@ function M.Create(page, options)
                 "uiColours.shadowColour",
                 string.format("0x%08X", colour)
             )
-            options.setAbilityShadowColour(colour)
         end,
     })
 
-    page:AddText("Tip! Hold Shift+Alt to reposition your gauges.")
+    page:AddText("Tip! Hold Shift+Ctrl to reposition your gauges.")
 
 end
 

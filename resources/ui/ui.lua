@@ -839,18 +839,6 @@ local CreateUI = function()
 
   -- Page: General
     generalSettings.Create(generalPage, {
-        setFontColour = function(colour)
-            -- for _, text in ipairs(fontTexts) do
-            --     text.colour = colourToVector4(colour)
-            -- end
-        end,
-
-        setAbilityShadowColour = function(colour)
-            for _, ability in ipairs(abilityShadows) do
-                ability.colour = colourToVector4(colour)
-            end
-        end,
-
         setOffsetX = function(value)
             OFFSET_POSITION_X = value
         end,
@@ -913,7 +901,6 @@ local function getLowestConjureDuration(conjures)
 end
 
 local function updateMagicUpkeepIndicator(indicator, upkeep)
-    local visibilitySettings = settings.Get("magicSettings.componentVisibility")
     indicator.shadow.sprite = overlaySprites.utility.bar
     indicator.sprite.sprite = overlaySprites.utility.bar
     indicator.sprite:SetSize(upkeep.remainingDuration * 2.25, 3)
@@ -1858,9 +1845,9 @@ local function updateOverlays()
 
     if Mouse.IsAvailable() and Keyboard.IsAvailable() then
         local shiftDown = Keyboard.IsShiftDown()
-        local altDown = Keyboard.IsAltDown()
+        local ctrlDown = Keyboard.IsControlDown()
         
-        if shiftDown and altDown then
+        if shiftDown and ctrlDown then
             isDraggingOverlay = true
             
             local mousePositionXY = Mouse.GetPosition()
@@ -1888,6 +1875,17 @@ settings.Subscribe(
 
         for _, text in ipairs(fontTexts) do
             text.colour = FONT_COLOUR
+        end
+    end
+)
+
+settings.Subscribe(
+    "uiColours.shadowColour",
+    function(colour)
+        ABILITY_SHADOW_COLOUR = colourToVector4(colour)
+
+        for _, shadow in ipairs(abilityShadows) do
+            shadow.colour = ABILITY_SHADOW_COLOUR
         end
     end
 )

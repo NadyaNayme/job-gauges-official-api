@@ -394,7 +394,7 @@ function settings.Set(name, value)
 
     current[keys[#keys]] = value
     PersistentDB:Set(keys[1], values[keys[1]])
-    notify(path, value)
+    notify(name, value)
 end
 
 function settings.Save()
