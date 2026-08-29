@@ -185,7 +185,24 @@ function M.Create(page, options)
         inline = true
     })
 
-    page:AddText("Tip! Hold Shift+Ctrl to reposition your gauges.")
+    page:AddTitle("Position Settings")
+
+    page:AddCheckboxButton({
+        {
+            text = "Lock Position",
+            value = true,
+            selected = settings.Get("generalSettings.positionLocked")
+        },
+    }, {
+        onChange = function(_, _, _, selected)
+            settings.Set(
+                "generalSettings.positionLocked",
+                selected
+            )
+        end,
+    })
+
+    page:AddText("Hold Shift+Ctrl while position is unlocked to reposition your gauges.")
 
 end
 

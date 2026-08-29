@@ -30,6 +30,7 @@ local defaults = {
     },
 
     generalSettings = {
+        positionLocked = false,
         automaticSwapping = "mainhand",
         hideOutOfCombat = "combat-visible",
         displayTimeAs = "precise-ticks",

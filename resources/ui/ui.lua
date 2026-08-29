@@ -34,6 +34,7 @@ end
 -- Globals
 local OFFSET_POSITION_X = settings.Get("generalSettings.offsetPosition.x")
 local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
+local POSITION_LOCKED = settings.Get("generalSettings.positionLocked")
 local isDraggingOverlay = false
 
 local ACTIVE_COMBAT_STYLE = settings.Get('playerState.combatStyle')
@@ -528,7 +529,7 @@ local function setAbilitySpriteIndicatorPosition(indicator, position)
 end
 
 local function setSpriteIndicatorPosition(indicator, position)
-    indicator:SetPos(
+    indicator.sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
     )
@@ -2028,7 +2029,7 @@ local function updateOverlays()
     end
 
 
-    if Mouse.IsAvailable() and Keyboard.IsAvailable() then
+    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED then
         local shiftDown = Keyboard.IsShiftDown()
         local ctrlDown = Keyboard.IsControlDown()
         
@@ -2089,6 +2090,13 @@ local function returnEquippedAmmo()
 end
 
 Event.ServerLogic.Subscribe("updateAmmo", returnEquippedAmmo)
+
+settings.Subscribe(
+    "generalSettings.positionLocked",
+    function(value)
+        POSITION_LOCKED = value
+    end
+)
 
 settings.Subscribe(
     "generalSettings.hideOutOfCombat",
