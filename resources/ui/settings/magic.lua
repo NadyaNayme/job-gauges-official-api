@@ -38,6 +38,21 @@ function M.Create(page, options)
             value = "show-sunshine",
             selected = magicComponentSettings["show-sunshine"]
         },
+        -- {
+        --     text = "Show Blood Tithe",
+        --     value = "show-blood-tithe",
+        --     selected = magicComponentSettings["show-blood-tithe"]
+        -- },
+        -- {
+        --     text = "Show Incite Fear",
+        --     value = "show-incite-fear",
+        --     selected = magicComponentSettings["show-incite-fear"]
+        -- },
+        -- {
+        --     text = "Show Essence Corruption",
+        --     value = "show-essence-corruption",
+        --     selected = magicComponentSettings["show-essence-corruption"]
+        -- },
     }, {
         onChange = function(_, _, changedValue, selected)
             settings.Set(
@@ -46,6 +61,81 @@ function M.Create(page, options)
             )
         end,
     })
+
+    page:AddTitle({
+        text = "Spell Stack Upkeeping Colours",
+    })
+    page:AddDivider({
+        marginTop = 10,
+        marginBottom = 8
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.barColours.bloodTitheBar"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Blood tithe Colour",
+        tooltip = "Choose the colour for Blood tithe",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.barColours.bloodTitheBar",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+    page:AddText({
+        inline = true,
+        text = "Blood Tithe (Exsanguinate)",
+    })    
+    page:AddDivider({
+        marginTop = 0
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.barColours.inciteFearBar"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Glacial Embrace Colour",
+        tooltip = "Choose the bar colour for Glacial Embrace",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.barColours.inciteFearBar",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+    page:AddText({
+        inline = true,
+        text = "Glacial Embrace (Incite Fear)",
+    })    
+    page:AddDivider({
+        marginTop = 0
+    })
+    page:AddColourPicker({
+        value = settings.Get("uiColours.barColours.essenceCorruptionBar"),
+        inline = true,
+        alphaSlider = true,
+        buttonSize = 28,
+        windowTitle = "Essence Corruption Bar Colour",
+        tooltip = "Choose the colour for Essence Corruption",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.barColours.essenceCorruptionBar",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+    page:AddText({
+        inline = true,
+        text = "Essence Corruption (Roar of Awakening passive)",
+    })
+
 end
 
 return M

@@ -22,9 +22,9 @@ local defaults = {
             inactiveShadow = "0xC1BDAC89",
         },
         barColours = {
-            bloodTitheBar = "0xFFFFFFFF",
-            inciteFearBar = "0xFFFFFFFF",
-            essenceCorruptionBar = "0xFFFFFFFF",
+            bloodTitheBar = "0xFFFA2B4F",
+            inciteFearBar = "0xFFB8E8F3",
+            essenceCorruptionBar = "0xFF70DC3F¢",
             bloatBar = nil,
         }
     },
@@ -33,6 +33,7 @@ local defaults = {
         automaticSwapping = "mainhand",
         hideOutOfCombat = "combat-visible",
         displayTimeAs = "precise-ticks",
+        readyText = "Ready",
         scale = 1,
         offsetPosition = {
             x = 0,
@@ -339,6 +340,26 @@ function settings.Get(name)
     return getNestedValue(values, name)
 end
 
+local listeners = {}
+function settings.Subscribe(path, callback)
+    if not listeners[path] then
+        listeners[path] = {}
+    end
+
+    table.insert(listeners[path], callback)
+end
+
+local function notify(path, value)
+    local callbacks = listeners[path]
+
+    if not callbacks then
+        return
+    end
+
+    for _, callback in ipairs(callbacks) do
+        callback(value)
+    end
+end
 
 function settings.Set(name, value)
     EnsureLoaded()
@@ -358,6 +379,7 @@ function settings.Set(name, value)
 
     current[keys[#keys]] = value
     PersistentDB:Set(keys[1], values[keys[1]])
+    notify(path, value)
 end
 
 function settings.Save()

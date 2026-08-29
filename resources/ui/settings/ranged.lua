@@ -103,12 +103,6 @@ function M.Create(page, options)
     page:AddTitle({
         text = "Guthixian Runes Colours",
     })
-    page:AddText({
-        text = "Because the sprites are initially blue, the colors won't accurately reflect your choices."
-    })
-    page:AddText({
-        text = "You're limited to blues and greens."
-    })
     page:AddDivider({
         marginTop = 10,
         marginBottom = 8

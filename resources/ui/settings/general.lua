@@ -69,19 +69,30 @@ function M.Create(page, options)
         end,
     })
 
+    page:AddText("Change 'Ready' text (set blank to hide)")
+    page:AddTextField({
+        text = settings.Get("generalSettings.readyText") or "Ready",
+        placeholder = "Ready text",
+        maxLength = 5,
+        onSubmit = function(_, text)
+            settings.Set("generalSettings.readyText", text)
+        end
+    })
+
     page:AddDivider({
         marginTop = 5,
         marginBottom = 5
     })
 
     page:AddTitle("Colour Settings")
-
-    page:AddText("Duration Text Colour")
+    page:AddText({
+        text = "Duration Text Colour",
+    })
     page:AddColourPicker({
         value = settings.Get("fontColours.durationText"),
         alphaSlider = true,
-        buttonSize = 48,
-        windowTitle = "Font Colour",
+        buttonSize = 26,
+        windowTitle = "Duration Colour",
         tooltip = "Choose the colour of duration and cooldown text",
         acceptText = "Set Colour",
 
@@ -91,7 +102,43 @@ function M.Create(page, options)
                 string.format("0x%08X", colour)
             )
             options.setFontColour(colour)
-            log(string.format("0x%08X", colour))
+        end,
+    })
+
+
+    page:AddText({
+        text = "'On Cooldown' Text Colour",
+    })
+    page:AddColourPicker({
+        value = settings.Get("fontColours.cooldownText"),
+        alphaSlider = true,
+        buttonSize = 26,
+        windowTitle = "Cooldown Colour",
+        tooltip = "Choose the colour of the remaining cooldown duration",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "fontColours.cooldownText",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+
+    page:AddText("'Ready' Text Colour")
+    page:AddColourPicker({
+        value = settings.Get("fontColours.readyText"),
+        alphaSlider = true,
+        buttonSize = 26,
+        windowTitle = "Ready Colour",
+        tooltip = "Choose the colour of 'Ready' text",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "fontColours.readyText",
+                string.format("0x%08X", colour)
+            )
         end,
     })
 
@@ -99,7 +146,7 @@ function M.Create(page, options)
     page:AddColourPicker({
         value = settings.Get("uiColours.shadowColour"),
         alphaSlider = true,
-        buttonSize = 48,
+        buttonSize = 26,
         windowTitle = "Ability Shadow Colour",
         tooltip = "Choose the colour of the shadow behind ability icons",
         acceptText = "Set Colour",

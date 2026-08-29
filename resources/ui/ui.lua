@@ -1,7 +1,7 @@
 local settings = require("resources/database/settings")
 local events = require("resources/events/events")
 local sprites = require("resources/ui/sprites")
-local guthixian = require("resources/data/guthixian")
+local guthixian = require("resources/data/guthixian_runes")
 
 local generalSettings = require("resources/ui/settings/general")
 local necromancySettings = require("resources/ui/settings/necromancy")
@@ -97,6 +97,15 @@ end
 
 local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 
+    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__GAME_AREA)
+    if not gameArea then
+    log("Can't find game area")
+    return
+    end
+
+    local guthixian_runes
+    guthixian_runes = guthixian.CreateSprites(gameArea)
+
     local word
 
     local selectedGuthixianRune = settings.Get("rangedSettings.selectedGuthixianRune")
@@ -150,10 +159,10 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
                 letter = selectedGuthixianRune
             end
 
-            local spriteId = guthixian[letter]
+            local runeSprite = guthixian_runes[letter]
 
-            shadow.sprite = spriteId
-            sprite.sprite = spriteId
+            shadow.sprite = runeSprite
+            sprite.sprite = runeSprite
 
             local x = runeLayout.x_offset + position.x + OFFSET_POSITION_X
             local y = position.y + OFFSET_POSITION_Y
@@ -211,7 +220,7 @@ local function ticksToSeconds(ticks)
 end
 
 local function scaleToFactor(number)
-    return math.floor(number * settings.Get("generalSettings.scale"))
+    return math.floor(number * settings.Get("generalSettings.scale") )
 end
 
 local function createGaugeLayer(parent)
@@ -799,9 +808,9 @@ local CreateUI = function()
   -- Page: General
     generalSettings.Create(generalPage, {
         setFontColour = function(colour)
-            for _, text in ipairs(fontTexts) do
-                text.colour = colourToVector4(colour)
-            end
+            -- for _, text in ipairs(fontTexts) do
+            --     text.colour = colourToVector4(colour)
+            -- end
         end,
 
         setAbilityShadowColour = function(colour)
@@ -879,15 +888,16 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
     indicator.shadow:SetSize(upkeep.remainingDuration * 2.25, 3)
     indicator.shadow.colour = ABILITY_SHADOW_COLOUR
     if upkeep.name == "Blood Tithe" then
-        indicator.sprite.colour = BLOOD_TITHE_COLOUR
+        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
     end
     if upkeep.name == "Incite Fear" then
-        indicator.sprite.colour = INCITE_FEAR_COLOUR
+        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
     end
     if upkeep.name == "Essence Corruption" then
-        indicator.sprite.colour = ESSENCE_CORRUPTION_COLOUR
+        indicator.sprite.colour = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
     end
     indicator.text.content = tostring(ticksToSeconds(upkeep.remainingDuration) .. " (" .. tostring(upkeep.stacks) .. ")")
+    indicator.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
     if upkeep.remainingDuration <= 16 and math.floor(upkeep.remainingDuration) % 2 == 0 then
         indicator.text.colour = EXPIRING_COLOUR
     else 
@@ -901,13 +911,6 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
     else 
         indicator.sprite.hidden = false
         indicator.shadow.hidden = false
-    end
-    if not visibilitySettings["show-blood-tithe"] and upkeep.name == "Blood Tithe" then
-        indicator.text.hidden = true
-    elseif not visibilitySettings["show-blood-tithe"] and upkeep.name == "Incite Fear" then
-        indicator.text.hidden = true
-    elseif  not visibilitySettings["show-blood-tithe"] and upkeep.name == "Essence Corruption" then
-        indicator.text.hidden = true
     end
 end
 
@@ -987,6 +990,7 @@ local function updateOverlays()
                 )
                 livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.remainingDuration))
+                livingDeath.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif necromancy.livingDeath.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     livingDeath,
@@ -995,6 +999,7 @@ local function updateOverlays()
                 )
                 livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.cooldown))
+                livingDeath.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     livingDeath,
@@ -1002,7 +1007,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 livingDeath.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                livingDeath.text.content = "Ready"
+                livingDeath.text.content = tostring(settings.Get("generalSettings.readyText"))
+                livingDeath.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         livingDeath.layer.hidden = true
@@ -1139,6 +1145,7 @@ local function updateOverlays()
                 end
                 sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.remainingDuration))
+                sunshine.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif magic.sunshine.cooldown >= 1 then 
                 if ultimates.greaterSunshineUnlocked == 1 then
                     setAbilityIndicatorSprite(
@@ -1155,6 +1162,7 @@ local function updateOverlays()
                 end
                 sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.cooldown))
+                sunshine.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 if ultimates.greaterSunshineUnlocked == 1 then
                     setAbilityIndicatorSprite(
@@ -1170,7 +1178,8 @@ local function updateOverlays()
                     )
                 end
                 sunshine.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                sunshine.text.content = "Ready"
+                sunshine.text.content = tostring(settings.Get("generalSettings.readyText"))
+                sunshine.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         sunshine.layer.hidden = true
@@ -1191,6 +1200,7 @@ local function updateOverlays()
                 end
                 tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.remainingDuration))
+                tsunami.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif magic.tsunami.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     tsunami,
@@ -1199,6 +1209,7 @@ local function updateOverlays()
                 )
                 tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.cooldown))
+                tsunami.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     tsunami,
@@ -1206,7 +1217,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 tsunami.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                tsunami.text.content = "Ready"
+                tsunami.text.content = tostring(settings.Get("generalSettings.readyText"))
+                tsunami.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         tsunami.layer.hidden = true
@@ -1227,6 +1239,7 @@ local function updateOverlays()
                 end
                 runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.remainingDuration))
+                runicCharge.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif magic.runicCharge.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     runicCharge,
@@ -1235,6 +1248,7 @@ local function updateOverlays()
                 )
                 runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.cooldown))
+                runicCharge.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     runicCharge,
@@ -1242,7 +1256,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 runicCharge.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                runicCharge.text.content = "Ready"
+                runicCharge.text.content = tostring(settings.Get("generalSettings.readyText"))
+                runicCharge.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         runicCharge.layer.hidden = true
@@ -1258,14 +1273,17 @@ local function updateOverlays()
                 end
                 soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.remainingDuration))
+                soulfire.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif magic.soulfire.cooldown >= 1 then 
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.inactive
                 soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.cooldown))
+                soulfire.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
                 soulfire.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                soulfire.text.content = "Ready"
+                soulfire.text.content = tostring(settings.Get("generalSettings.readyText"))
+                soulfire.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         soulfire.layer.hidden = true
@@ -1281,14 +1299,17 @@ local function updateOverlays()
                 end
                 instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 instability.text.content = tostring(ticksToSeconds(magic.instability.remainingDuration))
+                instability.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif magic.instability.cooldown >= 1 then 
                 instability.sprite.sprite = overlaySprites.magic.instability.inactive
                 instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 instability.text.content = tostring(ticksToSeconds(magic.instability.cooldown))
+                instability.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 instability.sprite.sprite = overlaySprites.magic.instability.active
                 instability.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                instability.text.content = "Ready"
+                instability.text.content = tostring(settings.Get("generalSettings.readyText"))
+                instability.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         instability.layer.hidden = true
@@ -1334,14 +1355,17 @@ local function updateOverlays()
                 end
                 crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.remainingDuration))
+                crystalRain.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif ranged.crystalRain.cooldown >= 1 then 
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.inactive
                 crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.cooldown))
+                crystalRain.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
                 crystalRain.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                crystalRain.text.content = "Ready"
+                crystalRain.text.content = tostring(settings.Get("generalSettings.readyText"))
+                crystalRain.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         crystalRain.layer.hidden = true
@@ -1357,14 +1381,17 @@ local function updateOverlays()
                 end
                 splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.remainingDuration))
+                splitSoul_ecb.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif ranged.splitSoul.cooldown >= 1 then 
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.inactive
                 splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.cooldown))
+                splitSoul_ecb.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.active
                 splitSoul_ecb.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                splitSoul_ecb.text.content = "Ready"
+                splitSoul_ecb.text.content = tostring(settings.Get("generalSettings.readyText"))
+                splitSoul_ecb.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         splitSoul_ecb.layer.hidden = true
@@ -1393,6 +1420,7 @@ local function updateOverlays()
                 end
                 deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
+                deathsSwiftness.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif ranged.deathsSwiftness.cooldown >= 1 then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
                     setAbilityIndicatorSprite(
@@ -1409,6 +1437,7 @@ local function updateOverlays()
                 end
                 deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
+                deathsSwiftness.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
                     setAbilityIndicatorSprite(
@@ -1424,7 +1453,8 @@ local function updateOverlays()
                     )
                 end
                 deathsSwiftness.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                deathsSwiftness.text.content = "Ready"
+                deathsSwiftness.text.content = tostring(settings.Get("generalSettings.readyText"))
+                deathsSwiftness.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         deathsSwiftness.layer.hidden = true
@@ -1445,6 +1475,7 @@ local function updateOverlays()
                 end
                 searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.remainingDuration))
+                searingWinds.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif ranged.searingWinds.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     searingWinds,
@@ -1453,6 +1484,7 @@ local function updateOverlays()
                 )
                 searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
+                searingWinds.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     searingWinds,
@@ -1460,7 +1492,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 searingWinds.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                searingWinds.text.content = "Ready"
+                searingWinds.text.content = tostring(settings.Get("generalSettings.readyText"))
+                searingWinds.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         searingWinds.layer.hidden = true
@@ -1481,6 +1514,7 @@ local function updateOverlays()
                 end
                 shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.remainingDuration))
+                shadowImbued.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif ranged.shadowImbued.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     shadowImbued,
@@ -1489,6 +1523,7 @@ local function updateOverlays()
                 )
                 shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
+                shadowImbued.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     shadowImbued,
@@ -1496,7 +1531,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 shadowImbued.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                shadowImbued.text.content = "Ready"
+                shadowImbued.text.content = tostring(settings.Get("generalSettings.readyText"))
+                shadowImbued.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         shadowImbued.layer.hidden = true
@@ -1559,14 +1595,17 @@ local function updateOverlays()
                 end
                 blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.remainingDuration))
+                blackhole.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif melee.blackhole.cooldown >= 1 then 
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.inactive
                 blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.cooldown))
+                blackhole.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
                 blackhole.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                blackhole.text.content = "Ready"
+                blackhole.text.content = tostring(settings.Get("generalSettings.readyText"))
+                blackhole.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         blackhole.layer.hidden = true
@@ -1582,14 +1621,17 @@ local function updateOverlays()
                 end
                 igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.remainingDuration))
+                igneousShowdown.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif melee.igneousShowdown.cooldown >= 1 then 
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.inactive
                 igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.cooldown))
+                igneousShowdown.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
                 igneousShowdown.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                igneousShowdown.text.content = "Ready"
+                igneousShowdown.text.content = tostring(settings.Get("generalSettings.readyText"))
+                igneousShowdown.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         igneousShowdown.layer.hidden = true
@@ -1623,14 +1665,17 @@ local function updateOverlays()
                 end
                 chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.remainingDuration))
+                chaosRoar.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif melee.chaosRoar.cooldown >= 1 then 
                 chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.inactive
                 chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.cooldown))
+                chaosRoar.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
                 chaosRoar.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                chaosRoar.text.content = "Ready"
+                chaosRoar.text.content = tostring(settings.Get("generalSettings.readyText"))
+                chaosRoar.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         chaosRoar.layer.hidden = true
@@ -1646,14 +1691,17 @@ local function updateOverlays()
                 end
                 meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.remainingDuration))
+                meteorStrike.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif melee.meteorStrike.cooldown >= 1 then 
                 meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.inactive
                 meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.cooldown))
+                meteorStrike.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
                 meteorStrike.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                meteorStrike.text.content = "Ready"
+                meteorStrike.text.content = tostring(settings.Get("generalSettings.readyText"))
+                meteorStrike.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         meteorStrike.layer.hidden = true
@@ -1673,6 +1721,7 @@ local function updateOverlays()
                 end
                 berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 berserk.text.content = tostring(ticksToSeconds(melee.berserk.remainingDuration))
+                berserk.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
             elseif melee.berserk.cooldown >= 1 then 
                 setAbilityIndicatorSprite(
                     berserk,
@@ -1681,6 +1730,7 @@ local function updateOverlays()
                 )
                 berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
                 berserk.text.content = tostring(ticksToSeconds(melee.berserk.cooldown))
+                berserk.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
             else
                 setAbilityIndicatorSprite(
                     berserk,
@@ -1688,7 +1738,8 @@ local function updateOverlays()
                     overlaySprites.utility.shadow
                 )
                 berserk.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
-                berserk.text.content = "Ready"
+                berserk.text.content = tostring(settings.Get("generalSettings.readyText"))
+                berserk.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
         end
     else 
         berserk.layer.hidden = true
@@ -1719,6 +1770,17 @@ local function updateOverlays()
 end
 
 Event.Logic.Subscribe("updateOverlays", updateOverlays)
+
+settings.Subscribe(
+    "fontColours.durationText",
+    function(colour)
+        FONT_COLOUR = colourToVector4(colour)
+
+        for _, text in ipairs(fontTexts) do
+            text.colour = FONT_COLOUR
+        end
+    end
+)
 
   return {
     Destroy = function()
