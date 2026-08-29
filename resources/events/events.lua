@@ -134,8 +134,14 @@ local events = {
         },
         ranged = {
             activeAmmo = {
-                icon = '',
-                name = ''
+                icon = 0,
+                name = '',
+                configName = '',
+            },
+            quiverAmmo = {
+                icon = 0,
+                name = '',
+                configName = '',
             },
             arrows = {
                 bikArrows = {
@@ -308,24 +314,6 @@ local function returnEquippedMainhand()
 
     if wornObj and wornObj.obj then
         return wornObj.obj.configName
-    end
-    return nil
-end
-
-local function returnEquippedAmmo()
-    local worn = Inventory.Find(config.Inv.WORN)
-    local wornObj = worn:GetSlot(14)
-
-    if wornObj and wornObj.obj then
-        local ammo = {
-            wornSlot = {
-                ammoSlotName = wornObj.obj.name or nil,
-                ammoSlotConfigName = wornObj.obj.configName or nil,
-                ammoSlotId = wornObj.obj.id or nil,
-            },
-            quiver_active_ammo = var.VarPlayer["QUIVER_ACTIVE_AMMO"].value.name or nil
-        }
-        events.playerData.ranged.activeAmmo = ammo
     end
     return nil
 end
@@ -975,7 +963,6 @@ Event.Logic.Subscribe("updatePlayerData", function()
 end)
 Event.ServerLogic.Subscribe("wornMainhand", function() 
     checkEquippedMainhand()
-    returnEquippedAmmo()
 end)
 
 return events

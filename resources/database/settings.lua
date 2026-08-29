@@ -170,12 +170,13 @@ local defaults = {
 
     rangedSettings = {
         componentVisibility = {
-            ["show-deaths-swiftness"] = true,
+            ["show-crystal-rain"] = true,
+            ["show-split-soul"] = true,
+            ["show-equipped-ammo"] = true,
             ["show-searing-winds"] = true,
             ["show-shadow-imbued"] = true,
+            ["show-deaths-swiftness"] = true,
             ["show-perfect-equilibrium"] = true,
-            ["show-split-soul"] = true,
-            ["show-crystal-rain"] = true,
         },
         offsetPosition = {
             x = 0,
@@ -188,6 +189,10 @@ local defaults = {
             },
             splitSoul = {
                 x = 40,
+                y = -34,
+            },
+            equippedAmmo = {
+                x = 80,
                 y = -34,
             },
             searingWinds = {

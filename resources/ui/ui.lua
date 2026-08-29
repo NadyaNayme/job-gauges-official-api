@@ -2,6 +2,7 @@ local settings = require("resources/database/settings")
 local events = require("resources/events/events")
 local sprites = require("resources/ui/sprites")
 local guthixian = require("resources/data/guthixian_runes")
+local ammoNames = require("resources/data/ammo")
 
 local generalSettings = require("resources/ui/settings/general")
 local necromancySettings = require("resources/ui/settings/necromancy")
@@ -72,6 +73,10 @@ local RUNE_SHADOW_OFFSET = 1
 local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
 local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
 local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
+
+local AMMO_ID = 2
+local AMMO_NAME = ''
+local AMMO_DISPLAY_NAME = nil
 
 local function getRuneLayout(perfectEquilibriumActive)
     local selectedGuthixianRune = SELECTED_GUTHIXIAN_RUNE
@@ -352,6 +357,75 @@ local function createSpriteIndicator(parent, position, width, height)
     return sprite
 end
 
+local function createObjectSpriteIndicator(parent, objectId, position, width, height)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(32, 32, 1.0, 1.0)
+
+    local sprite = ui.Sprite.new(layer)
+    
+    local worn = Inventory.Find(config.Inv.WORN)
+    local wornObj = worn:GetSlot(14)
+
+    if not wornObj or not wornObj.obj then
+        return nil
+    end
+
+    local equipped = wornObj.obj
+    local quiver = var.VarPlayer["QUIVER_ACTIVE_AMMO"]
+    local quiverValue = quiver and quiver.value
+
+    events.playerData.ranged.activeAmmo.name = equipped.name
+    events.playerData.ranged.activeAmmo.icon = equipped.configName
+    events.playerData.ranged.activeAmmo.id = equipped.id
+
+    if quiverValue then
+        events.playerData.ranged.quiverAmmo.name = quiverValue.name
+        events.playerData.ranged.quiverAmmo.icon = quiverValue.configName
+        events.playerData.ranged.quiverAmmo.id = quiverValue.id
+    end
+
+    if wornObj and wornObj.obj then
+        if wornObj.obj.configName:find("ARROW", 1, true) then
+            sprite:SetAssociatedObject(events.playerData.ranged.activeAmmo.id + 4)
+        elseif wornObj.obj.configName:find("BOLT", 1, true) then
+            sprite:SetAssociatedObject(events.playerData.ranged.activeAmmo.id + 0)
+        elseif wornObj.obj.configName:find("QUIVER", 1, true) then
+            sprite:SetAssociatedObject(events.playerData.ranged.quiverAmmo.id)
+        end
+    end
+
+    sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + 5),
+        math.floor(position.y + OFFSET_POSITION_Y + 2)
+    )
+
+    sprite:SetSize(
+        scaleToFactor(width),
+        scaleToFactor(height)
+    )
+    sprite:MoveToFront()
+
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(position.x + 8 + OFFSET_POSITION_X),
+        math.floor(position.y + 12 + OFFSET_POSITION_Y)
+    )
+    text:SetSize(22, 15)
+    text:MoveToFront()
+    text.content = AMMO_DISPLAY_NAME or AMMO_NAME
+    text.font = SMALL_FONT
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    text.alignHorizontal = ui.AlignMode.CENTRE
+    text.alignVertical = ui.AlignMode.CENTRE
+
+    return {
+        layer = layer,
+        sprite = sprite,
+        text = text
+    }
+end
+
 local magicUpkeepBars = {}
 local function createMagicUpkeepIndicator(parent, position, name)
     local layer = ui.Layer.new(parent)
@@ -589,6 +663,14 @@ local CreateUI = function()
     local crystalRain = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.crystalRain
+    )
+
+    local equippedAmmoSprite = createObjectSpriteIndicator(
+        rangedGaugeLayer,
+        tonumber(events.playerData.ranged.activeAmmo.icon), -- DELETE THIS LINE
+        GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo,
+        32,
+        32
     )
 
     local splitSoul_ecb = createAbilityIndicator(
@@ -1511,6 +1593,42 @@ local function updateOverlays()
         splitSoul_ecb.layer.hidden = true
     end
 
+    -- The nil checks are necessary as the ammo does not update immediately
+    -- but rather, updates on the first game tick. So the first check returns
+    -- and every subsequent check works
+    if rangedSettings.componentVisibility["show-equipped-ammo"] then
+        equippedAmmoSprite.layer.hidden = false
+        local worn = Inventory.Find(config.Inv.WORN)
+        local wornObj = worn:GetSlot(14)
+
+        if wornObj and wornObj.obj then
+            if wornObj.obj.configName:find("ARROW", 1, true) then
+                local AMMO_STACK_ID = tonumber(AMMO_ID) + 4
+                equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
+                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+            elseif wornObj.obj.configName:find("BOLT", 1, true) then
+                local AMMO_STACK_ID = tonumber(AMMO_ID)
+                equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
+                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+            elseif wornObj.obj.configName:find("QUIVER", 1, true) then
+                local QUIVER_AMMO_ID = tonumber(AMMO_ID)
+                if QUIVER_AMMO_ID == nil then return end
+                QUIVER_AMMO_ID = QUIVER_AMMO_ID + 4
+                equippedAmmoSprite.sprite:SetAssociatedObject(QUIVER_AMMO_ID)
+                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+            end
+        end
+    else
+        equippedAmmoSprite.layer.hidden = true
+    end
+
+    if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
+        activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
+        activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
+    else
+        activeSpellSprite:SetSize(0, 0)
+    end
+
     -- Death's Swiftness
     if rangedSettings.componentVisibility["show-deaths-swiftness"] then 
         deathsSwiftness.layer.hidden = false
@@ -1884,6 +2002,48 @@ local function updateOverlays()
 end
 
 Event.Logic.Subscribe("updateOverlays", updateOverlays)
+
+local function returnEquippedAmmo()
+    local worn = Inventory.Find(config.Inv.WORN)
+    local wornObj = worn:GetSlot(14)
+
+    if not wornObj or not wornObj.obj then
+        return nil
+    end
+
+    local equipped = wornObj.obj
+    local quiver = var.VarPlayer["QUIVER_ACTIVE_AMMO"]
+    local quiverValue = quiver and quiver.value
+
+    events.playerData.ranged.activeAmmo.name = equipped.name
+    events.playerData.ranged.activeAmmo.configName = equipped.configName
+    events.playerData.ranged.activeAmmo.id = equipped.id
+    AMMO_ID = events.playerData.ranged.activeAmmo.id
+    AMMO_NAME = events.playerData.ranged.activeAmmo.name
+    AMMO_DISPLAY_NAME = ammoNames[events.playerData.ranged.activeAmmo.configName]
+
+    if quiverValue then
+        events.playerData.ranged.quiverAmmo.name = quiverValue.name
+        events.playerData.ranged.quiverAmmo.configName = quiverValue.configName
+        events.playerData.ranged.quiverAmmo.id = quiverValue.id
+        if quiverValue.name ~= "" then
+            AMMO_NAME = events.playerData.ranged.quiverAmmo.name
+            AMMO_DISPLAY_NAME = ammoNames[events.playerData.ranged.quiverAmmo.configName]
+        end
+        if quiverValue.id ~= -1 then
+            AMMO_ID = events.playerData.ranged.quiverAmmo.id
+        end
+    end
+
+    log("AMMO CONFIG NAME: " .. equipped.configName)
+    if quiverValue.configName ~= nil then
+        log("QUIVER CONFIG NAME: " .. quiverValue.configName)
+    end
+
+    return nil
+end
+
+Event.ServerLogic.Subscribe("updateAmmo", returnEquippedAmmo)
 
 settings.Subscribe(
     "generalSettings.hideOutOfCombat",

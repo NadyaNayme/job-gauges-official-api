@@ -9,9 +9,19 @@ function M.Create(page, options)
 
     page:AddCheckboxButton({
         {
-            text = "Show Death's Swiftness",
-            value = "show-deaths-swiftness",
-            selected = rangedComponentSettings["show-deaths-swiftness"]
+            text = "Show Crystal Rain (Seren Godbow Special Attack)",
+            value = "show-crystal-rain",
+            selected = rangedComponentSettings["show-crystal-rain"]
+        },
+        {
+            text = "Show Split Soul (Eldritch Crossbow Special Attack)",
+            value = "show-split-soul",
+            selected = rangedComponentSettings["show-split-soul"]
+        },
+        {
+            text = "Show Equipped Ammo",
+            value = "show-equipped-ammo",
+            selected = rangedComponentSettings["show-equipped-ammo"]
         },
         {
             text = "Show Searing Winds (Galeshot)",
@@ -24,20 +34,17 @@ function M.Create(page, options)
             selected = rangedComponentSettings["show-shadow-imbued"]
         },
         {
+            text = "Show Death's Swiftness",
+            value = "show-deaths-swiftness",
+            selected = rangedComponentSettings["show-deaths-swiftness"]
+        },
+        {
             text = "Show Perfect Equilibrium",
             value = "show-perfect-equilibrium",
             selected = rangedComponentSettings["show-perfect-equilibrium"]
         },
-        {
-            text = "Show Split Soul (Eldritch Crossbow Special Attack)",
-            value = "show-split-soul",
-            selected = rangedComponentSettings["show-split-soul"]
-        },
-        {
-            text = "Show Crystal Rain (Seren Godbow Special Attack)",
-            value = "show-crystal-rain",
-            selected = rangedComponentSettings["show-crystal-rain"]
-        },
+
+
     }, {
     onChange = function(_, _, changedValue, selected)
         settings.Set(
