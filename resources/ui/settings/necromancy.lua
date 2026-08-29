@@ -10,6 +10,21 @@ function M.Create(page, options)
 
     page:AddCheckboxButton({
         {
+            text = "Show Death Grasp (T70 Weapon Spec)",
+            value = "show-death-grasp",
+            selected = componentSettings["show-death-grasp"]
+        },
+        {
+            text = "Show Death Essence (Omni Guard Weapon Spec)",
+            value = "show-death-essence",
+            selected = componentSettings["show-death-essence"]
+        },
+        {
+            text = "Show Soul Crush (Devourer's Guard Weapon Spec)",
+            value = "show-soul-crush",
+            selected = componentSettings["show-soul-crush"]
+        },
+        {
             text = "Show Conjures",
             value = "show-conjures",
             selected = componentSettings["show-conjures"]

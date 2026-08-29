@@ -43,6 +43,9 @@ local defaults = {
 
     necromancySettings = {
         componentVisibility = {
+            ["show-death-grasp"] = true,
+            ["show-death-essence"] = true,
+            ["show-soul-crush"] = true,
             ["show-conjures"] = true,
             ["show-residual-souls"] = true,
             ["show-necrosis-stacks"] = true,
@@ -58,6 +61,18 @@ local defaults = {
             y = 0,
         },
         componentPositions = {
+            deathGrasp = {
+                x = 0,
+                y = -34,
+            },
+            deathEssence = {
+                x = 40,
+                y = -34,
+            },
+            soulCrush = {
+                x = 80,
+                y = -34,
+            },
             conjureUndeadArmy = {
                 x = 0,
                 y = 0,

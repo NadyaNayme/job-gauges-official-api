@@ -8,6 +8,18 @@ function M.CreateSprites(parent)
 
     local sprites = {
         necromancy = {
+            death_grasp = {
+                active = Plugin.resources.sprites.necromancy.death_grasp.active,
+                inactive = Plugin.resources.sprites.necromancy.death_grasp.inactive
+            },
+            death_essence = {
+                active = Plugin.resources.sprites.necromancy.death_essence.active,
+                inactive = Plugin.resources.sprites.necromancy.death_essence.inactive
+            },
+            soul_crush = {
+                active = Plugin.resources.sprites.necromancy.soul_crush.active,
+                inactive = Plugin.resources.sprites.necromancy.soul_crush.inactive
+            },
             living_death = {
                 active = Plugin.resources.sprites.necromancy.living_death.active,
                 inactive = Plugin.resources.sprites.necromancy.living_death.inactive

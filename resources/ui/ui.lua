@@ -451,6 +451,22 @@ local CreateUI = function()
     local overlaySprites = sprites.CreateSprites(jobGaugeLayer)
 
     local necromancyGaugeLayer = createGaugeLayer(jobGaugeLayer)
+
+    local deathGrasp = createAbilityIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.deathGrasp
+    )
+
+    local deathEssence = createAbilityIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.deathEssence
+    )
+
+    local soulCrush = createAbilityIndicator(
+        necromancyGaugeLayer,
+        GAUGE_COMPONENT_POSITIONS.necromancy.soulCrush
+    )
+
     local conjureUndeadArmy = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy)
     local livingDeath = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.livingDeath)
 
@@ -626,6 +642,22 @@ local CreateUI = function()
 
     local function updateOverlayPositions()
         local positions = GAUGE_COMPONENT_POSITIONS
+
+        setAbilityIndicatorPosition(
+            deathGrasp,
+            positions.necromancy.deathGrasp
+        )
+
+        setAbilityIndicatorPosition(
+            deathEssence,
+            positions.necromancy.deathEssence
+        )
+
+        setAbilityIndicatorPosition(
+            soulCrush,
+            positions.necromancy.soulCrush
+        )
+
         setAbilityIndicatorPosition(
             conjureUndeadArmy,
             positions.necromancy.conjureUndeadArmy
@@ -942,6 +974,84 @@ local function updateOverlays()
         rangedGaugeLayer.hidden = true
         meleeGaugeLayer.hidden = true
      end
+
+    if necromancySettings.componentVisibility["show-death-grasp"] then 
+        deathGrasp.layer.hidden = false
+        if necromancy.deathGrasp.active == 1
+            then 
+                deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.active
+                if ticksToSeconds(necromancy.deathGrasp.remainingDuration) == 0.0 then
+                    necromancy.deathGrasp.active = 0
+                end
+                deathGrasp.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathGrasp.text.content = tostring(ticksToSeconds(necromancy.deathGrasp.remainingDuration))
+                deathGrasp.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
+            elseif necromancy.deathGrasp.cooldown >= 1 then 
+                deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.inactive
+                deathGrasp.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathGrasp.text.content = tostring(ticksToSeconds(necromancy.deathGrasp.cooldown))
+                deathGrasp.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
+            else
+                deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.active
+                deathGrasp.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                deathGrasp.text.content = tostring(settings.Get("generalSettings.readyText"))
+                deathGrasp.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
+        end
+    else 
+        deathGrasp.layer.hidden = true
+    end
+
+    if necromancySettings.componentVisibility["show-death-essence"] then 
+        deathEssence.layer.hidden = false
+        if necromancy.deathEssence.active == 1
+            then 
+                deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
+                if ticksToSeconds(necromancy.deathEssence.remainingDuration) == 0.0 then
+                    necromancy.deathEssence.active = 0
+                end
+                deathEssence.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathEssence.text.content = tostring(ticksToSeconds(necromancy.deathEssence.remainingDuration))
+                deathEssence.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
+            elseif necromancy.deathEssence.cooldown >= 1 then 
+                deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.inactive
+                deathEssence.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathEssence.text.content = tostring(ticksToSeconds(necromancy.deathEssence.cooldown))
+                deathEssence.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
+            else
+                deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
+                deathEssence.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                deathEssence.text.content = tostring(settings.Get("generalSettings.readyText"))
+                deathEssence.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
+        end
+    else 
+        deathEssence.layer.hidden = true
+    end
+
+    if necromancySettings.componentVisibility["show-soul-crush"] then 
+        soulCrush.layer.hidden = false
+        if necromancy.soulCrush.active == 1
+            then 
+                soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.active
+                if ticksToSeconds(necromancy.soulCrush.remainingDuration) == 0.0 then
+                    necromancy.soulCrush.active = 0
+                end
+                soulCrush.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulCrush.text.content = tostring(ticksToSeconds(necromancy.soulCrush.remainingDuration))
+                soulCrush.text.colour = colourToVector4(settings.Get("fontColours.durationText"))
+            elseif necromancy.soulCrush.cooldown >= 1 then 
+                soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.inactive
+                soulCrush.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulCrush.text.content = tostring(ticksToSeconds(necromancy.soulCrush.cooldown))
+                soulCrush.text.colour = colourToVector4(settings.Get("fontColours.cooldownText"))
+            else
+                soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.active
+                soulCrush.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                soulCrush.text.content = tostring(settings.Get("generalSettings.readyText"))
+                soulCrush.text.colour = colourToVector4(settings.Get("fontColours.readyText"))
+        end
+    else 
+        soulCrush.layer.hidden = true
+    end
 
     -- Conjure Undead Army
     if necromancySettings.componentVisibility["show-conjures"] then 

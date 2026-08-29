@@ -14,6 +14,21 @@ local events = {
         necromancy = { 
             necrosisStacks = 0,
             residualSoulStacks = 0,
+            deathGrasp = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            deathEssence = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
+            soulCrush = {
+                active = 0,
+                remainingDuration = 0,
+                cooldown = 0,
+            },
             livingDeath = {
                 active = 0,
                 remainingDuration = 0,
@@ -313,6 +328,29 @@ local function returnEquippedAmmo()
         events.playerData.ranged.activeAmmo = ammo
     end
     return nil
+end
+
+local function handleDeathGrasp(event)
+    events.playerData.necromancy.deathGrasp.remainingDuration = 0
+    events.playerData.necromancy.deathGrasp.cooldown = 50
+
+    swapGaugeToCombatStyle('necromancy')
+end
+
+local function handleDeathEssence(event)
+    events.playerData.necromancy.deathEssence.active = 1
+    events.playerData.necromancy.deathEssence.remainingDuration = 50
+    events.playerData.necromancy.deathEssence.cooldown = 100
+
+    swapGaugeToCombatStyle('necromancy')
+end
+
+local function handleSoulCrush(event)
+    events.playerData.necromancy.soulCrush.active = 1
+    events.playerData.necromancy.soulCrush.remainingDuration = 50
+    events.playerData.necromancy.soulCrush.cooldown = 100
+
+    swapGaugeToCombatStyle('necromancy')
 end
 
 local function handleLivingDeath(event)
@@ -617,6 +655,9 @@ local function handleLastCastSpell(event)
 end
 
 local VAR_TRANSMIT_HANDLERS = {
+    COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_START = handleDeathGrasp,
+    COMBATV2_COOLDOWN_WEAPON_NECRO_RASIAL_ARMGUARD_T95_START = handleDeathEssence,
+    COMBATV2_COOLDOWN_WEAPON_NECRO_DEVOURER_ARMGUARD_T95_START = handleSoulCrush,
     COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT = handleLivingDeath,
     COMBATV2_BUFF_MAGIC_WRACK_ACTIVE = handleRunicCharge,
     COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START = handleSunshine,
@@ -653,6 +694,16 @@ local VAR_TRANSMIT_HANDLERS = {
 }
 
 local COOLDOWN_RESET_MAP  = {
+
+    COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_END =
+        events.playerData.necromancy.deathGrasp,
+
+    COMBATV2_COOLDOWN_WEAPON_NECRO_RASIAL_ARMGUARD_T95_END =
+        events.playerData.necromancy.deathEssence,
+
+    COMBATV2_COOLDOWN_WEAPON_NECRO_DEVOURER_ARMGUARD_T95_END =
+        events.playerData.necromancy.soulCrush,
+
     COMBATV2_COOLDOWN_NECROMANCY_DEATH_TOUCH_END =
         events.playerData.necromancy.livingDeath,
 
