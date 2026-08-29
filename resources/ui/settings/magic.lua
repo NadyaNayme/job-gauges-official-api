@@ -63,11 +63,11 @@ function M.Create(page, options)
     })
 
     page:AddTitle({
-        text = "Spell Stack Upkeeping Colours",
+        text = "Spell Tracking Colours",
     })
-    page:AddDivider({
-        marginTop = 10,
-        marginBottom = 8
+    page:AddText({
+        text = "",
+        inline = false,
     })
     page:AddColourPicker({
         value = settings.Get("uiColours.barColours.bloodTitheBar"),
@@ -89,8 +89,9 @@ function M.Create(page, options)
         inline = true,
         text = "Blood Tithe (Exsanguinate)",
     })    
-    page:AddDivider({
-        marginTop = 0
+    page:AddText({
+        text = "",
+        inline = false,
     })
     page:AddColourPicker({
         value = settings.Get("uiColours.barColours.inciteFearBar"),
@@ -112,8 +113,9 @@ function M.Create(page, options)
         inline = true,
         text = "Glacial Embrace (Incite Fear)",
     })    
-    page:AddDivider({
-        marginTop = 0
+    page:AddText({
+        text = "",
+        inline = false,
     })
     page:AddColourPicker({
         value = settings.Get("uiColours.barColours.essenceCorruptionBar"),

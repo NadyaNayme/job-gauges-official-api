@@ -103,9 +103,9 @@ function M.Create(page, options)
     page:AddTitle({
         text = "Guthixian Runes Colours",
     })
-    page:AddDivider({
-        marginTop = 10,
-        marginBottom = 8
+    page:AddText({
+        text = "",
+        inline = false,
     })
     page:AddColourPicker({
         value = settings.Get("uiColours.runeColours.active"),
@@ -113,7 +113,7 @@ function M.Create(page, options)
         alphaSlider = true,
         buttonSize = 28,
         windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the colour",
+        tooltip = "Choose the active colour",
         acceptText = "Set Colour",
 
         onChange = function(_, colour)
@@ -129,7 +129,7 @@ function M.Create(page, options)
         alphaSlider = true,
         buttonSize = 28,
         windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the shadow colour",
+        tooltip = "Choose the active shadow colour",
         acceptText = "Set Colour",
 
         onChange = function(_, colour)
@@ -143,8 +143,9 @@ function M.Create(page, options)
         inline = true,
         text = "Active Color & Active Shadow",
     })    
-    page:AddDivider({
-        marginTop = 0
+    page:AddText({
+        text = "",
+        inline = false,
     })
     page:AddColourPicker({
         value = settings.Get("uiColours.runeColours.inactive"),
@@ -152,7 +153,7 @@ function M.Create(page, options)
         alphaSlider = true,
         buttonSize = 28,
         windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the colour",
+        tooltip = "Choose the inactive colour",
         acceptText = "Set Colour",
 
         onChange = function(_, colour)
@@ -168,7 +169,7 @@ function M.Create(page, options)
         alphaSlider = true,
         buttonSize = 28,
         windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the shadow colour",
+        tooltip = "Choose the inactive shadow colour",
         acceptText = "Set Colour",
 
         onChange = function(_, colour)

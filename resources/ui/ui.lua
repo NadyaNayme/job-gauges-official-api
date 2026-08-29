@@ -51,6 +51,10 @@ local READY_TEXT = settings.Get("generalSettings.readyText")
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
 local UI_SCALE = settings.Get("generalSettings.scale")
 
+local LARGE_FONT = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+local MEDIUM_FONT = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
+local SMALL_FONT = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+
 local FONT_COLOUR = colourToVector4(settings.Get("fontColours.durationText"))
 local COOLDOWN_COLOUR = colourToVector4(settings.Get("fontColours.cooldownText"))
 local EXPIRING_COLOUR = colourToVector4(settings.Get("fontColours.expiringText"))
@@ -270,7 +274,7 @@ local function createAbilityIndicator(parent, position)
     text:SetSize(22, 15)
     text:MoveToFront()
     text.content = ""
-    text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+    text.font = LARGE_FONT
     text.colour = FONT_COLOUR
     text.isShadowed = true
     text.alignHorizontal = ui.AlignMode.CENTRE
@@ -315,7 +319,7 @@ local function createAbilitySpriteIndicator(parent, position)
     text:SetSize(22, 15)
     text:MoveToFront()
     text.content = ""
-    text.font = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
+    text.font = MEDIUM_FONT
     text.colour = FONT_COLOUR
     text.isShadowed = true
     text.alignHorizontal = ui.AlignMode.CENTRE
@@ -360,7 +364,7 @@ local function createMagicUpkeepIndicator(parent, position, name)
     )
     text:SetSize(28, 16)
     text.content = ""
-    text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+    text.font = SMALL_FONT
     text.colour = FONT_COLOUR
     text.isShadowed = true
 
@@ -613,7 +617,7 @@ local CreateUI = function()
     perfectEquilibriumStacksText:SetSize(22, 24)
     perfectEquilibriumStacksText:MoveToFront()
     perfectEquilibriumStacksText.content = "0"
-    perfectEquilibriumStacksText.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+    perfectEquilibriumStacksText.font = LARGE_FONT
     perfectEquilibriumStacksText.colour = FONT_COLOUR
     perfectEquilibriumStacksText.isShadowed = true
     perfectEquilibriumStacksText.alignHorizontal = ui.AlignMode.CENTRE
@@ -827,11 +831,11 @@ local CreateUI = function()
     end
 
   local settingsBox = prettyui.Window.new(gameArea, {
-    title = "Job Gauges",
-    x = 10,
+    title = "Job Gauges by Nyu",
+    x = 50,
     y = 250,
-    width = 800,
-    height = 700,
+    width = 600,
+    height = 835,
   })
 
   settingsBox.root.hidden = true
@@ -983,17 +987,17 @@ local function updateOverlays()
                 if ticksToSeconds(necromancy.deathGrasp.remainingDuration) == 0.0 then
                     necromancy.deathGrasp.active = 0
                 end
-                deathGrasp.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathGrasp.text.font = LARGE_FONT
                 deathGrasp.text.content = tostring(ticksToSeconds(necromancy.deathGrasp.remainingDuration))
                 deathGrasp.text.colour = FONT_COLOUR
             elseif necromancy.deathGrasp.cooldown >= 1 then 
                 deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.inactive
-                deathGrasp.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathGrasp.text.font = LARGE_FONT
                 deathGrasp.text.content = tostring(ticksToSeconds(necromancy.deathGrasp.cooldown))
                 deathGrasp.text.colour = COOLDOWN_COLOUR
             else
                 deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.active
-                deathGrasp.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                deathGrasp.text.font = SMALL_FONT
                 deathGrasp.text.content = READY_TEXT
                 deathGrasp.text.colour = READY_COLOUR
         end
@@ -1009,17 +1013,17 @@ local function updateOverlays()
                 if ticksToSeconds(necromancy.deathEssence.remainingDuration) == 0.0 then
                     necromancy.deathEssence.active = 0
                 end
-                deathEssence.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathEssence.text.font = LARGE_FONT
                 deathEssence.text.content = tostring(ticksToSeconds(necromancy.deathEssence.remainingDuration))
                 deathEssence.text.colour = FONT_COLOUR
             elseif necromancy.deathEssence.cooldown >= 1 then 
                 deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.inactive
-                deathEssence.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathEssence.text.font = LARGE_FONT
                 deathEssence.text.content = tostring(ticksToSeconds(necromancy.deathEssence.cooldown))
                 deathEssence.text.colour = COOLDOWN_COLOUR
             else
                 deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
-                deathEssence.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                deathEssence.text.font = SMALL_FONT
                 deathEssence.text.content = READY_TEXT
                 deathEssence.text.colour = READY_COLOUR
         end
@@ -1035,17 +1039,17 @@ local function updateOverlays()
                 if ticksToSeconds(necromancy.soulCrush.remainingDuration) == 0.0 then
                     necromancy.soulCrush.active = 0
                 end
-                soulCrush.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulCrush.text.font = LARGE_FONT
                 soulCrush.text.content = tostring(ticksToSeconds(necromancy.soulCrush.remainingDuration))
                 soulCrush.text.colour = FONT_COLOUR
             elseif necromancy.soulCrush.cooldown >= 1 then 
                 soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.inactive
-                soulCrush.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulCrush.text.font = LARGE_FONT
                 soulCrush.text.content = tostring(ticksToSeconds(necromancy.soulCrush.cooldown))
                 soulCrush.text.colour = COOLDOWN_COLOUR
             else
                 soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.active
-                soulCrush.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                soulCrush.text.font = SMALL_FONT
                 soulCrush.text.content = READY_TEXT
                 soulCrush.text.colour = READY_COLOUR
         end
@@ -1070,7 +1074,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.conjures.active,
                     overlaySprites.utility.shadow
                 )
-                conjureUndeadArmy.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                conjureUndeadArmy.text.font = LARGE_FONT
                 if lowestDuration then
                     conjureUndeadArmy.text.content =
                         tostring(ticksToSeconds(lowestDuration))
@@ -1098,7 +1102,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.active,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                livingDeath.text.font = LARGE_FONT
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.remainingDuration))
                 livingDeath.text.colour = FONT_COLOUR
             elseif necromancy.livingDeath.cooldown >= 1 then 
@@ -1107,7 +1111,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.inactive,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                livingDeath.text.font = LARGE_FONT
                 livingDeath.text.content = tostring(ticksToSeconds(necromancy.livingDeath.cooldown))
                 livingDeath.text.colour = COOLDOWN_COLOUR
             else
@@ -1116,7 +1120,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.active,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                livingDeath.text.font = SMALL_FONT
                 livingDeath.text.content = READY_TEXT
                 livingDeath.text.colour = READY_COLOUR
         end
@@ -1253,7 +1257,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.sunshine.remainingDuration) == 0.0 then
                     magic.sunshine.active = 0
                 end
-                sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                sunshine.text.font = LARGE_FONT
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.remainingDuration))
                 sunshine.text.colour = FONT_COLOUR
             elseif magic.sunshine.cooldown >= 1 then 
@@ -1270,7 +1274,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                sunshine.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                sunshine.text.font = LARGE_FONT
                 sunshine.text.content = tostring(ticksToSeconds(magic.sunshine.cooldown))
                 sunshine.text.colour = COOLDOWN_COLOUR
             else
@@ -1287,7 +1291,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                sunshine.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                sunshine.text.font = SMALL_FONT
                 sunshine.text.content = READY_TEXT
                 sunshine.text.colour = READY_COLOUR
         end
@@ -1308,7 +1312,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.tsunami.remainingDuration) == 0.0 then
                     magic.tsunami.active = 0
                 end
-                tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                tsunami.text.font = LARGE_FONT
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.remainingDuration))
                 tsunami.text.colour = FONT_COLOUR
             elseif magic.tsunami.cooldown >= 1 then 
@@ -1317,7 +1321,7 @@ local function updateOverlays()
                     overlaySprites.magic.tsunami.inactive,
                     overlaySprites.utility.shadow
                 )
-                tsunami.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                tsunami.text.font = LARGE_FONT
                 tsunami.text.content = tostring(ticksToSeconds(magic.tsunami.cooldown))
                 tsunami.text.colour = COOLDOWN_COLOUR
             else
@@ -1326,7 +1330,7 @@ local function updateOverlays()
                     overlaySprites.magic.tsunami.active,
                     overlaySprites.utility.shadow
                 )
-                tsunami.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                tsunami.text.font = SMALL_FONT
                 tsunami.text.content = READY_TEXT
                 tsunami.text.colour = READY_COLOUR
         end
@@ -1347,7 +1351,7 @@ local function updateOverlays()
                 if ticksToSeconds(magic.runicCharge.remainingDuration) == 0.0 then
                     magic.runicCharge.active = 0
                 end
-                runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                runicCharge.text.font = LARGE_FONT
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.remainingDuration))
                 runicCharge.text.colour = FONT_COLOUR
             elseif magic.runicCharge.cooldown >= 1 then 
@@ -1356,7 +1360,7 @@ local function updateOverlays()
                     overlaySprites.magic.runicCharge.inactive,
                     overlaySprites.utility.shadow
                 )
-                runicCharge.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                runicCharge.text.font = LARGE_FONT
                 runicCharge.text.content = tostring(ticksToSeconds(magic.runicCharge.cooldown))
                 runicCharge.text.colour = COOLDOWN_COLOUR
             else
@@ -1365,7 +1369,7 @@ local function updateOverlays()
                     overlaySprites.magic.runicCharge.active,
                     overlaySprites.utility.shadow
                 )
-                runicCharge.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                runicCharge.text.font = SMALL_FONT
                 runicCharge.text.content = READY_TEXT
                 runicCharge.text.colour = READY_COLOUR
         end
@@ -1381,17 +1385,17 @@ local function updateOverlays()
                 if ticksToSeconds(magic.soulfire.remainingDuration) == 0.0 then
                     magic.soulfire.active = 0
                 end
-                soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulfire.text.font = LARGE_FONT
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.remainingDuration))
                 soulfire.text.colour = FONT_COLOUR
             elseif magic.soulfire.cooldown >= 1 then 
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.inactive
-                soulfire.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                soulfire.text.font = LARGE_FONT
                 soulfire.text.content = tostring(ticksToSeconds(magic.soulfire.cooldown))
                 soulfire.text.colour = COOLDOWN_COLOUR
             else
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
-                soulfire.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                soulfire.text.font = SMALL_FONT
                 soulfire.text.content = READY_TEXT
                 soulfire.text.colour = READY_COLOUR
         end
@@ -1407,17 +1411,17 @@ local function updateOverlays()
                 if ticksToSeconds(magic.instability.remainingDuration) == 0.0 then
                     magic.instability.active = 0
                 end
-                instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                instability.text.font = LARGE_FONT
                 instability.text.content = tostring(ticksToSeconds(magic.instability.remainingDuration))
                 instability.text.colour = FONT_COLOUR
             elseif magic.instability.cooldown >= 1 then 
                 instability.sprite.sprite = overlaySprites.magic.instability.inactive
-                instability.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                instability.text.font = LARGE_FONT
                 instability.text.content = tostring(ticksToSeconds(magic.instability.cooldown))
                 instability.text.colour = COOLDOWN_COLOUR
             else
                 instability.sprite.sprite = overlaySprites.magic.instability.active
-                instability.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                instability.text.font = SMALL_FONT
                 instability.text.content = READY_TEXT
                 instability.text.colour = READY_COLOUR
         end
@@ -1463,17 +1467,17 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.crystalRain.remainingDuration) == 0.0 then
                     ranged.crystalRain.active = 0
                 end
-                crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                crystalRain.text.font = LARGE_FONT
                 crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.remainingDuration))
                 crystalRain.text.colour = FONT_COLOUR
             elseif ranged.crystalRain.cooldown >= 1 then 
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.inactive
-                crystalRain.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                crystalRain.text.font = LARGE_FONT
                 crystalRain.text.content = tostring(ticksToSeconds(ranged.crystalRain.cooldown))
                 crystalRain.text.colour = COOLDOWN_COLOUR
             else
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
-                crystalRain.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                crystalRain.text.font = SMALL_FONT
                 crystalRain.text.content = READY_TEXT
                 crystalRain.text.colour = READY_COLOUR
         end
@@ -1489,17 +1493,17 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.splitSoul.remainingDuration) == 0.0 then
                     ranged.splitSoul.active = 0
                 end
-                splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                splitSoul_ecb.text.font = LARGE_FONT
                 splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.remainingDuration))
                 splitSoul_ecb.text.colour = FONT_COLOUR
             elseif ranged.splitSoul.cooldown >= 1 then 
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.inactive
-                splitSoul_ecb.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                splitSoul_ecb.text.font = LARGE_FONT
                 splitSoul_ecb.text.content = tostring(ticksToSeconds(ranged.splitSoul.cooldown))
                 splitSoul_ecb.text.colour = COOLDOWN_COLOUR
             else
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.active
-                splitSoul_ecb.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                splitSoul_ecb.text.font = SMALL_FONT
                 splitSoul_ecb.text.content = READY_TEXT
                 splitSoul_ecb.text.colour = READY_COLOUR
         end
@@ -1528,7 +1532,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.deathsSwiftness.remainingDuration) == 0.0 then
                     ranged.deathsSwiftness.active = 0
                 end
-                deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathsSwiftness.text.font = LARGE_FONT
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.remainingDuration))
                 deathsSwiftness.text.colour = FONT_COLOUR
             elseif ranged.deathsSwiftness.cooldown >= 1 then 
@@ -1545,7 +1549,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                deathsSwiftness.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                deathsSwiftness.text.font = LARGE_FONT
                 deathsSwiftness.text.content = tostring(ticksToSeconds(ranged.deathsSwiftness.cooldown))
                 deathsSwiftness.text.colour = COOLDOWN_COLOUR
             else
@@ -1562,7 +1566,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                deathsSwiftness.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                deathsSwiftness.text.font = SMALL_FONT
                 deathsSwiftness.text.content = READY_TEXT
                 deathsSwiftness.text.colour = READY_COLOUR
         end
@@ -1583,7 +1587,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.searingWinds.remainingDuration) == 0.0 then
                     ranged.searingWinds.active = 0
                 end
-                searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                searingWinds.text.font = LARGE_FONT
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.remainingDuration))
                 searingWinds.text.colour = FONT_COLOUR
             elseif ranged.searingWinds.cooldown >= 1 then 
@@ -1592,7 +1596,7 @@ local function updateOverlays()
                     overlaySprites.ranged.searing_winds.inactive,
                     overlaySprites.utility.shadow
                 )
-                searingWinds.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                searingWinds.text.font = LARGE_FONT
                 searingWinds.text.content = tostring(ticksToSeconds(ranged.searingWinds.cooldown))
                 searingWinds.text.colour = COOLDOWN_COLOUR
             else
@@ -1601,7 +1605,7 @@ local function updateOverlays()
                     overlaySprites.ranged.searing_winds.active,
                     overlaySprites.utility.shadow
                 )
-                searingWinds.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                searingWinds.text.font = SMALL_FONT
                 searingWinds.text.content = READY_TEXT
                 searingWinds.text.colour = READY_COLOUR
         end
@@ -1622,7 +1626,7 @@ local function updateOverlays()
                 if ticksToSeconds(ranged.shadowImbued.remainingDuration) == 0.0 then
                     ranged.shadowImbued.active = 0
                 end
-                shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                shadowImbued.text.font = LARGE_FONT
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.remainingDuration))
                 shadowImbued.text.colour = FONT_COLOUR
             elseif ranged.shadowImbued.cooldown >= 1 then 
@@ -1631,7 +1635,7 @@ local function updateOverlays()
                     overlaySprites.ranged.shadow_imbued.inactive,
                     overlaySprites.utility.shadow
                 )
-                shadowImbued.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                shadowImbued.text.font = LARGE_FONT
                 shadowImbued.text.content = tostring(ticksToSeconds(ranged.shadowImbued.cooldown))
                 shadowImbued.text.colour = COOLDOWN_COLOUR
             else
@@ -1640,7 +1644,7 @@ local function updateOverlays()
                     overlaySprites.ranged.shadow_imbued.active,
                     overlaySprites.utility.shadow
                 )
-                shadowImbued.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                shadowImbued.text.font = SMALL_FONT
                 shadowImbued.text.content = READY_TEXT
                 shadowImbued.text.colour = READY_COLOUR
         end
@@ -1667,7 +1671,7 @@ local function updateOverlays()
                     ranged.perfectEquilibrium.active = 0
                 end
 
-                perfectEquilibrium.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                perfectEquilibrium.text.font = LARGE_FONT
                 perfectEquilibrium.text.content =
                     tostring(ticksToSeconds(ranged.perfectEquilibrium.remainingDuration))
             else
@@ -1703,17 +1707,17 @@ local function updateOverlays()
                 if ticksToSeconds(melee.blackhole.remainingDuration) == 0.0 then
                     melee.blackhole.active = 0
                 end
-                blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                blackhole.text.font = LARGE_FONT
                 blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.remainingDuration))
                 blackhole.text.colour = FONT_COLOUR
             elseif melee.blackhole.cooldown >= 1 then 
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.inactive
-                blackhole.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                blackhole.text.font = LARGE_FONT
                 blackhole.text.content = tostring(ticksToSeconds(melee.blackhole.cooldown))
                 blackhole.text.colour = COOLDOWN_COLOUR
             else
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
-                blackhole.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                blackhole.text.font = SMALL_FONT
                 blackhole.text.content = READY_TEXT
                 blackhole.text.colour = READY_COLOUR
         end
@@ -1729,17 +1733,17 @@ local function updateOverlays()
                 if ticksToSeconds(melee.igneousShowdown.remainingDuration) == 0.0 then
                     melee.igneousShowdown.active = 0
                 end
-                igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                igneousShowdown.text.font = LARGE_FONT
                 igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.remainingDuration))
                 igneousShowdown.text.colour = FONT_COLOUR
             elseif melee.igneousShowdown.cooldown >= 1 then 
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.inactive
-                igneousShowdown.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                igneousShowdown.text.font = LARGE_FONT
                 igneousShowdown.text.content = tostring(ticksToSeconds(melee.igneousShowdown.cooldown))
                 igneousShowdown.text.colour = COOLDOWN_COLOUR
             else
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
-                igneousShowdown.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                igneousShowdown.text.font = SMALL_FONT
                 igneousShowdown.text.content = READY_TEXT
                 igneousShowdown.text.colour = READY_COLOUR
         end
@@ -1773,17 +1777,17 @@ local function updateOverlays()
                 if ticksToSeconds(melee.chaosRoar.remainingDuration) == 0.0 then
                     melee.chaosRoar.active = 0
                 end
-                chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                chaosRoar.text.font = LARGE_FONT
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.remainingDuration))
                 chaosRoar.text.colour = FONT_COLOUR
             elseif melee.chaosRoar.cooldown >= 1 then 
                 chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.inactive
-                chaosRoar.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                chaosRoar.text.font = LARGE_FONT
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.cooldown))
                 chaosRoar.text.colour = COOLDOWN_COLOUR
             else
                 chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
-                chaosRoar.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                chaosRoar.text.font = SMALL_FONT
                 chaosRoar.text.content = READY_TEXT
                 chaosRoar.text.colour = READY_COLOUR
         end
@@ -1799,17 +1803,17 @@ local function updateOverlays()
                 if ticksToSeconds(melee.meteorStrike.remainingDuration) == 0.0 then
                     melee.meteorStrike.active = 0
                 end
-                meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                meteorStrike.text.font = LARGE_FONT
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.remainingDuration))
                 meteorStrike.text.colour = FONT_COLOUR
             elseif melee.meteorStrike.cooldown >= 1 then 
                 meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.inactive
-                meteorStrike.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                meteorStrike.text.font = LARGE_FONT
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.cooldown))
                 meteorStrike.text.colour = COOLDOWN_COLOUR
             else
                 meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
-                meteorStrike.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                meteorStrike.text.font = SMALL_FONT
                 meteorStrike.text.content = READY_TEXT
                 meteorStrike.text.colour = READY_COLOUR
         end
@@ -1829,7 +1833,7 @@ local function updateOverlays()
                 if ticksToSeconds(melee.berserk.remainingDuration) == 0.0 then
                     melee.berserk.active = 0
                 end
-                berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                berserk.text.font = LARGE_FONT
                 berserk.text.content = tostring(ticksToSeconds(melee.berserk.remainingDuration))
                 berserk.text.colour = FONT_COLOUR
             elseif melee.berserk.cooldown >= 1 then 
@@ -1838,7 +1842,7 @@ local function updateOverlays()
                     overlaySprites.melee.berserk.inactive,
                     overlaySprites.utility.shadow
                 )
-                berserk.text.font = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+                berserk.text.font = LARGE_FONT
                 berserk.text.content = tostring(ticksToSeconds(melee.berserk.cooldown))
                 berserk.text.colour = COOLDOWN_COLOUR
             else
@@ -1847,7 +1851,7 @@ local function updateOverlays()
                     overlaySprites.melee.berserk.active,
                     overlaySprites.utility.shadow
                 )
-                berserk.text.font = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+                berserk.text.font = SMALL_FONT
                 berserk.text.content = READY_TEXT
                 berserk.text.colour = READY_COLOUR
         end
@@ -1892,6 +1896,27 @@ settings.Subscribe(
     "playerState.combatStyle",
     function(value)
         ACTIVE_COMBAT_STYLE = value
+    end
+)
+
+settings.Subscribe(
+    "fontSizes.largeFont",
+    function(value)
+        LARGE_FONT = value
+    end
+)
+
+settings.Subscribe(
+    "fontSizes.mediumFont",
+    function(value)
+        MEDIUM_FONT = value
+    end
+)
+
+settings.Subscribe(
+    "fontSizes.smallFont",
+    function(value)
+        SMALL_FONT = value
     end
 )
 
