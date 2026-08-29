@@ -354,6 +354,32 @@ local function handleLivingDeath(event)
     end
 end
 
+local function handleThreadsOfFate(event)
+    if event.oldValue == 0 and event.newValue == 1 then
+        events.playerData.necromancy.incantations.threadsOfFate.active = 1
+        events.playerData.necromancy.incantations.threadsOfFate.remainingDuration = 11
+        events.playerData.necromancy.incantations.threadsOfFate.cooldown = 75
+
+        swapGaugeToCombatStyle('necromancy')
+    else
+        events.playerData.necromancy.incantations.threadsOfFate.active = 0
+        events.playerData.necromancy.incantations.threadsOfFate.remainingDuration = 0
+    end
+end
+
+local function handleSplitSoulIncantion(event)
+    if event.oldValue == 0 and event.newValue == 1 then
+        events.playerData.necromancy.incantations.splitSoul.active = 1
+        events.playerData.necromancy.incantations.splitSoul.remainingDuration = 34
+        events.playerData.necromancy.incantations.splitSoul.cooldown = 100
+
+        swapGaugeToCombatStyle('necromancy')
+    else
+        events.playerData.necromancy.incantations.splitSoul.active = 0
+        events.playerData.necromancy.incantations.splitSoul.remainingDuration = 0
+    end
+end
+
 local function handleRunicCharge(event)
     if event.oldValue == 0 and event.newValue == 1 then
         events.playerData.magic.runicCharge.active = 1
@@ -521,6 +547,7 @@ end
 local function handleCappedStacks(event)
     local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
     local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
+    local deathMarkedTarget = var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_DEATH_MARK"].value
 
     if events.playerData.magic.activeSpell.name == "Exsanguinate" and bloodTithe == 12 then
         events.playerData.magic.upkeep.blood_tithe.remainingDuration = 33
@@ -530,6 +557,12 @@ local function handleCappedStacks(event)
     if events.playerData.magic.activeSpell.name == "Incite Fear" and glacialEmbrace == 5 then
         events.playerData.magic.upkeep.incite_fear.remainingDuration = 33
         events.playerData.magic.upkeep.incite_fear.stacks = 5
+    end
+
+    if deathMarkedTarget == 1 then
+        events.playerData.necromancy.incantations.invokeDeath.active = 1
+    else
+        events.playerData.necromancy.incantations.invokeDeath.active = 0
     end
 
 end
@@ -675,6 +708,8 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_MELEE_BERSERK_ACTIVE = handleBerserk,
     COMBATV2_BUFF_MELEE_BERSERK_END = pauseBerserk,
     COMBATV2_JUST_USED_ABILITY = handleChaosRoarUse,
+    COMBATV2_BUFF_NECROMANCY_THREADS_OF_FATE_ACTIVE = handleThreadsOfFate,
+    COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE = handleSplitSoulIncantion,
 
 
     BANK_TEMP = handleBank,
@@ -733,6 +768,12 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_COOLDOWN_STRENGTH_BERSERK_END =
         events.playerData.melee.berserk,
+
+    COMBATV2_COOLDOWN_NECROMANCY_SPLIT_SOUL_END =
+        events.playerData.necromancy.incantations.splitSoul,
+
+    COMBATV2_COOLDOWN_NECROMANCY_THREADS_OF_FATE_END =
+        events.playerData.necromancy.incantations.threadsOfFate,
 }
 
 -- The user can reset their cooldowns at the Altar of War. The altar does this
@@ -849,26 +890,6 @@ local function updateConjures()
     end
 end
 
-local function updateIncantations()
-    local incantations = events.playerData.necromancy.incantations
-
-    incantations.threadsOfFate.active =
-        var.VarPlayer["COMBATV2_BUFF_NECROMANCY_THREADS_OF_FATE_ACTIVE"].value
-
-    incantations.darkness.active =
-        var.VarPlayer["COMBATV2_BUFF_NECROMANCY_DARKNESS_ACTIVE"].value
-
-    incantations.invokeDeath.active =
-        var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_DEATH_MARK"].value
-
-    incantations.splitSoul.active =
-        var.VarPlayer["COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE"].value
-
-    if (incantations.threadsOfFate.active == 1 or incantations.splitSoul.active == 1) then
-        swapGaugeToCombatStyle('necromancy')
-    end
-end
-
 local function updateBloat()
     local bloat = events.playerData.necromancy.bloat
 
@@ -895,7 +916,6 @@ end
 local function updateNecromancy()
     updateNecromancyResources()
     updateConjures()
-    updateIncantations()
     updateBloat()
 end
 

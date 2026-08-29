@@ -71,7 +71,17 @@ function M.Create(page, options)
                 selected
             )
         end,
-        })
+    })
+
+    page:AddText("Change 'Ready' text for Incantions (set blank to hide)")
+    page:AddTextField({
+        text = settings.Get("generalSettings.spriteReadyText") or "R",
+        placeholder = "Ready text",
+        maxLength = 5,
+        onSubmit = function(_, text)
+            settings.Set("generalSettings.spriteReadyText", text)
+        end
+    })
 
 end
 

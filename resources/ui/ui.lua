@@ -49,6 +49,7 @@ local GAUGE_COMPONENT_POSITIONS = {
 local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT")
 
 local READY_TEXT = settings.Get("generalSettings.readyText")
+local SPRITE_READY_TEXT = settings.Get("generalSettings.spriteReadyText")
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
 local UI_SCALE = settings.Get("generalSettings.scale")
 
@@ -342,7 +343,9 @@ local function createAbilitySpriteIndicator(parent, position)
 end
 
 local function createSpriteIndicator(parent, position, width, height)
-    local sprite = ui.Sprite.new(parent)
+    local layer = ui.Layer.new(parent)
+    layer:SetSize(20, 20, 1.0, 1.0)
+    local sprite = ui.Sprite.new(layer)
 
     sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
@@ -354,7 +357,27 @@ local function createSpriteIndicator(parent, position, width, height)
         scaleToFactor(height)
     )
 
-    return sprite
+    sprite:MoveToFront()
+
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(position.x + 1 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
+    text:SetSize(22, 15)
+    text:MoveToFront()
+    text.content = ""
+    text.font = SMALL_FONT
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    text.alignHorizontal = ui.AlignMode.CENTRE
+    text.alignVertical = ui.AlignMode.CENTRE
+
+    return {
+        layer = layer,
+        sprite = sprite,
+        text = text
+    }
 end
 
 local function createObjectSpriteIndicator(parent, objectId, position, width, height)
@@ -1212,109 +1235,136 @@ local function updateOverlays()
     
     -- Residual Soul Stacks
     if necromancySettings.componentVisibility["show-residual-souls"] then 
-        residualSoulsStacks:SetSize(scaleToFactor(132), scaleToFactor(24))
+        residualSoulsStacks.layer.hidden = false
         if necromancy.residualSoulStacks == 0 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.zero
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.zero
         elseif necromancy.residualSoulStacks == 1 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.one
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.one
         elseif necromancy.residualSoulStacks == 2 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.two
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.two
         elseif necromancy.residualSoulStacks == 3 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.three
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.three
         elseif necromancy.residualSoulStacks == 4 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.four
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.four
         elseif necromancy.residualSoulStacks == 5 then
-                residualSoulsStacks.sprite = overlaySprites.necromancy.souls.five
+                residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.five
         end
     else 
-        residualSoulsStacks:SetSize(0, 0)
+        residualSoulsStacks.layer.hidden = true
     end
 
     -- Necrosis Stacks
     if necromancySettings.componentVisibility["show-necrosis-stacks"] then 
-        necrosisStacks:SetSize(scaleToFactor(132), scaleToFactor(20))
+        necrosisStacks.layer.hidden = false
         if necromancy.necrosisStacks == 0 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.zero
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.zero
         elseif necromancy.necrosisStacks == 2 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.two
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.two
         elseif necromancy.necrosisStacks == 4 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.four
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.four
         elseif necromancy.necrosisStacks == 6 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.six
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.six
         elseif necromancy.necrosisStacks == 8 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.eight
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.eight
         elseif necromancy.necrosisStacks == 10 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.ten
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.ten
         elseif necromancy.necrosisStacks == 12 then
-                necrosisStacks.sprite = overlaySprites.necromancy.necrosis.twelve
+                necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.twelve
         end
     else 
-        necrosisStacks:SetSize(0, 0)
+        necrosisStacks.layer.hidden = true
     end
 
     if necromancySettings.componentVisibility["show-bloat"] then
-        bloat:SetSize(scaleToFactor(132), scaleToFactor(24))
+        bloat.layer.hidden = false
 
         if necromancy.bloat.active then
             if necromancy.bloat.remainingDuration < 1 then
-                bloat.sprite = overlaySprites.necromancy.bloat.expired
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.expired
             elseif necromancy.bloat.remainingDuration < 3 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_0
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_0
             elseif necromancy.bloat.remainingDuration < 6 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_10
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_10
             elseif necromancy.bloat.remainingDuration < 9 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_20
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_20
             elseif necromancy.bloat.remainingDuration < 12 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_30
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_30
             elseif necromancy.bloat.remainingDuration < 15 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_40
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_40
             elseif necromancy.bloat.remainingDuration < 18 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_50
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_50
             elseif necromancy.bloat.remainingDuration < 21 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_60
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_60
             elseif necromancy.bloat.remainingDuration < 24 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_70
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_70
             elseif necromancy.bloat.remainingDuration < 27 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_80
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_80
             elseif necromancy.bloat.remainingDuration < 30 then
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_90
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_90
             else
-                bloat.sprite = overlaySprites.necromancy.bloat.bloat_100
+                bloat.sprite.sprite = overlaySprites.necromancy.bloat.bloat_100
             end
         else
-            bloat.sprite = overlaySprites.necromancy.bloat.expired
+            bloat.sprite.sprite = overlaySprites.necromancy.bloat.expired
         end
     else
-        bloat:SetSize(0, 0)
+        bloat.layer.hidden = true
     end
 
     -- Incantations
-    if necromancySettings.componentVisibility["show-threads-of-fate"] then 
-        threadsOfFate:SetSize(scaleToFactor(24), scaleToFactor(21))
-    if necromancy.incantations.threadsOfFate.active == 1 then
-        threadsOfFate.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
-        else threadsOfFate.sprite = overlaySprites.necromancy.incantations.threadsOfFate.inactive
-        end
-    else
-        threadsOfFate:SetSize(0, 0)
-    end
-    if necromancySettings.componentVisibility["show-split-soul"] then 
-        splitSoul:SetSize(scaleToFactor(24), scaleToFactor(21))
-    if necromancy.incantations.splitSoul.active == 1 then
-        splitSoul.sprite = overlaySprites.necromancy.incantations.splitSoul.active
-        else splitSoul.sprite = overlaySprites.necromancy.incantations.splitSoul.inactive
-        end
-    else
-        splitSoul:SetSize(0, 0)
-    end
+
+    -- Invoke Death
     if necromancySettings.componentVisibility["show-invoke-death"] then 
-        invokeDeath:SetSize(scaleToFactor(24), scaleToFactor(21))
-    if necromancy.incantations.invokeDeath.active == 1 then
-        invokeDeath.sprite = overlaySprites.necromancy.incantations.invokeDeath.active
-        else invokeDeath.sprite = overlaySprites.necromancy.incantations.invokeDeath.inactive
+        invokeDeath.layer.hidden = false
+        if necromancy.incantations.invokeDeath.active == 1 then
+            invokeDeath.sprite.sprite = overlaySprites.necromancy.incantations.invokeDeath.active
+        else 
+            invokeDeath.sprite.sprite = overlaySprites.necromancy.incantations.invokeDeath.inactive
         end
     else
-        invokeDeath:SetSize(0, 0)
+        invokeDeath.layer.hidden = true
+    end
+
+    -- Threads of Fate
+    if necromancySettings.componentVisibility["show-threads-of-fate"] then 
+        threadsOfFate.layer.hidden = false
+        if necromancy.incantations.threadsOfFate.active == 1 then
+            threadsOfFate.sprite.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
+            threadsOfFate.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.threadsOfFate.remainingDuration))
+            threadsOfFate.text.colour = FONT_COLOUR
+        else 
+            threadsOfFate.sprite.sprite = overlaySprites.necromancy.incantations.threadsOfFate.inactive
+            threadsOfFate.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.threadsOfFate.cooldown))
+            threadsOfFate.text.colour = COOLDOWN_COLOUR
+            if necromancy.incantations.threadsOfFate.cooldown == 0 then
+                threadsOfFate.sprite.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
+                threadsOfFate.text.content = SPRITE_READY_TEXT
+                threadsOfFate.text.colour = READY_COLOUR
+            end
+        end
+    else
+        threadsOfFate.layer.hidden = true
+    end
+
+    -- Split Soul
+    if necromancySettings.componentVisibility["show-split-soul"] then 
+        splitSoul.layer.hidden = false
+        if necromancy.incantations.splitSoul.active == 1 then
+            splitSoul.sprite.sprite = overlaySprites.necromancy.incantations.splitSoul.active
+            splitSoul.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.splitSoul.remainingDuration))
+            splitSoul.text.colour = FONT_COLOUR
+        else 
+            splitSoul.sprite.sprite = overlaySprites.necromancy.incantations.splitSoul.inactive
+            splitSoul.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.splitSoul.cooldown))
+            splitSoul.text.colour = COOLDOWN_COLOUR
+            if necromancy.incantations.splitSoul.cooldown == 0 then
+                splitSoul.sprite.sprite = overlaySprites.necromancy.incantations.splitSoul.active
+                splitSoul.text.content = SPRITE_READY_TEXT
+                splitSoul.text.colour = READY_COLOUR
+            end
+        end
+    else
+        splitSoul.layer.hidden = true
     end
 
     -- Magic Gauge
@@ -1512,10 +1562,10 @@ local function updateOverlays()
     end
 
     if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
-        activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
-        activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
+        activeSpellSprite.layer.hidden = false
+        activeSpellSprite.sprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
-        activeSpellSprite:SetSize(0, 0)
+        activeSpellSprite.layer.hidden = true
     end
 
     if magicSettings.componentVisibility["show-blood-tithe"] then
@@ -1623,10 +1673,10 @@ local function updateOverlays()
     end
 
     if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
-        activeSpellSprite:SetSize(scaleToFactor(24), scaleToFactor(21))
-        activeSpellSprite.sprite = id.Sprite[magic.activeSpell.icon]
+        activeSpellSprite.layer.hidden = false
+        activeSpellSprite.sprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
-        activeSpellSprite:SetSize(0, 0)
+        activeSpellSprite.layer.hidden = true
     end
 
     -- Death's Swiftness
@@ -2035,11 +2085,6 @@ local function returnEquippedAmmo()
         end
     end
 
-    log("AMMO CONFIG NAME: " .. equipped.configName)
-    if quiverValue.configName ~= nil then
-        log("QUIVER CONFIG NAME: " .. quiverValue.configName)
-    end
-
     return nil
 end
 
@@ -2084,6 +2129,13 @@ settings.Subscribe(
     "generalSettings.readyText",
     function(value)
         READY_TEXT = value
+    end
+)
+
+settings.Subscribe(
+    "generalSettings.spriteReadyText",
+    function(value)
+        SPRITE_READY_TEXT = value
     end
 )
 

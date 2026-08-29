@@ -34,6 +34,7 @@ local defaults = {
         hideOutOfCombat = "combat-visible",
         displayTimeAs = "precise-ticks",
         readyText = "Ready",
+        spriteReadyText = "R",
         scale = 1,
         offsetPosition = {
             x = 0,

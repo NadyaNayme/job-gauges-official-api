@@ -69,6 +69,33 @@ function M.Create(page, options)
         text = "",
         inline = false,
     })
+
+    page:AddColourPicker({
+        value = settings.Get("fontColours.expiringText"),
+        alphaSlider = true,
+        inline = true,
+        buttonSize = 26,
+        windowTitle = "Expiring Flash",
+        tooltip = "Choose the colour of Expiring text",
+        acceptText = "Set Colour",
+
+        onChange = function(_, colour)
+            settings.Set(
+                "fontColours.expiringText",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+    page:AddText({
+        text = "Expiring Flash - This color alternates when under 10s to keep stacks",
+        inline = true
+    })
+
+    page:AddText({
+        text = "",
+        inline = false,
+    })
+
     page:AddColourPicker({
         value = settings.Get("uiColours.barColours.bloodTitheBar"),
         inline = true,
