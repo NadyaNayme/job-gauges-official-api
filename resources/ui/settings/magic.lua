@@ -1,58 +1,44 @@
 local settings = require("resources/database/settings")
+local L = require("resources/data/localize")
 
 local M = {}
 
 function M.Create(page, options)
-    page:AddTitle("Magic Gauge Components")
+    page:AddTitle(L.Get("magic.gaugeComponentsTitle"))
 
     local magicComponentSettings = settings.Get("magicSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
-            text = "Show Soulfire (Roar of Awakening Special Attack)",
+            text = L.Get("magic.visibilityOptions.soulfire"),
             value = "show-soulfire",
             selected = magicComponentSettings["show-soulfire"]
         },
         {
-            text = "Show Instability (Fractured Staff of Armadyl Special Attack)",
+            text = L.Get("magic.visibilityOptions.instability"),
             value = "show-instability",
             selected = magicComponentSettings["show-instability"]
         },
         {
-            text = "Show Active Spell",
+            text = L.Get("magic.visibilityOptions.activeSpell"),
             value = "show-active-spell",
             selected = magicComponentSettings["show-active-spell"]
         },
         {
-            text = "Show Runic Charge",
+            text = L.Get("magic.visibilityOptions.runicCharge"),
             value = "show-runic-charge",
             selected = magicComponentSettings["show-runic-charge"]
         },
         {
-            text = "Show Tsunami",
+            text = L.Get("magic.visibilityOptions.tsunami"),
             value = "show-tsunami",
             selected = magicComponentSettings["show-tsunami"]
         },
         {
-            text = "Show Sunshine",
+            text = L.Get("magic.visibilityOptions.sunshine"),
             value = "show-sunshine",
             selected = magicComponentSettings["show-sunshine"]
         },
-        -- {
-        --     text = "Show Blood Tithe",
-        --     value = "show-blood-tithe",
-        --     selected = magicComponentSettings["show-blood-tithe"]
-        -- },
-        -- {
-        --     text = "Show Incite Fear",
-        --     value = "show-incite-fear",
-        --     selected = magicComponentSettings["show-incite-fear"]
-        -- },
-        -- {
-        --     text = "Show Essence Corruption",
-        --     value = "show-essence-corruption",
-        --     selected = magicComponentSettings["show-essence-corruption"]
-        -- },
     }, {
         onChange = function(_, _, changedValue, selected)
             settings.Set(
@@ -63,7 +49,7 @@ function M.Create(page, options)
     })
 
     page:AddTitle({
-        text = "Spell Tracking Colours",
+        text = L.Get("magic.spellTrackingColoursTitle"),
     })
     page:AddText({
         text = "",
@@ -75,9 +61,9 @@ function M.Create(page, options)
         alphaSlider = true,
         inline = true,
         buttonSize = 26,
-        windowTitle = "Expiring Flash",
-        tooltip = "Choose the colour of Expiring text",
-        acceptText = "Set Colour",
+        windowTitle = L.Get("magic.expiringFlash.windowTitle"),
+        tooltip = L.Get("magic.expiringFlash.tooltip"),
+        acceptText = L.Get("magic.expiringFlash.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -87,7 +73,7 @@ function M.Create(page, options)
         end,
     })
     page:AddText({
-        text = "Expiring Flash - This color alternates when under 10s to keep stacks",
+        text = L.Get("magic.expiringFlash.label"),
         inline = true
     })
 
@@ -101,9 +87,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Blood tithe Colour",
-        tooltip = "Choose the colour for Blood tithe",
-        acceptText = "Set Colour",
+        windowTitle = L.Get("magic.bloodTithe.windowTitle"),
+        tooltip = L.Get("magic.bloodTithe.tooltip"),
+        acceptText = L.Get("magic.bloodTithe.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -114,7 +100,7 @@ function M.Create(page, options)
     })
     page:AddText({
         inline = true,
-        text = "Blood Tithe (Exsanguinate)",
+        text = L.Get("magic.bloodTithe.label"),
     })    
     page:AddText({
         text = "",
@@ -125,9 +111,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Glacial Embrace Colour",
-        tooltip = "Choose the bar colour for Glacial Embrace",
-        acceptText = "Set Colour",
+        windowTitle = L.Get("magic.glacialEmbrace.windowTitle"),
+        tooltip = L.Get("magic.glacialEmbrace.tooltip"),
+        acceptText = L.Get("magic.glacialEmbrace.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -138,7 +124,7 @@ function M.Create(page, options)
     })
     page:AddText({
         inline = true,
-        text = "Glacial Embrace (Incite Fear)",
+        text = L.Get("magic.glacialEmbrace.label"),
     })    
     page:AddText({
         text = "",
@@ -149,9 +135,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Essence Corruption Bar Colour",
-        tooltip = "Choose the colour for Essence Corruption",
-        acceptText = "Set Colour",
+        windowTitle = L.Get("magic.essenceCorruption.windowTitle"),
+        tooltip = L.Get("magic.essenceCorruption.tooltip"),
+        acceptText = L.Get("magic.essenceCorruption.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -162,7 +148,7 @@ function M.Create(page, options)
     })
     page:AddText({
         inline = true,
-        text = "Essence Corruption (Roar of Awakening passive)",
+        text = L.Get("magic.essenceCorruption.label"),
     })
 
 end

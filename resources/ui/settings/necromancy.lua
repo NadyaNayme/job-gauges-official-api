@@ -1,66 +1,67 @@
 local settings = require("resources/database/settings")
+local L = require("resources/data/localize")
 
 local M = {}
 
 function M.Create(page, options)
 
-    page:AddTitle("Necromancy Gauge Components")
+    page:AddTitle(L.Get("necromancy.gaugeComponentsTitle"))
 
     local componentSettings = settings.Get("necromancySettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
-            text = "Show Death Grasp (T70 Weapon Spec)",
+            text = L.Get("necromancy.visibilityOptions.deathGrasp"),
             value = "show-death-grasp",
             selected = componentSettings["show-death-grasp"]
         },
         {
-            text = "Show Death Essence (Omni Guard Weapon Spec)",
+            text = L.Get("necromancy.visibilityOptions.deathEssence"),
             value = "show-death-essence",
             selected = componentSettings["show-death-essence"]
         },
         {
-            text = "Show Soul Crush (Devourer's Guard Weapon Spec)",
+            text = L.Get("necromancy.visibilityOptions.soulCrush"),
             value = "show-soul-crush",
             selected = componentSettings["show-soul-crush"]
         },
         {
-            text = "Show Conjures",
+            text = L.Get("necromancy.visibilityOptions.conjures"),
             value = "show-conjures",
             selected = componentSettings["show-conjures"]
         },
         {
-            text = "Show Residual Souls",
+            text = L.Get("necromancy.visibilityOptions.residualSouls"),
             value = "show-residual-souls",
             selected = componentSettings["show-residual-souls"]
         },
         {
-            text = "Show Necrosis Stacks",
+            text = L.Get("necromancy.visibilityOptions.necrosisStacks"),
             value = "show-necrosis-stacks",
             selected = componentSettings["show-necrosis-stacks"]
         },
         {
-            text = "Show Bloat",
+            text = L.Get("necromancy.visibilityOptions.bloat"),
             value = "show-bloat",
             selected = componentSettings["show-bloat"]
         },
         {
-            text = "Show Living Death",
+            text = L.Get("necromancy.visibilityOptions.livingDeath"),
             value = "show-living-death",
             selected = componentSettings["show-living-death"]
         },
         {
-            text = "Show Invoke Death",
+            text = L.Get("necromancy.visibilityOptions.invokeDeath"),
             value = "show-invoke-death",
             selected = componentSettings["show-invoke-death"]
         },
         {
-            text = "Show Threads of Fate",
+            text = L.Get("necromancy.visibilityOptions.threadsOfFate"),
             value = "show-threads-of-fate",
             selected = componentSettings["show-threads-of-fate"]
         },
         {
-            text = "Show Split Soul",
+            text = L.Get("necromancy.visibilityOptions.splitSoul"),
             value = "show-split-soul",
             selected = componentSettings["show-split-soul"]
         },
@@ -73,7 +74,7 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText("Change 'Ready' text for Incantions (set blank to hide)")
+    page:AddText(L.Get("necromancy.incantationsReadyTextLabel"))
     page:AddTextField({
         text = settings.Get("generalSettings.spriteReadyText") or "R",
         placeholder = "Ready text",

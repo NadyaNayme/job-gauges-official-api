@@ -1,40 +1,41 @@
 local settings = require("resources/database/settings")
+local L = require("resources/data/localize")
 
 local M = {}
 
 function M.Create(page, options)
-    page:AddTitle("Melee Gauge Components")
+    page:AddTitle(L.Get("melee.gaugeComponentsTitle"))
 
     local meleeComponentSettings = settings.Get("meleeSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
-            text = "Show Blackhole (Zaros godsword Special Attack)",
+            text = L.Get("melee.blackhole"),
             value = "show-blackhole",
             selected = meleeComponentSettings["show-blackhole"]
         },
         {
-            text = "Show Igneous Showdown (Ek-ZekKil Special Attack)",
+            text = L.Get("melee.igneousShowdown"),
             value = "show-igneous-showdown",
             selected = meleeComponentSettings["show-igneous-showdown"]
         },
         {
-            text = "Show Bloodlust Stacks",
+            text = L.Get("melee.bloodlust"),
             value = "show-bloodlust",
             selected = meleeComponentSettings["show-bloodlust"]
         },
         {
-            text = "Show Chaos Roar",
+            text = L.Get("melee.chaosRoar"),
             value = "show-chaos-roar",
             selected = meleeComponentSettings["show-chaos-roar"]
         },
         {
-            text = "Show Meteor Strike",
+            text = L.Get("melee.meteorStrike"),
             value = "show-meteor-strike",
             selected = meleeComponentSettings["show-meteor-strike"]
         },
         {
-            text = "Show Berserk",
+            text = L.Get("melee.berserk"),
             value = "show-berserk",
             selected = meleeComponentSettings["show-berserk"]
         },

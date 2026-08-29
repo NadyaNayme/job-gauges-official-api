@@ -940,8 +940,8 @@ local CreateUI = function()
     title = "Job Gauges by Nyu",
     x = 50,
     y = 250,
-    width = 600,
-    height = 835,
+    width = 625,
+    height = 885,
   })
 
   settingsBox.root.hidden = true

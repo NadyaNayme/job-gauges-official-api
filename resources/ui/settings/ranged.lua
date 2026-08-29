@@ -1,45 +1,46 @@
 local settings = require("resources/database/settings")
+local L = require("resources/data/localize")
 
 local M = {}
 
 function M.Create(page, options)
-    page:AddTitle("Ranged Gauge Components")
+    page:AddTitle(L.Get("ranged.gaugeComponentsTitle"))
 
     local rangedComponentSettings = settings.Get("rangedSettings.componentVisibility")
 
     page:AddCheckboxButton({
         {
-            text = "Show Crystal Rain (Seren Godbow Special Attack)",
+            text = L.Get("ranged.crystalRain"),
             value = "show-crystal-rain",
             selected = rangedComponentSettings["show-crystal-rain"]
         },
         {
-            text = "Show Split Soul (Eldritch Crossbow Special Attack)",
+            text = L.Get("ranged.splitSoul"),
             value = "show-split-soul",
             selected = rangedComponentSettings["show-split-soul"]
         },
         {
-            text = "Show Equipped Ammo",
+            text = L.Get("ranged.equippedAmmo"),
             value = "show-equipped-ammo",
             selected = rangedComponentSettings["show-equipped-ammo"]
         },
         {
-            text = "Show Searing Winds (Galeshot)",
+            text = L.Get("ranged.searingWinds"),
             value = "show-searing-winds",
             selected = rangedComponentSettings["show-searing-winds"]
         },
         {
-            text = "Show Shadow Imbued (Imbue: Shadows)",
+            text = L.Get("ranged.shadowImbued"),
             value = "show-shadow-imbued",
             selected = rangedComponentSettings["show-shadow-imbued"]
         },
         {
-            text = "Show Death's Swiftness",
+            text = L.Get("ranged.deathsSwiftness"),
             value = "show-deaths-swiftness",
             selected = rangedComponentSettings["show-deaths-swiftness"]
         },
         {
-            text = "Show Perfect Equilibrium",
+            text = L.Get("ranged.perfectEquilibrium"),
             value = "show-perfect-equilibrium",
             selected = rangedComponentSettings["show-perfect-equilibrium"]
         },
@@ -54,7 +55,7 @@ function M.Create(page, options)
     end,
     })
 
-    page:AddText("Guthixian Rune for Perfect Equilibrium Stacks")
+    page:AddText(L.Get("ranged.guthixianRuneLabel"))
 
     page:AddComboBox({
     entries = {
@@ -108,7 +109,7 @@ function M.Create(page, options)
 })
 
     page:AddTitle({
-        text = "Guthixian Runes Colours",
+        text = L.Get("ranged.guthixianRunesColoursTitle"),
     })
     page:AddText({
         text = "",
@@ -119,9 +120,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the active colour",
-        acceptText = "Set Colour",
+        windowTitle = "Guthixian Runes",
+        tooltip = L.Get("ranged.activeColours.activeTooltip"),
+        acceptText = L.Get("general.durationText.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -135,9 +136,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the active shadow colour",
-        acceptText = "Set Colour",
+        windowTitle = "Guthixian Runes",
+        tooltip = L.Get("ranged.activeColours.inactiveTooltip"),
+        acceptText = L.Get("general.durationText.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -148,7 +149,7 @@ function M.Create(page, options)
     })
     page:AddText({
         inline = true,
-        text = "Active Color & Active Shadow",
+        text = L.Get("ranged.activeColours.label"),
     })    
     page:AddText({
         text = "",
@@ -159,9 +160,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the inactive colour",
-        acceptText = "Set Colour",
+        windowTitle = "Guthixian Runes",
+        tooltip = L.Get("ranged.inactiveColours.activeTooltip"),
+        acceptText = L.Get("general.durationText.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -175,9 +176,9 @@ function M.Create(page, options)
         inline = true,
         alphaSlider = true,
         buttonSize = 28,
-        windowTitle = "Guthixian Runes Colour",
-        tooltip = "Choose the inactive shadow colour",
-        acceptText = "Set Colour",
+        windowTitle = "Guthixian Runes",
+        tooltip = L.Get("ranged.inactiveColours.inactiveTooltip"),
+        acceptText = L.Get("general.durationText.acceptButton"),
 
         onChange = function(_, colour)
             settings.Set(
@@ -188,7 +189,7 @@ function M.Create(page, options)
     })
     page:AddText({
         inline = true,
-        text = "Inactive Color & Inactive Shadow",
+        text = L.Get("ranged.inactiveColours.label"),
     })
     
 end
