@@ -1,8 +1,14 @@
+-- Lazy i18n
+-- Self explanatory but it pulls all UI strings and keys
+-- which ones to use based on the user's clientLanguage.
+-- A setting to override the detected language will be
+-- provided, in case a user prefers not to localize.
+
 local localization = require("resources/data/localization")
 
 local M = {}
 
-local currentLanguage = "de"
+local currentLanguage = "en"
 
 local clientLanguage = game.options.Language.setting
 if clientLanguage == 1 then

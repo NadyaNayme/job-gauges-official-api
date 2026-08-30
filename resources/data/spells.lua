@@ -1,3 +1,11 @@
+-- LASTCASTSPELL returns an ID
+-- This ID is used to lookup the matching Sprite & Spell name
+-- So that the sprite can be added. Names were originally
+-- planned but I scrapped the idea, as I feel people do not
+-- struggle with recognizing spells by their icons. Unlike
+-- the Ranged quiver which is easy to forget which ammo you are 
+-- cycled to and many people struggle to tell ammo apart by icons.
+
 -- Spell | Icon | LASTCASTSPELL
 
 local spells = {

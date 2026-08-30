@@ -1,3 +1,7 @@
+-- I made this before finding out the `combatv2_mainhand_style` varp exists
+-- I plan to migrate to combatv2_mainhand_style at some point, as Jagex
+-- may decide to add more weapon types in the future -- ie. 2H Necromancy! ;)
+
 local weapons = {
     [id.Category.WEAPON_STAFF]      = "magic",
     [id.Category.WEAPON_ELEMENTAL]  = "magic",

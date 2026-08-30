@@ -1,3 +1,9 @@
+-- A map of `CONFIGNAME` to short, abbreviated Display Names.
+-- These names show on the equipped ammo component of the
+-- Ranged gauge. Any name not mapped is truncated to the
+-- first 3 characters. A complete map of all ammo is planned
+-- eventually, but for now the most meta ammo were tracked down.
+
 local ammoNames = {
     ["DINARROW_JAS_DRAGONBANE"]      = "JAS<br>Dragon",
     ["DINARROW_JAS_DEMONBANE"]      = "JAS<br>Demon",

@@ -1,5 +1,11 @@
 local M = {}
 
+-- I want to easily be able to access all of my sprites - so I load them once into the gauge and reference
+-- them all this way.
+
+-- Bloat, Necrosis Stacks, and Residual Souls might get refactored to use a single, repeated sprite for 
+-- active/inactive (Necrosis/Souls) while Bloat might get refactored to look more like the Magic Stacks Upkeep bars.
+
 function M.CreateSprites(parent)
     if not parent then
         log("CreateSprites: parent is nil")

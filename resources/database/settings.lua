@@ -1,5 +1,7 @@
 local settings = {}
 
+
+-- Default initialization of settings
 local defaults = {
 
     playerState = {
@@ -218,6 +220,7 @@ local defaults = {
                 y = 50,
             },
             RUNE_LAYOUT = {
+                -- LORE
                 BALANCE = {
                     [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
                     [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
@@ -228,7 +231,7 @@ local defaults = {
                     [7] = { x_offset = 82,  size = { width = 24, height = 24 } },
                     stacksText = { x = 120, y = 50},
                 },
-
+                -- Easter egg. :-) 
                 NYU = {
                     [1] = { x_offset = 0,   size = { width = 24, height = 24 } },
                     [2] = { x_offset = 12,  size = { width = 24, height = 24 } },
@@ -301,6 +304,7 @@ local defaults = {
     }
 }
 
+-- Things do what they say from here on out
 
 local values = {}
 local loaded = false
@@ -362,6 +366,9 @@ function settings.Get(name)
     return getNestedValue(values, name)
 end
 
+-- Allow functions to subscribe to settings updates, allowing the UI to update whenever
+-- a user changes their settings. Without doing what I was doing before, which was
+-- calling settings.Get() every Logic event. Which was probably very bad. ^^;
 local listeners = {}
 function settings.Subscribe(path, callback)
     if not listeners[path] then

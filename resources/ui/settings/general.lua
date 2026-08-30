@@ -4,6 +4,9 @@ local L = require("resources/data/localize")
 
 local M = {}
 
+-- This and the next 4 settings files handles all the PrettyUI settings windows
+-- with lazy localization to fully support all officially supported languages
+
 function M.Create(page, options)
 
     page:AddTitle(L.Get("general.gaugeSettingsTitle"))

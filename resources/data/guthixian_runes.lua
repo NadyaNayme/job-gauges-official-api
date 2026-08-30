@@ -1,4 +1,8 @@
-
+-- The client provided sprites have a colour applied to them,
+-- causing players to only be able to customize them to dark blue
+-- or various shades of lighter green. Colors like red or purple
+-- would appear as black. So the sprites were taken and made
+-- white so that they can reflect the user's selected color accurately.
 
 local M = {}
 

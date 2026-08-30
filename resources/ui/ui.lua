@@ -12,6 +12,14 @@ local rangedSettings = require("resources/ui/settings/ranged")
 
 local M = {}
 
+-- The vast majority of this is boilerplate to setup all of the UI components,
+-- get them positioned, and tell them how to update based on data from events.playerData
+
+-- Things typically go in blocks of Necromancy -> Magic -> Ranged -> Melee and repeat
+-- as that is the order I developed the gauges in. First everything gets created: `create__ComponentType()`.
+-- Then everything gets individual functions to update their state `update__ComponentName()`.
+-- There is a block to reposition everything at once: `set__ComponentPosition()`.
+
 local function colourToVector4(colour)
     local colour = tonumber(colour)
     local r = math.floor(colour / 0x1000000) % 0x100
@@ -27,7 +35,7 @@ local function colourToVector4(colour)
     )
 end
 
--- ============================================================ You excited for school tomorrow school today, I mean school today what's a little coffeein this friend fashion before being cheap and funny. This is one of those popular places to cruise them. She's on this space. I shall she goes proved and what would you do anything and make you feel like my bus on your sideshifts at all and I'm sure you feel that way I'm feeling from workers free legs are in I appreciate and I've took a lot here to say that now I think what's in right now for minutes to couple don't forget to meet pressure so you can keep it still a very small life and I was to choose one and vice versa I would probably do for funding prize is machines like subrays to get money to kill it before you go to that thought the works that we had was when the air conditioning went out that was by far like the one worst night we had than last year
+-- ============================================================ 
 -- Constants / Configuration
 -- ============================================================
 
@@ -1077,6 +1085,13 @@ local function updateOverlays()
     end
 
     updateGaugeVisibility()
+
+    -- Everything here follows the floor of "check visibility setting"
+    -- and then what needs to be shown based on events.playerData
+
+    -- TODO: Potential optimization: Only update gauges when that combat style is the active style...
+    -- by adding `ACTIVE_COMBAT_STYLE == 'type' and` to each of these checks to shortcircuit
+    -- if that gauge isn't visible and thus doesn't need to be being updated.
     
     if playerData.inCombat ~= true and HIDE_OUT_OF_COMBAT == "combat-visible" then
         necromancyGaugeLayer.hidden = true
@@ -1654,14 +1669,17 @@ local function updateOverlays()
 
         if wornObj and wornObj.obj then
             if wornObj.obj.configName:find("ARROW", 1, true) then
+                -- Every stack of 5 is packed for arrows, at least that I saw
                 local AMMO_STACK_ID = tonumber(AMMO_ID) + 4
                 equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
                 equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
-            elseif wornObj.obj.configName:find("BOLT", 1, true) then
+            elseif wornObj.obj.configName:find("BOLT", 1, true) then 
+                -- The same is not true of Bolts.
                 local AMMO_STACK_ID = tonumber(AMMO_ID)
                 equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
                 equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
             elseif wornObj.obj.configName:find("QUIVER", 1, true) then
+                -- If we have a quiver equipped, report the currently cycled ammo instead.
                 local QUIVER_AMMO_ID = tonumber(AMMO_ID)
                 if QUIVER_AMMO_ID == nil then return end
                 QUIVER_AMMO_ID = QUIVER_AMMO_ID + 4
@@ -2028,7 +2046,11 @@ local function updateOverlays()
         berserk.layer.hidden = true
     end
 
-
+    -- Allow for repositioning the gauges without clunky X,Y sliders.
+    -- TODO: Let users change the keybinds for this? Or change into a button
+    -- that is clicked and begins repositioning until you press a keybind to stop it.
+    -- But I prefer being able to unlock it and have it be freely movable.
+    -- I'll have to see which users prefer.
     if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED then
         local shiftDown = Keyboard.IsShiftDown()
         local ctrlDown = Keyboard.IsControlDown()
@@ -2052,8 +2074,11 @@ local function updateOverlays()
 
 end
 
+-- ServerLogic would result in a 1 tick delay - not sure this is too frequent to update everything
 Event.Logic.Subscribe("updateOverlays", updateOverlays)
 
+-- Return the user's ammo, unless the user has a quiver in which case
+-- return the active ammo inside of the quiver instead.
 local function returnEquippedAmmo()
     local worn = Inventory.Find(config.Inv.WORN)
     local wornObj = worn:GetSlot(14)
@@ -2089,8 +2114,13 @@ local function returnEquippedAmmo()
     return nil
 end
 
+-- Ammo can only be updated once every game tick, so only need to
+-- check once every game tick.
 Event.ServerLogic.Subscribe("updateAmmo", returnEquippedAmmo)
 
+-- UI update subscriptions to changes in the user's settings
+-- Update the global variables and then on the next re-render
+-- aka the next `Logic.logicTick` everything is updated
 settings.Subscribe(
     "generalSettings.positionLocked",
     function(value)

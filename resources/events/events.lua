@@ -2,6 +2,12 @@ local settings = require("resources/database/settings")
 local spells = require("resources/data/spells")
 local weapons = require("resources/data/weapons")
 
+-- playerData is nested in events because my mental model
+-- is unlike data that comes from Settings - this is data
+-- that may initialize from Settings but is kept up-to-date
+-- via events and called "eventsData". I renamed it "events"
+-- because "eventsData.playerData" felt too redundant.
+
 local events = {
     playerData = {
         inCombat = false,
@@ -226,20 +232,19 @@ local events = {
     }
 }
 
-local ULT_GREATER_DURATION = 62
-local ULT_NORMAL_DURATION = 50
-
 local function getRemainingTicks(startVar, endVar)
     return var.VarPlayer[endVar].value - var.VarPlayer[startVar].value 
 end
 
--- Used for Sunshine & Death's Swiftness checks
+-- Used in Sunshine & Death's Swiftness duration checks
 local function isPlantedFeetEquipped()
     local rank = var.VarPlayer.INVENT_PERK_PLANTEDFEET.value
     return rank ~= nil and rank > 0
 end
 
 local function getSunshineDuration()
+    local ULT_GREATER_DURATION = 62
+    local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterSunshineUnlocked == 1
         or isPlantedFeetEquipped()
     then
@@ -249,7 +254,10 @@ local function getSunshineDuration()
     return ULT_NORMAL_DURATION
 end
 
+-- Redundancy because I try to avoid using parameters as control flow flags
 local function getDeathsSwiftnessDuration()
+    local ULT_GREATER_DURATION = 62
+    local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterDeathsSwiftnessUnlocked == 1
         or isPlantedFeetEquipped()
     then
@@ -284,6 +292,7 @@ local function swapGaugeToCombatStyle(style)
         events.playerData.combatStyle = style
     end
 
+    -- Only update if the combat style has changed
     if settings.Get('playerState.combatStyle') ~= style then
         settings.Set('playerState.combatStyle', style)
     end
@@ -292,6 +301,7 @@ end
 local function checkEquippedMainhand()
     if settings.Get('generalSettings.automaticSwapping') ~= 'mainhand' then return end
 
+    -- TODO: Use `combatv2_mainhand_style` here instead
     local worn = Inventory.Find(config.Inv.WORN)
     local wornObj = worn:GetSlot(4)
 
@@ -308,6 +318,13 @@ local function checkEquippedMainhand()
     end
 end
 
+-- To match various Augmented & Dyed and alternate names like Trimmed
+-- or Custom-Fitted a string match against the item's name will be used.
+-- Such that it will match all variants of the item.
+--
+-- This was done because I didn't realize I could get data about the
+-- last ability used to easily determine which special attack was used.
+-- Instead, I'm checking what weapon they specced with.
 local function returnEquippedMainhand()
     local worn = Inventory.Find(config.Inv.WORN)
     local wornObj = worn:GetSlot(4)
@@ -318,6 +335,11 @@ local function returnEquippedMainhand()
     return nil
 end
 
+-- This gets copy/pasted an awful lot with the times (counted in ServerLogic events)
+-- mostly being hard-coded rather than derived. This is because many have an _END
+-- without a _START and I didn't think to cache a _START value and increment it
+-- myself with ServerLogic events to track _START irregardless if a varp is set.
+-- As this could otherwise always be derived by `END - cachedServerLogic_START`
 local function handleDeathGrasp(event)
     events.playerData.necromancy.deathGrasp.remainingDuration = 0
     events.playerData.necromancy.deathGrasp.cooldown = 50
@@ -457,6 +479,10 @@ local function handleDeathsSwiftness(event)
     swapGaugeToCombatStyle('ranged')
 end
 
+-- The UI side is a similar, though better refactored, slew of copy/pasted blocks.
+-- This continues for a while longer. I'm a little sorry, but I'm too scared to
+-- refactor it without breaking everything. It works and it's very easy to follow.
+
 local function handleSearingWinds(event)
     events.playerData.ranged.searingWinds.active = 1
     events.playerData.ranged.searingWinds.remainingDuration = getRemainingTicks("COMBATV2_COOLDOWN_RANGED_GALESHOT_START", "COMBATV2_BUFF_RANGED_SEARING_WINDS_END")
@@ -465,6 +491,8 @@ local function handleSearingWinds(event)
     swapGaugeToCombatStyle('ranged')
 end
 
+-- Rapid Fire pauses the timer for Searing Winds. To simulate, we remove the time we would decrement from decrementTimers.
+-- By cancelling each other out - we have paused the timer.
 local function pauseSearingWinds(event)
     events.playerData.ranged.searingWinds.remainingDuration = events.playerData.ranged.searingWinds.remainingDuration + 1
 end
@@ -479,11 +507,14 @@ local function handleShadowImbued(event)
     end
 end
 
+-- When the player uses Shadow Tendrils it adds 6 ticks duration to the current Imbued Shadows duration.
 local function extendShadowImbued(event)
-    if events.playerData.ranged.shadowImbued.remainingDuration > 0 and events.playerData.ranged.shadowImbued.remainingDuration < 49 then
-        events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
+    if events.playerData.ranged.shadowImbued.remainingDuration > 0 
+        and events.playerData.ranged.shadowImbued.remainingDuration < 49 then
+            events.playerData.ranged.shadowImbued.remainingDuration = events.playerData.ranged.shadowImbued.remainingDuration + 6
         if events.playerData.ranged.shadowImbued.cooldown == 100 then
-        events.playerData.ranged.shadowImbued.cooldown = events.playerData.ranged.shadowImbued.cooldown - 5
+            -- This is -5 instead of -6 because we need to account for decrementTimers() also ticking it down by one.
+            events.playerData.ranged.shadowImbued.cooldown = events.playerData.ranged.shadowImbued.cooldown - 5
         end
     end
 end
@@ -540,10 +571,17 @@ local function handleEssenceCorruption(event)
     end
 end
 
--- When the player has maximum stacks for Exsanguinate or Incite Fear the VarTransmit stops transmitting the Stacks value
--- So to determine if the Timer should reset for the player's Stacks to be maintained - the activeSpell is checked and
--- the appropriate spell timer is reinitialized. The stacks are set because if the plugin is started when already at maximum stacks,
--- they display as `0` until you lose them and gain them again.
+-- When the player has maximum stacks for Exsanguinate or Incite Fear the 
+-- VarTransmit event stops transmitting the stack value. To determine if the Timer
+-- resets & the player's Stacks maintained - the activeSpell is checked on GCD and
+-- if the appropriate spell is set they timer is reinitialized. 
+-- The stacks must be reset because if the plugin is started when already at maximum stacks,
+-- they will display as `0` until you lose and regain some otherwise.
+
+-- This fires every time the player incurs a GCD. If they're at max stacks and meet
+-- the requirements to reset the timer, the timer is reset and their stacks are set 
+-- in case they were initialized as 0 and haven't been given an opportunity to update
+-- from the relevant varp being transmitted.
 local function handleCappedStacks(event)
     local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
     local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
@@ -570,6 +608,7 @@ end
 -- Similar to Exsanguinate and Incite Fear, the Roar of Awakening's Essence Corruption stacks stop transmitting at 100
 -- so to determine whether the timer should restart to 30s, I check to see if the player has a Roar equipped when they use 
 -- one of the Magic bleeds (Roar Weapon Special, Combust, or Corruption Blast) and restart the timer.
+-- This is dispatched when the _START timers of Combust, Corruption, and the Roar's Special Attack change values.
 local function handleCappedEssenceCorruption(event)
     local essenceCorruption = var.VarPlayer["COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS"].value
     local equippedMainhand = returnEquippedMainhand()
@@ -671,10 +710,13 @@ local function handleBank()
     events.playerData.inCombat = false
 end
 
+-- Any time the users updates their LASTCASTSPELL varp, do a lookup and set their
+-- active spell to that spell. Will need to be updated whenever new spells are released.
 local function handleLastCastSpell(event)
     updateActiveSpell(event.newValue)
 end
 
+-- Dispatchers - the handler functions tell you what the varp being mapped for dispatch helps keep updated.
 local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_START = handleDeathGrasp,
     COMBATV2_COOLDOWN_WEAPON_NECRO_RASIAL_ARMGUARD_T95_START = handleDeathEssence,
@@ -716,6 +758,10 @@ local VAR_TRANSMIT_HANDLERS = {
     LASTCASTSPELL = handleLastCastSpell,
 }
 
+-- War's Altar of War works by resetting all of the player's _END varps
+-- to a value of 0, which instantly removes them from cooldown. This map
+-- watches for varps of tracked abilities and, when found, makes sure
+-- that their cooldown is reset to 0 and the ability goes back to a Ready state.
 local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_END =
@@ -776,8 +822,6 @@ local COOLDOWN_RESET_MAP  = {
         events.playerData.necromancy.incantations.threadsOfFate,
 }
 
--- The user can reset their cooldowns at the Altar of War. The altar does this
--- by setting all _END values to 0, forcing them to be off cooldown.
 local function handleCooldownReset(event)
     if event.newValue ~= 0 then
         return
@@ -790,6 +834,9 @@ local function handleCooldownReset(event)
     end
 end
 
+-- I don't think I'm tracking nearly enough things for this
+-- to be a bottleneck of performance. I'll admit, this was
+-- out of laziness. If it's an issue, I can map it out.
 local function decrementTimers(tbl)
     for key, value in pairs(tbl) do
         if type(value) == "table" then
@@ -810,6 +857,7 @@ local function decrementTimers(tbl)
     end
 end
 
+-- If the player has a targeted enemy, they are considered to be in, or starting, combat.
 local function updateInCombatState()
     events.playerData.inCombat = 
         var.VarClient["COMBATV2_TARGET_SIDE_PANEL_HEALTH"].value > 0
@@ -824,10 +872,14 @@ local function updateNecromancyResources()
     necromancy.residualSoulStacks =
         var.VarPlayer["COMBATV2_BUFF_NECROMANCY_RESIDUAL_SOUL_STACKS"].value
 
+    -- Death Spark stacks are tracked but currently unused.
+    -- I don't know a great way to display it.
     necromancy.deathSparkStacks =
         var.VarPlayer["COMBATV2_BUFF_NECRO_RASIAL_ARMGUARD_T95_PASSIVE_STACKS"].value
 end
 
+-- A map of all the conjures so I could keep their definitions in one place.
+-- And because it made it easier copy/pasting the varps.
 local CONJURE_DEFINITIONS = {
     skeletonWarrior = {
         activeVar = "COMBATV2_ABILITY_NECROMANCY_CONJURE_SKELETON_WARRIOR_ACTIVE",
@@ -856,6 +908,15 @@ local CONJURE_DEFINITIONS = {
     },
 }
 
+-- The duration display always shows the conjure with the
+-- least duration remaining (aka: the oldest conjure).
+-- Because when that conjure dies, someone without COA
+-- will be able to prepare to re-summon the summon that is
+-- about to vanish. I found this easier to track my conjures
+-- instead of 3 or 4 separate sprites for each individual conjure.
+-- I could display the 4 conjures as 4 sprites, similar to how
+-- I display the Incantations. My target audience has 99 Necromancy
+-- though, so Conjure Undead Army is expected to be used.
 local function updateConjure(name, definition)
     local conjure = events.playerData.necromancy.conjures[name]
 
@@ -947,10 +1008,13 @@ end
 local checkOnce = false
 
 local function updatePlayerData()
+    -- Data that needs to be updated with each server tick to keep up-to-date
+    -- with the player's known state.
     updateInCombatState()
     updateNecromancy()
     updateRanged()
 
+    -- Data that only needs to be checked once after signing in
     if (not checkOnce) then
         checkGreaterUnlocks()
         updateActiveSpell(var.VarPlayer["LASTCASTSPELL"].value)
@@ -975,12 +1039,25 @@ Event.VarTransmit.Subscribe("cooldownTracking", function(event)
     handleCooldownReset(event)
 end)
 
+-- Lazily keep track of time since ServerLogic lacks an
+-- equivalent to Logic's logickTick. Again, I didn't
+-- think to cache a _START value to increment and pretend
+-- to be an equivalent to ServerLogic.logickTick
 Event.ServerLogic.Subscribe("decrementCooldowns", function()
     decrementTimers(events.playerData)
 end)
+
+-- I'm not sure if this is too often, but if this is
+-- on ServerLogic instead the entire UI is always a tick
+-- behind. Not sure if % 2'ing and running this half
+-- as often matters at all or what the performance looks
+-- like since most of the code is reads & simple boolean
+-- or value check branches; no complex algorithms.
 Event.Logic.Subscribe("updatePlayerData", function() 
     updatePlayerData()
 end)
+
+-- Check mainhand weapon each game tick for a swap
 Event.ServerLogic.Subscribe("wornMainhand", function() 
     checkEquippedMainhand()
 end)
