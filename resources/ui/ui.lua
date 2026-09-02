@@ -389,11 +389,36 @@ local function createSpriteIndicator(parent, position, width, height)
     }
 end
 
-local function createObjectSpriteIndicator(parent, objectId, position, width, height)
+local function createObjectSpriteIndicator(parent, position, width, height)
     local layer = ui.Layer.new(parent)
     layer:SetSize(32, 32, 1.0, 1.0)
 
     local sprite = ui.Sprite.new(layer)
+   
+    sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X + 5),
+        math.floor(position.y + OFFSET_POSITION_Y + 2)
+    )
+
+    sprite:SetSize(
+        scaleToFactor(width),
+        scaleToFactor(height)
+    )
+    sprite:MoveToFront()
+
+    local text = ui.Text.new(layer)
+    text:SetPos(
+        math.floor(position.x + 8 + OFFSET_POSITION_X),
+        math.floor(position.y + 12 + OFFSET_POSITION_Y)
+    )
+    text:SetSize(22, 15)
+    text:MoveToFront()
+    text.content = AMMO_DISPLAY_NAME or AMMO_NAME
+    text.font = SMALL_FONT
+    text.colour = FONT_COLOUR
+    text.isShadowed = true
+    text.alignHorizontal = ui.AlignMode.CENTRE
+    text.alignVertical = ui.AlignMode.CENTRE
     
     local worn = Inventory.Find(config.Inv.WORN)
     local wornObj = worn:GetSlot(14)
@@ -426,36 +451,25 @@ local function createObjectSpriteIndicator(parent, objectId, position, width, he
         end
     end
 
-    sprite:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X + 5),
-        math.floor(position.y + OFFSET_POSITION_Y + 2)
-    )
-
-    sprite:SetSize(
-        scaleToFactor(width),
-        scaleToFactor(height)
-    )
-    sprite:MoveToFront()
-
-    local text = ui.Text.new(layer)
-    text:SetPos(
-        math.floor(position.x + 8 + OFFSET_POSITION_X),
-        math.floor(position.y + 12 + OFFSET_POSITION_Y)
-    )
-    text:SetSize(22, 15)
-    text:MoveToFront()
-    text.content = AMMO_DISPLAY_NAME or AMMO_NAME
-    text.font = SMALL_FONT
-    text.colour = FONT_COLOUR
-    text.isShadowed = true
-    text.alignHorizontal = ui.AlignMode.CENTRE
-    text.alignVertical = ui.AlignMode.CENTRE
-
     return {
         layer = layer,
         sprite = sprite,
         text = text
     }
+end
+
+local function setObjectSpriteIndicatorPosition(indicator, position)
+
+    indicator.sprite:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
+    indicator.text:SetPos(
+        math.floor(position.x + 8 + OFFSET_POSITION_X),
+        math.floor(position.y + 14 + OFFSET_POSITION_Y)
+    )
+
 end
 
 local magicUpkeepBars = {}
@@ -699,7 +713,6 @@ local CreateUI = function()
 
     local equippedAmmoSprite = createObjectSpriteIndicator(
         rangedGaugeLayer,
-        tonumber(events.playerData.ranged.activeAmmo.icon), -- DELETE THIS LINE
         GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo,
         32,
         32
@@ -882,6 +895,11 @@ local CreateUI = function()
         setAbilityIndicatorPosition(
             splitSoul_ecb,
             positions.ranged.splitSoul
+        )
+
+        setObjectSpriteIndicatorPosition(
+            equippedAmmoSprite,
+            positions.ranged.equippedAmmo
         )
 
         setAbilityIndicatorPosition(

@@ -377,7 +377,7 @@ local function handleLivingDeath(event)
 end
 
 local function handleThreadsOfFate(event)
-    if event.oldValue == 0 and event.newValue == 1 then
+    if event.newValue == 1 then
         events.playerData.necromancy.incantations.threadsOfFate.active = 1
         events.playerData.necromancy.incantations.threadsOfFate.remainingDuration = 11
         events.playerData.necromancy.incantations.threadsOfFate.cooldown = 75
@@ -390,7 +390,7 @@ local function handleThreadsOfFate(event)
 end
 
 local function handleSplitSoulIncantion(event)
-    if event.oldValue == 0 and event.newValue == 1 then
+    if event.newValue == 1 then
         events.playerData.necromancy.incantations.splitSoul.active = 1
         events.playerData.necromancy.incantations.splitSoul.remainingDuration = 34
         events.playerData.necromancy.incantations.splitSoul.cooldown = 100
@@ -403,16 +403,12 @@ local function handleSplitSoulIncantion(event)
 end
 
 local function handleRunicCharge(event)
-    if event.oldValue == 0 and event.newValue == 1 then
-        events.playerData.magic.runicCharge.active = 1
-        events.playerData.magic.runicCharge.remainingDuration = 25
-        events.playerData.magic.runicCharge.cooldown = 50
+    log("Chastised used")
+    events.playerData.magic.runicCharge.active = 1
+    events.playerData.magic.runicCharge.remainingDuration = 25
+    events.playerData.magic.runicCharge.cooldown = 50
 
-        swapGaugeToCombatStyle('magic')
-    else
-        events.playerData.magic.runicCharge.active = 0
-        events.playerData.magic.runicCharge.remainingDuration = 0
-    end
+    swapGaugeToCombatStyle('magic')
 end
 
 local function handleSunshine(event)
@@ -447,7 +443,7 @@ local function handleInstability(event)
 end
 
 local function handleTsunami(event)
-    if event.oldValue == 0 and event.newValue == 1 then
+    if event.newValue == 1 then
         events.playerData.magic.tsunami.active = 1
         events.playerData.magic.tsunami.remainingDuration = 50
         events.playerData.magic.tsunami.cooldown = 100 
@@ -582,10 +578,12 @@ end
 -- the requirements to reset the timer, the timer is reset and their stacks are set 
 -- in case they were initialized as 0 and haven't been given an opportunity to update
 -- from the relevant varp being transmitted.
-local function handleCappedStacks(event)
+local function handleGcdChecks(event)
     local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
     local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
     local deathMarkedTarget = var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_DEATH_MARK"].value
+    local animaChargedBuffActive = var.VarPlayer["COMBATV2_COOLDOWN_MAGIC_CHASTISE_END"].value
+    animaChargedBuffActive = animaChargedBuffActive >= event.newValue
 
     if events.playerData.magic.activeSpell.name == "Exsanguinate" and bloodTithe == 12 then
         events.playerData.magic.upkeep.blood_tithe.remainingDuration = 33
@@ -601,6 +599,11 @@ local function handleCappedStacks(event)
         events.playerData.necromancy.incantations.invokeDeath.active = 1
     else
         events.playerData.necromancy.incantations.invokeDeath.active = 0
+    end
+
+    if animaChargedBuffActive and events.playerData.magic.runicCharge.active == 1 then
+        events.playerData.magic.runicCharge.active = 0
+        events.playerData.magic.runicCharge.remainingDuration = 0
     end
 
 end
@@ -718,11 +721,12 @@ end
 
 -- Dispatchers - the handler functions tell you what the varp being mapped for dispatch helps keep updated.
 local VAR_TRANSMIT_HANDLERS = {
+    COMBATV2_GLOBAL_COOLDOWN_START = handleGcdChecks,
     COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_START = handleDeathGrasp,
     COMBATV2_COOLDOWN_WEAPON_NECRO_RASIAL_ARMGUARD_T95_START = handleDeathEssence,
     COMBATV2_COOLDOWN_WEAPON_NECRO_DEVOURER_ARMGUARD_T95_START = handleSoulCrush,
     COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT = handleLivingDeath,
-    COMBATV2_BUFF_MAGIC_WRACK_ACTIVE = handleRunicCharge,
+    COMBATV2_COOLDOWN_MAGIC_CHASTISE_START = handleRunicCharge,
     COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START = handleSunshine,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_END = handleSoulfire,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
@@ -737,7 +741,6 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS = handleInciteFear,
     COMBATV2_BUFF_BLOOD_TITHE_STACKS = handleBloodTithe,
     COMBATV2_BUFF_MAGIC_DEVOURER_T95_PASSIVE_STACKS = handleEssenceCorruption,
-    COMBATV2_GLOBAL_COOLDOWN_START = handleCappedStacks,
     COMBATV2_ABILITY_WEAPON_COOLDOWN_SOULFIRE_START = handleCappedEssenceCorruption,
     COMBATV2_COOLDOWN_MAGIC_COMBUST_START = handleCappedEssenceCorruption,
     COMBATV2_COOLDOWN_MAGIC_CORRUPTION_START = handleCappedEssenceCorruption,
