@@ -403,7 +403,6 @@ local function handleSplitSoulIncantion(event)
 end
 
 local function handleRunicCharge(event)
-    log("Chastised used")
     events.playerData.magic.runicCharge.active = 1
     events.playerData.magic.runicCharge.remainingDuration = 25
     events.playerData.magic.runicCharge.cooldown = 50
@@ -582,8 +581,6 @@ local function handleGcdChecks(event)
     local bloodTithe = var.VarPlayer["COMBATV2_BUFF_BLOOD_TITHE_STACKS"].value
     local glacialEmbrace = var.VarPlayer["COMBATV2_BUFF_GLACIAL_EMBRACE_STACKS"].value
     local deathMarkedTarget = var.VarPlayer["COMBATV2_TARGET_SIDE_PANEL_TARGET_DEATH_MARK"].value
-    local animaChargedBuffActive = var.VarPlayer["COMBATV2_COOLDOWN_MAGIC_CHASTISE_END"].value
-    animaChargedBuffActive = animaChargedBuffActive >= event.newValue
 
     if events.playerData.magic.activeSpell.name == "Exsanguinate" and bloodTithe == 12 then
         events.playerData.magic.upkeep.blood_tithe.remainingDuration = 33
@@ -600,12 +597,6 @@ local function handleGcdChecks(event)
     else
         events.playerData.necromancy.incantations.invokeDeath.active = 0
     end
-
-    if animaChargedBuffActive and events.playerData.magic.runicCharge.active == 1 then
-        events.playerData.magic.runicCharge.active = 0
-        events.playerData.magic.runicCharge.remainingDuration = 0
-    end
-
 end
 
 -- Similar to Exsanguinate and Incite Fear, the Roar of Awakening's Essence Corruption stacks stop transmitting at 100
@@ -659,10 +650,35 @@ local function handleChaosRoar(event)
     end
 end
 
-local function handleChaosRoarUse(event)
+local animaChargedAbilities = {
+    [45450] = true,
+    [47221] = true,
+    [14730] = true,
+    [19343] = true,
+    [19342] = true
+}
+
+local function handleLastAbilityUsed(event)
+    local lastUsedAbilityId = event.newValue
+
+    -- Chaos Roar, we check the oldValue because Chaos Roar would be
+    -- the ability used **before** the ability that consumes the buff
     if event.oldValue == 46279 then
         events.playerData.melee.chaosRoar.active = 0
         events.playerData.melee.chaosRoar.remainingDuration = 0
+    end
+
+    -- Anima Charged abilities (SW/GSW, CB/GCB, Dragon Breath)
+    -- Runic Charge is not guaranteed to be the previous ability but is consumed
+    -- when one of these 3 abilities (or their greater variants) are used
+    local animaChargedBuffActive = var.VarPlayer["COMBATV2_COOLDOWN_MAGIC_CHASTISE_END"].value
+    animaChargedBuffActive = animaChargedBuffActive >= event.newValue
+    if animaChargedBuffActive 
+        and events.playerData.magic.runicCharge.active == 1 
+        and lastUsedAbilityId and animaChargedAbilities[lastUsedAbilityId] 
+    then
+        events.playerData.magic.runicCharge.active = 0
+        events.playerData.magic.runicCharge.remainingDuration = 0
     end
 end
 
@@ -752,7 +768,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_BUFF_MELEE_METEOR_STRIKE_ADRENALINE_EFFECT = handleMeteorStrike,
     COMBATV2_BUFF_MELEE_BERSERK_ACTIVE = handleBerserk,
     COMBATV2_BUFF_MELEE_BERSERK_END = pauseBerserk,
-    COMBATV2_JUST_USED_ABILITY = handleChaosRoarUse,
+    COMBATV2_JUST_USED_ABILITY = handleLastAbilityUsed,
     COMBATV2_BUFF_NECROMANCY_THREADS_OF_FATE_ACTIVE = handleThreadsOfFate,
     COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE = handleSplitSoulIncantion,
 
@@ -784,6 +800,9 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_COOLDOWN_MAGIC_TSUNAMI_END =
         events.playerData.magic.tsunami,
+
+    COMBATV2_COOLDOWN_MAGIC_CHASTISE_END =
+        events.playerData.magic.runicCharge,
 
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_END =
         events.playerData.magic.instability,
