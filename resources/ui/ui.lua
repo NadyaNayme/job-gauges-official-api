@@ -84,7 +84,7 @@ local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bl
 local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
 local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
 
-local AMMO_ID = 2
+local AMMO_ID = 53 -- Headless Arrow by default if no ammo is detected
 local AMMO_NAME = ''
 local AMMO_DISPLAY_NAME = nil
 
