@@ -26,7 +26,7 @@ local defaults = {
         barColours = {
             bloodTitheBar = "0xFFFA2B4F",
             inciteFearBar = "0xFFB8E8F3",
-            essenceCorruptionBar = "0xFF70DC3F¢",
+            essenceCorruptionBar = "0xFF70DC3F",
             bloatBar = nil,
         }
     },
