@@ -64,8 +64,9 @@ function M.Create(page, options)
     page:AddText(L.Get("general.displayTimeAsLabel"))
     page:AddText("")
     page:AddRadioButton({
-        { text = L.Get("general.displayTimeAsOptions.preciseTime"), value = "precise-ticks" },
+        { text = L.Get("general.displayTimeAsOptions.preciseTime"), value = "precise-time" },
         { text = L.Get("general.displayTimeAsOptions.nearestSecond"), value = "nearest-second" },
+        { text = L.Get("general.displayTimeAsOptions.preciseTicks"), value = "precise-ticks" },
     }, {
         selectedValue = settings.Get("generalSettings.displayTimeAs"),
         inline = true,
@@ -205,7 +206,28 @@ function M.Create(page, options)
         end,
     })
 
+    page:AddCheckboxButton({
+        {
+            text = L.Get("general.componentEditingLabel"),
+            value = true,
+            selected = settings.Get("generalSettings.componentEditing")
+        },
+    }, {
+        onChange = function(_, _, _, selected)
+            settings.Set(
+                "generalSettings.componentEditing",
+                selected
+            )
+        end,
+    })
+
     page:AddText(L.Get("general.lockPositionHelp"))
+
+    -- TODO: Allow users to reset their settings
+    -- page:AddTitle("Restore Default Settings")
+    -- page:AddSimpleButton(id.Sprite.CHAT_V2_FILTERS_ON_8, function()
+    -- settings.Reset()
+    -- end)
 
 end
 

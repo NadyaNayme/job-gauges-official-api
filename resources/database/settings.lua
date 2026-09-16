@@ -27,12 +27,13 @@ local defaults = {
             bloodTitheBar = "0xFFFA2B4F",
             inciteFearBar = "0xFFB8E8F3",
             essenceCorruptionBar = "0xFF70DC3F",
-            bloatBar = nil,
+            bloatBar = "0xFF70DC3F",
         }
     },
 
     generalSettings = {
         positionLocked = false,
+        componentEditing = false,
         automaticSwapping = "mainhand",
         hideOutOfCombat = "combat-visible",
         displayTimeAs = "precise-ticks",
@@ -181,6 +182,7 @@ local defaults = {
             ["show-shadow-imbued"] = true,
             ["show-deaths-swiftness"] = true,
             ["show-perfect-equilibrium"] = true,
+            ["show-guthixian-runes"] = true,
         },
         offsetPosition = {
             x = 0,
@@ -311,7 +313,11 @@ local loaded = false
 
 local function mergeDefaults(saved, default)
     if type(default) ~= "table" then
-        return saved ~= nil and saved or default
+        if saved ~= nil then
+            return saved
+        end
+
+        return default
     end
 
     if type(saved) ~= "table" then
@@ -331,7 +337,6 @@ local function EnsureLoaded()
     for key, default in pairs(defaults) do
         local saved = PersistentDB:Get(key)
         values[key] = mergeDefaults(saved, default)
-        PersistentDB:Set(key, values[key])
     end
 
     loaded = true
@@ -391,7 +396,7 @@ local function notify(path, value)
 end
 
 function settings.Set(name, value)
-    EnsureLoaded()
+    --EnsureLoaded()
 
     local keys = getPathKeys(name)
     local current = values
@@ -412,13 +417,29 @@ function settings.Set(name, value)
 end
 
 function settings.Save()
-    EnsureLoaded()
+    --EnsureLoaded()
 
     for key, value in pairs(values) do
         PersistentDB:Set(key, value)
     end
 end
 
+function settings.Reset()
+    EnsureLoaded()
 
+    values = mergeDefaults({}, defaults)
+
+    for key, value in pairs(values) do
+        PersistentDB:Set(key, value)
+    end
+
+    for path, callbacks in pairs(listeners) do
+        local value = getNestedValue(values, path)
+
+        for _, callback in ipairs(callbacks) do
+            callback(value)
+        end
+    end
+end
 
 return settings

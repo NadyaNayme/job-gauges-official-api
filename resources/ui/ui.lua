@@ -43,10 +43,16 @@ end
 local OFFSET_POSITION_X = settings.Get("generalSettings.offsetPosition.x")
 local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
 local POSITION_LOCKED = settings.Get("generalSettings.positionLocked")
+local COMPONENT_EDITING = settings.Get("generalSettings.componentEditing")
 local isDraggingOverlay = false
+local draggedComponent = nil
+local dragOffsetX = 0
+local dragOffsetY = 0
 
 local ACTIVE_COMBAT_STYLE = settings.Get('playerState.combatStyle')
 local HIDE_OUT_OF_COMBAT = settings.Get('generalSettings.hideOutOfCombat')
+
+local GAUGE_COMPONENTS = {}
 
 local GAUGE_COMPONENT_POSITIONS = {
     necromancy = settings.Get("necromancySettings.componentPositions"),
@@ -73,6 +79,7 @@ local READY_COLOUR = colourToVector4(settings.Get("fontColours.readyText"))
 
 local SELECTED_GUTHIXIAN_RUNE = settings.Get("rangedSettings.selectedGuthixianRune")
 
+local SHOW_RUNES = settings.Get("rangedSettings.componentVisibility")["show-guthixian-runes"]
 local ACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.active"))
 local ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"))
 local INACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactive"))
@@ -88,17 +95,21 @@ local AMMO_ID = 53 -- Headless Arrow by default if no ammo is detected
 local AMMO_NAME = ''
 local AMMO_DISPLAY_NAME = nil
 
+local function snapToGrid(value, gridSize)
+    return math.floor(value / gridSize + 0.5) * gridSize
+end
+
 local function getRuneLayout(perfectEquilibriumActive)
     local selectedGuthixianRune = SELECTED_GUTHIXIAN_RUNE
 
     if selectedGuthixianRune == "lore" then
-        if perfectEquilibriumActive then
+        if perfectEquilibriumActive or not SHOW_RUNES then
             return RUNE_LAYOUT.NYU
         else
             return RUNE_LAYOUT.BALANCE
         end
     else
-        if perfectEquilibriumActive then
+        if perfectEquilibriumActive or not SHOW_RUNES then
             return RUNE_LAYOUT.THREE
         else
             return RUNE_LAYOUT.SEVEN
@@ -227,6 +238,10 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             shadow:SetSize(0, 0)
             sprite:SetSize(0, 0)
         end
+        if not SHOW_RUNES then
+            shadow:SetSize(0, 0)
+            sprite:SetSize(0, 0)
+        end
     end
 end
 
@@ -239,8 +254,10 @@ local abilityShadows = {}
 local fontTexts = {}
 
 local function ticksToSeconds(ticks)
-    if DISPLAY_TIME_AS == "precise-ticks" then 
+    if DISPLAY_TIME_AS == "precise-time" then 
         return ticks * 0.6
+    elseif DISPLAY_TIME_AS == "precise-ticks" then
+        return ticks
     else 
         return math.ceil(ticks * 0.6)
     end
@@ -263,7 +280,7 @@ end
 
 local function createAbilityIndicator(parent, position)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(40, 40, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(40), scaleToFactor(40), 1.0, 1.0)
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
@@ -303,12 +320,15 @@ local function createAbilityIndicator(parent, position)
         shadow = shadow,
         sprite = sprite,
         text = text,
+        width = 40,
+        height = 40,
+        position = position,
     }
 end
 
 local function createAbilitySpriteIndicator(parent, position)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(20, 20, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(20), scaleToFactor(20), 1.0, 1.0)
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
@@ -348,12 +368,15 @@ local function createAbilitySpriteIndicator(parent, position)
         shadow = shadow,
         sprite = sprite,
         text = text,
+        width = 20,
+        height = 20,
+        position = position,
     }
 end
 
 local function createSpriteIndicator(parent, position, width, height)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(20, 20, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(20), scaleToFactor(20), 1.0, 1.0)
     local sprite = ui.Sprite.new(layer)
 
     sprite:SetPos(
@@ -391,7 +414,7 @@ end
 
 local function createObjectSpriteIndicator(parent, position, width, height)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(32, 32, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(32), scaleToFactor(32), 1.0, 1.0)
 
     local sprite = ui.Sprite.new(layer)
    
@@ -555,6 +578,10 @@ local function setSpriteIndicatorPosition(indicator, position)
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
     )
+    indicator.text:SetPos(
+        math.floor(position.x + 1 + OFFSET_POSITION_X),
+        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+    )
 end
 
 local function setMagicUpkeepIndicatorPosition(indicator, position)
@@ -590,20 +617,50 @@ local CreateUI = function()
         necromancyGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.necromancy.deathGrasp
     )
+    deathGrasp.style = "necromancy"
+    deathGrasp.position = GAUGE_COMPONENT_POSITIONS.necromancy.deathGrasp
+    deathGrasp.positionKey = "deathGrasp"
+    deathGrasp.width = 40
+    deathGrasp.height = 40
+    table.insert(GAUGE_COMPONENTS, deathGrasp)
 
     local deathEssence = createAbilityIndicator(
         necromancyGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.necromancy.deathEssence
     )
+    deathEssence.style = "necromancy"
+    deathEssence.position = GAUGE_COMPONENT_POSITIONS.necromancy.deathEssence
+    deathEssence.positionKey = "deathEssence"
+    deathEssence.width = 40
+    deathEssence.height = 40
+    table.insert(GAUGE_COMPONENTS, deathEssence)
 
     local soulCrush = createAbilityIndicator(
         necromancyGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.necromancy.soulCrush
     )
+    soulCrush.style = "necromancy"
+    soulCrush.position = GAUGE_COMPONENT_POSITIONS.necromancy.soulCrush
+    soulCrush.positionKey = "soulCrush"
+    soulCrush.width = 40
+    soulCrush.height = 40
+    table.insert(GAUGE_COMPONENTS, soulCrush)
 
     local conjureUndeadArmy = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy)
     local livingDeath = createAbilityIndicator(necromancyGaugeLayer, GAUGE_COMPONENT_POSITIONS.necromancy.livingDeath)
 
+    conjureUndeadArmy.style = "necromancy"
+    conjureUndeadArmy.position = GAUGE_COMPONENT_POSITIONS.necromancy.conjureUndeadArmy
+    conjureUndeadArmy.positionKey = "conjureUndeadArmy"
+    conjureUndeadArmy.width = 40
+    conjureUndeadArmy.height = 40
+    table.insert(GAUGE_COMPONENTS, conjureUndeadArmy)
+    livingDeath.style = "necromancy"
+    livingDeath.position = GAUGE_COMPONENT_POSITIONS.necromancy.livingDeath
+    livingDeath.positionKey = "livingDeath"
+    livingDeath.width = 40
+    livingDeath.height = 40
+    table.insert(GAUGE_COMPONENTS, livingDeath)
 
     local residualSoulsStacks = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -611,6 +668,12 @@ local CreateUI = function()
         132,
         24
     )
+    residualSoulsStacks.style = "necromancy"
+    residualSoulsStacks.position = GAUGE_COMPONENT_POSITIONS.necromancy.residualSoulsStacks
+    residualSoulsStacks.positionKey = "residualSoulsStacks"
+    residualSoulsStacks.width = 132
+    residualSoulsStacks.height = 24
+    table.insert(GAUGE_COMPONENTS, residualSoulsStacks)
 
     local necrosisStacks = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -618,6 +681,12 @@ local CreateUI = function()
         132,
         20
     )
+    necrosisStacks.style = "necromancy"
+    necrosisStacks.position = GAUGE_COMPONENT_POSITIONS.necromancy.necrosisStacks
+    necrosisStacks.positionKey = "necrosisStacks"
+    necrosisStacks.width = 132
+    necrosisStacks.height = 20
+    table.insert(GAUGE_COMPONENTS, necrosisStacks)
 
     local bloat = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -625,6 +694,12 @@ local CreateUI = function()
         132,
         24
     )
+    bloat.style = "necromancy"
+    bloat.position = GAUGE_COMPONENT_POSITIONS.necromancy.bloat
+    bloat.positionKey = "bloat"
+    bloat.width = 132
+    bloat.height = 24
+    table.insert(GAUGE_COMPONENTS, bloat)
 
     local invokeDeath = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -632,6 +707,12 @@ local CreateUI = function()
         24,
         21
     )
+    invokeDeath.style = "necromancy"
+    invokeDeath.position = GAUGE_COMPONENT_POSITIONS.necromancy.invokeDeath
+    invokeDeath.positionKey = "invokeDeath"
+    invokeDeath.width = 24
+    invokeDeath.height = 21
+    table.insert(GAUGE_COMPONENTS, invokeDeath)
 
     local threadsOfFate = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -639,6 +720,12 @@ local CreateUI = function()
         24,
         21
     )
+    threadsOfFate.style = "necromancy"
+    threadsOfFate.position = GAUGE_COMPONENT_POSITIONS.necromancy.threadsOfFate
+    threadsOfFate.positionKey = "threadsOfFate"
+    threadsOfFate.width = 24
+    threadsOfFate.height = 21
+    table.insert(GAUGE_COMPONENTS, threadsOfFate)
 
     local splitSoul = createSpriteIndicator(
         necromancyGaugeLayer,
@@ -646,6 +733,12 @@ local CreateUI = function()
         24,
         21
     )
+    splitSoul.style = "necromancy"
+    splitSoul.position = GAUGE_COMPONENT_POSITIONS.necromancy.splitSoul
+    splitSoul.positionKey = "splitSoul"
+    splitSoul.width = 24
+    splitSoul.height = 21
+    table.insert(GAUGE_COMPONENTS, splitSoul)
 
   -- Magic Overlay
     local magicGaugeLayer = createGaugeLayer(jobGaugeLayer)
@@ -653,26 +746,56 @@ local CreateUI = function()
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.tsunami
     )
+    tsunami.style = "magic"
+    tsunami.position = GAUGE_COMPONENT_POSITIONS.magic.tsunami
+    tsunami.positionKey = "tsunami"
+    tsunami.width = 40
+    tsunami.height = 40
+    table.insert(GAUGE_COMPONENTS, tsunami)
 
     local sunshine = createAbilityIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.sunshine
     )
+    sunshine.style = "magic"
+    sunshine.position = GAUGE_COMPONENT_POSITIONS.magic.sunshine
+    sunshine.positionKey = "sunshine"
+    sunshine.width = 40
+    sunshine.height = 40
+    table.insert(GAUGE_COMPONENTS, sunshine)
 
     local runicCharge = createAbilityIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.runicCharge
     )
+    runicCharge.style = "magic"
+    runicCharge.position = GAUGE_COMPONENT_POSITIONS.magic.runicCharge
+    runicCharge.positionKey = "runicCharge"
+    runicCharge.width = 40
+    runicCharge.height = 40
+    table.insert(GAUGE_COMPONENTS, runicCharge)
 
     local soulfire = createAbilityIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.soulfire
     )
+    soulfire.style = "magic"
+    soulfire.position = GAUGE_COMPONENT_POSITIONS.magic.soulfire
+    soulfire.positionKey = "soulfire"
+    soulfire.width = 40
+    soulfire.height = 40
+    table.insert(GAUGE_COMPONENTS, soulfire)
 
     local instability = createAbilityIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.instability
     )
+    instability.style = "magic"
+    instability.position = GAUGE_COMPONENT_POSITIONS.magic.instability
+    instability.positionKey = "instability"
+    instability.width = 40
+    instability.height = 40
+    table.insert(GAUGE_COMPONENTS, instability)
 
     local activeSpellSprite = createSpriteIndicator(
         magicGaugeLayer,
@@ -680,24 +803,48 @@ local CreateUI = function()
         24,
         21
     )
+    activeSpellSprite.style = "magic"
+    activeSpellSprite.position = GAUGE_COMPONENT_POSITIONS.magic.activeSpell
+    activeSpellSprite.positionKey = "activeSpellSprite"
+    activeSpellSprite.width = 24
+    activeSpellSprite.height = 21
+    table.insert(GAUGE_COMPONENTS, activeSpellSprite)
 
     local bloodTithe = createMagicUpkeepIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.bloodTithe,
         "bloodTithe"
     )
+    bloodTithe.style = "magic"
+    bloodTithe.position = GAUGE_COMPONENT_POSITIONS.magic.bloodTithe
+    bloodTithe.positionKey = "bloodTithe"
+    bloodTithe.width = 90
+    bloodTithe.height = 24
+    table.insert(GAUGE_COMPONENTS, bloodTithe)
 
     local inciteFear = createMagicUpkeepIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.inciteFear,
         "inciteFear"
     )
+    inciteFear.style = "magic"
+    inciteFear.position = GAUGE_COMPONENT_POSITIONS.magic.inciteFear
+    inciteFear.positionKey = "inciteFear"
+    inciteFear.width = 90
+    inciteFear.height = 24
+    table.insert(GAUGE_COMPONENTS, inciteFear)
 
     local essenceCorruption = createMagicUpkeepIndicator(
         magicGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.magic.essenceCorruption,
         "essenceCorruption"
     )
+    essenceCorruption.style = "magic"
+    essenceCorruption.position = GAUGE_COMPONENT_POSITIONS.magic.essenceCorruption
+    essenceCorruption.positionKey = "essenceCorruption"
+    essenceCorruption.width = 90
+    essenceCorruption.height = 24
+    table.insert(GAUGE_COMPONENTS, essenceCorruption)
 
     -- Ranged Overlay
     local rangedGaugeLayer = createGaugeLayer(jobGaugeLayer)
@@ -705,11 +852,23 @@ local CreateUI = function()
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.deathsSwiftness
     )
+    deathsSwiftness.style = "ranged"
+    deathsSwiftness.position = GAUGE_COMPONENT_POSITIONS.ranged.deathsSwiftness
+    deathsSwiftness.positionKey = "deathsSwiftness"
+    deathsSwiftness.width = 40
+    deathsSwiftness.height = 40
+    table.insert(GAUGE_COMPONENTS, deathsSwiftness)
 
     local crystalRain = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.crystalRain
     )
+    crystalRain.style = "ranged"
+    crystalRain.position = GAUGE_COMPONENT_POSITIONS.ranged.crystalRain
+    crystalRain.positionKey = "crystalRain"
+    crystalRain.width = 40
+    crystalRain.height = 40
+    table.insert(GAUGE_COMPONENTS, crystalRain)
 
     local equippedAmmoSprite = createObjectSpriteIndicator(
         rangedGaugeLayer,
@@ -717,28 +876,64 @@ local CreateUI = function()
         32,
         32
     )
+    equippedAmmoSprite.style = "ranged"
+    equippedAmmoSprite.position = GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo
+    equippedAmmoSprite.positionKey = "equippedAmmoSprite"
+    equippedAmmoSprite.width = 32
+    equippedAmmoSprite.height = 32
+    table.insert(GAUGE_COMPONENTS, equippedAmmoSprite)
 
     local splitSoul_ecb = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.splitSoul
     )
+    splitSoul_ecb.style = "ranged"
+    splitSoul_ecb.position = GAUGE_COMPONENT_POSITIONS.ranged.splitSoul
+    splitSoul_ecb.positionKey = "splitSoul_ecb"
+    splitSoul_ecb.width = 40
+    splitSoul_ecb.height = 40
+    table.insert(GAUGE_COMPONENTS, splitSoul_ecb)
 
     local searingWinds = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.searingWinds
     )
+    searingWinds.style = "ranged"
+    searingWinds.position = GAUGE_COMPONENT_POSITIONS.ranged.searingWinds
+    searingWinds.positionKey = "searingWinds"
+    searingWinds.width = 40
+    searingWinds.height = 40
+    table.insert(GAUGE_COMPONENTS, searingWinds)
 
     local shadowImbued = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.shadowImbued
     )
+    shadowImbued.style = "ranged"
+    shadowImbued.position = GAUGE_COMPONENT_POSITIONS.ranged.shadowImbued
+    shadowImbued.positionKey = "shadowImbued"
+    shadowImbued.width = 40
+    shadowImbued.height = 40
+    table.insert(GAUGE_COMPONENTS, shadowImbued)
 
     local perfectEquilibrium = createAbilityIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.perfectEquilibrium
     )
+    perfectEquilibrium.style = "ranged"
+    perfectEquilibrium.position = GAUGE_COMPONENT_POSITIONS.ranged.perfectEquilibrium
+    perfectEquilibrium.positionKey = "perfectEquilibrium"
+    perfectEquilibrium.width = 40
+    perfectEquilibrium.height = 40
+    table.insert(GAUGE_COMPONENTS, perfectEquilibrium)
 
     createBOLGLetters(rangedGaugeLayer)
+    bolgLetters.style = "ranged"
+    bolgLetters.position = GAUGE_COMPONENT_POSITIONS.ranged.guthixianRunes
+    bolgLetters.positionKey = "bolgLetters"
+    bolgLetters.width = 120
+    bolgLetters.height = 40
+    table.insert(GAUGE_COMPONENTS, bolgLetters)
 
     local perfectEquilibriumStacksText = ui.Text.new(rangedGaugeLayer)
     perfectEquilibriumStacksText:SetSize(22, 24)
@@ -758,31 +953,67 @@ local CreateUI = function()
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.blackhole
     )
+    blackhole.style = "melee"
+    blackhole.position = GAUGE_COMPONENT_POSITIONS.melee.blackhole
+    blackhole.positionKey = "blackhole"
+    blackhole.width = 40
+    blackhole.height = 40
+    table.insert(GAUGE_COMPONENTS, blackhole)
 
     local igneousShowdown = createAbilityIndicator(
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.igneousShowdown
     )
+    igneousShowdown.style = "melee"
+    igneousShowdown.position = GAUGE_COMPONENT_POSITIONS.melee.igneousShowdown
+    igneousShowdown.positionKey = "igneousShowdown"
+    igneousShowdown.width = 40
+    igneousShowdown.height = 40
+    table.insert(GAUGE_COMPONENTS, igneousShowdown)
 
     local bloodlust = createAbilitySpriteIndicator(
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.bloodlust
     )
+    bloodlust.style = "melee"
+    bloodlust.position = GAUGE_COMPONENT_POSITIONS.melee.bloodlust
+    bloodlust.positionKey = "bloodlust"
+    bloodlust.width = 20
+    bloodlust.height = 20
+    table.insert(GAUGE_COMPONENTS, bloodlust)
 
     local chaosRoar = createAbilityIndicator(
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.chaosRoar
     )
+    chaosRoar.style = "melee"
+    chaosRoar.position = GAUGE_COMPONENT_POSITIONS.melee.chaosRoar
+    chaosRoar.positionKey = "chaosRoar"
+    chaosRoar.width = 40
+    chaosRoar.height = 40
+    table.insert(GAUGE_COMPONENTS, chaosRoar)
 
     local meteorStrike = createAbilityIndicator(
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.meteorStrike
     )
+    meteorStrike.style = "melee"
+    meteorStrike.position = GAUGE_COMPONENT_POSITIONS.melee.meteorStrike
+    meteorStrike.positionKey = "meteorStrike"
+    meteorStrike.width = 40
+    meteorStrike.height = 40
+    table.insert(GAUGE_COMPONENTS, meteorStrike)
 
     local berserk = createAbilityIndicator(
         meleeGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.melee.berserk
     )
+    berserk.style = "melee"
+    berserk.position = GAUGE_COMPONENT_POSITIONS.melee.berserk
+    berserk.positionKey = "berserk"
+    berserk.width = 40
+    berserk.height = 40
+    table.insert(GAUGE_COMPONENTS, berserk)
 
     local function updateOverlayPositions()
         local positions = GAUGE_COMPONENT_POSITIONS
@@ -955,11 +1186,42 @@ local CreateUI = function()
         local perfectEquilibriumActive = events.playerData.ranged.perfectEquilibrium.active == 1
         local layout = getRuneLayout(perfectEquilibriumActive)
 
-        perfectEquilibriumStacksText:SetPos(
-            math.floor(layout.stacksText.x + OFFSET_POSITION_X),
-            math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
-        )
+    perfectEquilibriumStacksText:SetPos(
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - 24),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - 50)
+    )
 
+    end
+
+    local function getHoveredComponent()
+        if not Mouse.IsAvailable() then
+            return nil
+        end
+
+        local mousePosition = Mouse.GetPosition()
+        local combatStyle = events.playerData.combatStyle
+
+        for _, component in ipairs(GAUGE_COMPONENTS) do
+            if component.style == combatStyle then
+                local position = component.position
+
+                local x = position.x + OFFSET_POSITION_X
+                local y = position.y + OFFSET_POSITION_Y
+
+                local width = scaleToFactor(component.width)
+                local height = scaleToFactor(component.height)
+
+                if mousePosition.x >= x
+                    and mousePosition.x <= x + width
+                    and mousePosition.y >= y
+                    and mousePosition.y <= y + height
+                then
+                    return component
+                end
+            end
+        end
+
+        return nil
     end
 
   local settingsBox = prettyui.Window.new(gameArea, {
@@ -1898,8 +2160,8 @@ local function updateOverlays()
     local layout = getRuneLayout(perfectEquilibriumActive)
 
     perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y)
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - 24),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - 50)
     )
 
 
@@ -1978,7 +2240,11 @@ local function updateOverlays()
         chaosRoar.layer.hidden = false
         if melee.chaosRoar.active == 1
             then 
-                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
+                setAbilityIndicatorSprite(
+                    chaosRoar,
+                    overlaySprites.melee.chaos_roar.active,
+                    overlaySprites.utility.shadow
+                )
                 if ticksToSeconds(melee.chaosRoar.remainingDuration) == 0.0 then
                     melee.chaosRoar.active = 0
                 end
@@ -1986,12 +2252,20 @@ local function updateOverlays()
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.remainingDuration))
                 chaosRoar.text.colour = FONT_COLOUR
             elseif melee.chaosRoar.cooldown >= 1 then 
-                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.inactive
+                setAbilityIndicatorSprite(
+                    chaosRoar,
+                    overlaySprites.melee.chaos_roar.inactive,
+                    overlaySprites.utility.shadow
+                )
                 chaosRoar.text.font = LARGE_FONT
                 chaosRoar.text.content = tostring(ticksToSeconds(melee.chaosRoar.cooldown))
                 chaosRoar.text.colour = COOLDOWN_COLOUR
             else
-                chaosRoar.sprite.sprite = overlaySprites.melee.chaos_roar.active
+                setAbilityIndicatorSprite(
+                    chaosRoar,
+                    overlaySprites.melee.chaos_roar.active,
+                    overlaySprites.utility.shadow
+                )
                 chaosRoar.text.font = SMALL_FONT
                 chaosRoar.text.content = READY_TEXT
                 chaosRoar.text.colour = READY_COLOUR
@@ -2004,7 +2278,11 @@ local function updateOverlays()
         meteorStrike.layer.hidden = false
         if melee.meteorStrike.active == 1
             then 
-                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
+                setAbilityIndicatorSprite(
+                    meteorStrike,
+                    overlaySprites.melee.meteor_strike.active,
+                    overlaySprites.utility.shadow
+                )
                 if ticksToSeconds(melee.meteorStrike.remainingDuration) == 0.0 then
                     melee.meteorStrike.active = 0
                 end
@@ -2012,12 +2290,20 @@ local function updateOverlays()
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.remainingDuration))
                 meteorStrike.text.colour = FONT_COLOUR
             elseif melee.meteorStrike.cooldown >= 1 then 
-                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.inactive
+                setAbilityIndicatorSprite(
+                    meteorStrike,
+                    overlaySprites.melee.meteor_strike.inactive,
+                    overlaySprites.utility.shadow
+                )
                 meteorStrike.text.font = LARGE_FONT
                 meteorStrike.text.content = tostring(ticksToSeconds(melee.meteorStrike.cooldown))
                 meteorStrike.text.colour = COOLDOWN_COLOUR
             else
-                meteorStrike.sprite.sprite = overlaySprites.melee.meteor_strike.active
+                setAbilityIndicatorSprite(
+                    meteorStrike,
+                    overlaySprites.melee.meteor_strike.active,
+                    overlaySprites.utility.shadow
+                )
                 meteorStrike.text.font = SMALL_FONT
                 meteorStrike.text.content = READY_TEXT
                 meteorStrike.text.colour = READY_COLOUR
@@ -2069,7 +2355,7 @@ local function updateOverlays()
     -- that is clicked and begins repositioning until you press a keybind to stop it.
     -- But I prefer being able to unlock it and have it be freely movable.
     -- I'll have to see which users prefer.
-    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED then
+    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED and not COMPONENT_EDITING then
         local shiftDown = Keyboard.IsShiftDown()
         local ctrlDown = Keyboard.IsControlDown()
         
@@ -2087,6 +2373,65 @@ local function updateOverlays()
                 settings.Set("generalSettings.offsetPosition.x", OFFSET_POSITION_X)
                 settings.Set("generalSettings.offsetPosition.y", OFFSET_POSITION_Y)
             end
+        end
+    end
+
+    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED and COMPONENT_EDITING then
+        local shiftDown = Keyboard.IsShiftDown()
+        local ctrlDown = Keyboard.IsControlDown()
+        local altDown = Keyboard.IsAltDown()
+
+        if shiftDown and ctrlDown then
+            local mousePositionXY = Mouse.GetPosition()
+
+            if draggedComponent == nil then
+                draggedComponent = getHoveredComponent()
+
+                if draggedComponent then
+                    local position = draggedComponent.position
+
+                    local componentX = position.x + OFFSET_POSITION_X
+                    local componentY = position.y + OFFSET_POSITION_Y
+
+                    dragOffsetX = mousePositionXY.x - componentX
+                    dragOffsetY = mousePositionXY.y - componentY
+                end
+            end
+
+            if draggedComponent then
+                local position = draggedComponent.position
+
+                local newX = mousePositionXY.x - OFFSET_POSITION_X - dragOffsetX
+                local newY = mousePositionXY.y - OFFSET_POSITION_Y - dragOffsetY
+
+                if altDown then
+                    newX = snapToGrid(newX, 10)
+                    newY = snapToGrid(newY, 10)
+                end
+
+                position.x = newX
+                position.y = newY
+
+                updateOverlayPositions()
+            end
+        elseif draggedComponent then
+            local position = draggedComponent.position
+
+            settings.Set(
+                draggedComponent.style .. "Settings.componentPositions." ..
+                draggedComponent.positionKey .. ".x",
+                position.x
+            )
+
+            settings.Set(
+                draggedComponent.style .. "Settings.componentPositions." ..
+                draggedComponent.positionKey .. ".y",
+                position.y
+            )
+
+            draggedComponent = nil
+            dragOffsetX = 0
+            dragOffsetY = 0
         end
     end
 
@@ -2143,6 +2488,13 @@ settings.Subscribe(
     "generalSettings.positionLocked",
     function(value)
         POSITION_LOCKED = value
+    end
+)
+
+settings.Subscribe(
+    "generalSettings.componentEditing",
+    function(value)
+        COMPONENT_EDITING = value
     end
 )
 
@@ -2311,6 +2663,13 @@ settings.Subscribe(
     "rangedSettings.selectedGuthixianRune",
     function(value)
         SELECTED_GUTHIXIAN_RUNE = value
+    end
+)
+
+settings.Subscribe(
+    "rangedSettings.componentVisibility.show-guthixian-runes",
+    function(value)
+        SHOW_RUNES = value
     end
 )
 

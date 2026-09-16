@@ -44,6 +44,11 @@ function M.Create(page, options)
             value = "show-perfect-equilibrium",
             selected = rangedComponentSettings["show-perfect-equilibrium"]
         },
+        {
+            text = L.Get("ranged.guthixianRunes"),
+            value = "show-guthixian-runes",
+            selected = rangedComponentSettings["show-guthixian-runes"]
+        },
 
 
     }, {
@@ -85,7 +90,7 @@ function M.Create(page, options)
         { label = "X", id = 24 },
         { label = "Y", id = 25 },
         { label = "Z", id = 26 },
-        { label = "???", id = 27 },
+        { label = "???", id = 27 }
     },
     selectedID = settings.Get("rangedSettings.selectedGuthixianRuneId") or 27,
     onChange = function(_, id, label)

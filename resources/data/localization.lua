@@ -21,10 +21,11 @@ local localization = {
                 yes = "Yes",
                 no = "No",
             },
-            displayTimeAsLabel = "Show precise time or round up to the nearest second?",
+            displayTimeAsLabel = "How should time be displayed?",
             displayTimeAsOptions = {
-                preciseTime = "Precise Time (16.8)",
-                nearestSecond = "Nearest Second (17)"
+                preciseTime = "Precise (16.8)",
+                nearestSecond = "Rounded (17)",
+                preciseTicks = "Game Ticks (28)"
             },
             readyTextLabel = "Change 'Ready' text (set blank to hide)",
             readyTextPlaceholder = "Ready text",
@@ -54,8 +55,9 @@ local localization = {
                 acceptButton = "Set Colour",
             },
             positionSettingsTitle = "Position Settings",
-            lockPositionLabel = "Lock Position",
-            lockPositionHelp = "Hold Shift+Ctrl while position is unlocked to reposition your gauges"
+            lockPositionLabel = "Lock Position - Prevents repositioning",
+            componentEditingLabel = "Advanced Positioning - Allow moving individual components",
+            lockPositionHelp = "Hold Shift+Ctrl to reposition <br>(While hovering a component if using Advanced Positioning)"
         },
         necromancy = {
             gaugeComponentsTitle = "Necromancy Gauge Components",
@@ -128,6 +130,7 @@ local localization = {
             shadowImbued = "Show Shadow Imbued (Imbue: Shadows)",
             deathsSwiftness = "Show Death's Swiftness",
             perfectEquilibrium = "Show Perfect Equilibrium",
+            guthixianRunes = "Show Guthixian Runes",
             guthixianRuneLabel = "Guthixian Rune for Perfect Equilibrium Stacks",
             guthixianRunesColoursTitle = "Guthixian Runes Colours",
             activeColours = {
