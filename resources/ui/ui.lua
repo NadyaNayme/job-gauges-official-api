@@ -1,5 +1,6 @@
 local settings = require("resources/database/settings")
 local events = require("resources/events/events")
+local InterfaceMouse = require("resources/ui/mouse")
 local sprites = require("resources/ui/sprites")
 local guthixian = require("resources/data/guthixian_runes")
 local ammoNames = require("resources/data/ammo")
@@ -1285,7 +1286,10 @@ local CreateUI = function()
             return nil
         end
 
-        local mousePosition = Mouse.GetPosition()
+        local mousePosition = InterfaceMouse.GetPosition()
+        if not mousePosition then
+            return nil
+        end
         local combatStyle = events.playerData.combatStyle
 
         for _, component in ipairs(GAUGE_COMPONENTS) do
@@ -2451,10 +2455,13 @@ local function updateOverlays()
         if shiftDown and ctrlDown then
             isDraggingOverlay = true
             
-            local mousePositionXY = Mouse.GetPosition()
-            OFFSET_POSITION_X = mousePositionXY.x
-            OFFSET_POSITION_Y = mousePositionXY.y
-            updateOverlayPositions()
+            local mousePositionXY = InterfaceMouse.GetPosition()
+
+            if mousePositionXY then
+                OFFSET_POSITION_X = mousePositionXY.x
+                OFFSET_POSITION_Y = mousePositionXY.y
+                updateOverlayPositions()
+            end
         else
             if isDraggingOverlay then
                 isDraggingOverlay = false
@@ -2471,37 +2478,39 @@ local function updateOverlays()
         local altDown = Keyboard.IsAltDown()
 
         if shiftDown and ctrlDown then
-            local mousePositionXY = Mouse.GetPosition()
+            local mousePositionXY = InterfaceMouse.GetPosition()
 
-            if draggedComponent == nil then
-                draggedComponent = getHoveredComponent()
+            if mousePositionXY then
+                if draggedComponent == nil then
+                    draggedComponent = getHoveredComponent()
+
+                    if draggedComponent then
+                        local position = draggedComponent.position
+
+                        local componentX = position.x + OFFSET_POSITION_X
+                        local componentY = position.y + OFFSET_POSITION_Y
+
+                        dragOffsetX = mousePositionXY.x - componentX
+                        dragOffsetY = mousePositionXY.y - componentY
+                    end
+                end
 
                 if draggedComponent then
                     local position = draggedComponent.position
 
-                    local componentX = position.x + OFFSET_POSITION_X
-                    local componentY = position.y + OFFSET_POSITION_Y
+                    local newX = mousePositionXY.x - OFFSET_POSITION_X - dragOffsetX
+                    local newY = mousePositionXY.y - OFFSET_POSITION_Y - dragOffsetY
 
-                    dragOffsetX = mousePositionXY.x - componentX
-                    dragOffsetY = mousePositionXY.y - componentY
+                    if altDown then
+                        newX = snapToGrid(newX, 10)
+                        newY = snapToGrid(newY, 10)
+                    end
+
+                    position.x = newX
+                    position.y = newY
+
+                    updateOverlayPositions()
                 end
-            end
-
-            if draggedComponent then
-                local position = draggedComponent.position
-
-                local newX = mousePositionXY.x - OFFSET_POSITION_X - dragOffsetX
-                local newY = mousePositionXY.y - OFFSET_POSITION_Y - dragOffsetY
-
-                if altDown then
-                    newX = snapToGrid(newX, 10)
-                    newY = snapToGrid(newY, 10)
-                end
-
-                position.x = newX
-                position.y = newY
-
-                updateOverlayPositions()
             end
         elseif draggedComponent then
             local position = draggedComponent.position
@@ -2774,6 +2783,12 @@ settings.Subscribe(
 )
 
   return {
+    Destroy = function()
+      if settingsView then
+        settingsView:Destroy()
+        settingsView = nil
+      end
+    end,
   }
 end
 
