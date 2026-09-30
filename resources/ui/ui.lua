@@ -63,8 +63,8 @@ local GAUGE_COMPONENT_POSITIONS = {
 
 local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT")
 
-local READY_TEXT = settings.Get("generalSettings.readyText")
-local SPRITE_READY_TEXT = settings.Get("generalSettings.spriteReadyText")
+local READY_TEXT = tostring(settings.Get("generalSettings.readyText"))
+local SPRITE_READY_TEXT = tostring(settings.Get("generalSettings.spriteReadyText"))
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
 local UI_SCALE = settings.Get("generalSettings.scale")
 
@@ -87,6 +87,7 @@ local INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.rune
 
 local RUNE_SHADOW_OFFSET = 1
 
+local BACKDROP_COLOUR = colourToVector4(settings.Get("uiColours.backdropColour"))
 local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
 local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
 local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
@@ -250,6 +251,7 @@ local ABILITY_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.shadowColo
 local ABILITY_SHADOW_SIZE = 42
 local ABILITY_SHADOW_OFFSET = -1
 local abilityShadows = {}
+local backdrops = {}
 
 local fontTexts = {}
 
@@ -281,6 +283,16 @@ end
 local function createAbilityIndicator(parent, position)
     local layer = ui.Layer.new(parent)
     layer:SetSize(scaleToFactor(40), scaleToFactor(40), 1.0, 1.0)
+
+    local backdrop = ui.Rectangle.new(layer)
+    backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+    backdrop.colour = BACKDROP_COLOUR
+    backdrop.fill = true
+    backdrop.outlineThickness = -4
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
@@ -314,9 +326,11 @@ local function createAbilityIndicator(parent, position)
 
     table.insert(fontTexts, text)
     table.insert(abilityShadows, shadow)
+    table.insert(backdrops, backdrop)
 
     return {
         layer = layer,
+        backdrop = backdrop,
         shadow = shadow,
         sprite = sprite,
         text = text,
@@ -329,6 +343,16 @@ end
 local function createAbilitySpriteIndicator(parent, position)
     local layer = ui.Layer.new(parent)
     layer:SetSize(scaleToFactor(20), scaleToFactor(20), 1.0, 1.0)
+
+    local backdrop = ui.Rectangle.new(layer)
+    backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+    backdrop.colour = BACKDROP_COLOUR
+    backdrop.fill = true
+    backdrop.outlineThickness = -4
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
@@ -362,9 +386,11 @@ local function createAbilitySpriteIndicator(parent, position)
 
     table.insert(fontTexts, text)
     table.insert(abilityShadows, shadow)
+    table.insert(backdrops, backdrop)
 
     return {
         layer = layer,
+        backdrop = backdrop,
         shadow = shadow,
         sprite = sprite,
         text = text,
@@ -377,8 +403,19 @@ end
 local function createSpriteIndicator(parent, position, width, height)
     local layer = ui.Layer.new(parent)
     layer:SetSize(scaleToFactor(20), scaleToFactor(20), 1.0, 1.0)
-    local sprite = ui.Sprite.new(layer)
 
+    local backdrop = ui.Rectangle.new(layer)
+    backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    backdrop:SetSize(scaleToFactor(width), scaleToFactor(height))
+    backdrop.colour = BACKDROP_COLOUR
+    backdrop.fill = true
+    backdrop.outlineThickness = -4
+    table.insert(backdrops, backdrop)
+
+    local sprite = ui.Sprite.new(layer)
     sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
@@ -407,6 +444,7 @@ local function createSpriteIndicator(parent, position, width, height)
 
     return {
         layer = layer,
+        backdrop = backdrop,
         sprite = sprite,
         text = text
     }
@@ -416,8 +454,19 @@ local function createObjectSpriteIndicator(parent, position, width, height)
     local layer = ui.Layer.new(parent)
     layer:SetSize(scaleToFactor(32), scaleToFactor(32), 1.0, 1.0)
 
-    local sprite = ui.Sprite.new(layer)
-   
+
+    local backdrop = ui.Rectangle.new(layer)
+    backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    backdrop:SetSize(scaleToFactor(width), scaleToFactor(height))
+    backdrop.colour = BACKDROP_COLOUR
+    backdrop.fill = true
+    backdrop.outlineThickness = -4
+    table.insert(backdrops, backdrop)
+
+    local sprite = ui.Sprite.new(layer)   
     sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X + 5),
         math.floor(position.y + OFFSET_POSITION_Y + 2)
@@ -476,12 +525,18 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     return {
         layer = layer,
+        backdrop = backdrop,
         sprite = sprite,
         text = text
     }
 end
 
 local function setObjectSpriteIndicatorPosition(indicator, position)
+
+    indicator.backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
 
     indicator.sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
@@ -499,6 +554,17 @@ local magicUpkeepBars = {}
 local function createMagicUpkeepIndicator(parent, position, name)
     local layer = ui.Layer.new(parent)
     layer:SetSize(90, 24, 1.0, 1.0)
+
+    local backdrop = ui.Rectangle.new(layer)
+    backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+    backdrop:SetSize(scaleToFactor(90), scaleToFactor(24))
+    backdrop.colour = BACKDROP_COLOUR
+    backdrop.fill = true
+    backdrop.outlineThickness = -4
+    table.insert(backdrops, backdrop)
 
     local text = ui.Text.new(layer)
     text:SetPos(
@@ -529,6 +595,7 @@ local function createMagicUpkeepIndicator(parent, position, name)
 
     magicUpkeepBars[name] = {
         layer = layer,
+        backdrop = backdrop,
         text = text,
         sprite = sprite,
         shadow = shadow,
@@ -538,6 +605,11 @@ local function createMagicUpkeepIndicator(parent, position, name)
 end
 
 local function setAbilityIndicatorPosition(indicator, position)
+    indicator.backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
     indicator.shadow:SetPos(
         math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
         math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
@@ -556,6 +628,11 @@ local function setAbilityIndicatorPosition(indicator, position)
 end
 
 local function setAbilitySpriteIndicatorPosition(indicator, position)
+    indicator.backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
     indicator.shadow:SetPos(
         math.floor(position.x + OFFSET_POSITION_X + ABILITY_SHADOW_OFFSET),
         math.floor(position.y + OFFSET_POSITION_Y + ABILITY_SHADOW_OFFSET)
@@ -574,6 +651,11 @@ local function setAbilitySpriteIndicatorPosition(indicator, position)
 end
 
 local function setSpriteIndicatorPosition(indicator, position)
+    indicator.backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
     indicator.sprite:SetPos(
         math.floor(position.x + OFFSET_POSITION_X),
         math.floor(position.y + OFFSET_POSITION_Y)
@@ -585,6 +667,11 @@ local function setSpriteIndicatorPosition(indicator, position)
 end
 
 local function setMagicUpkeepIndicatorPosition(indicator, position)
+    indicator.backdrop:SetPos(
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
+    )
+
     indicator.text:SetPos(
         math.floor(position.x + 9 + OFFSET_POSITION_X),
         math.floor(position.y - 4 + OFFSET_POSITION_Y)
@@ -1202,7 +1289,7 @@ local CreateUI = function()
         local combatStyle = events.playerData.combatStyle
 
         for _, component in ipairs(GAUGE_COMPONENTS) do
-            if component.style == combatStyle then
+            if component.style == combatStyle or combatStyle == "all" then
                 local position = component.position
 
                 local x = position.x + OFFSET_POSITION_X
@@ -1224,23 +1311,18 @@ local CreateUI = function()
         return nil
     end
 
-  local settingsBox = prettyui.Window.new(gameArea, {
-    title = "Job Gauges by Nyu",
-    x = 50,
-    y = 250,
-    width = 625,
-    height = 885,
-  })
+local settingsView
+Event.SettingsLayerReady.Subscribe("openSettingsWindow", function(event)
+     if settingsView then settingsView:Destroy() end
 
-  settingsBox.root.hidden = true
-  local itemRibbon = prettyui.RibbonBar.Register({
-    id = "job-gauges",
-    icon = id.Sprite.RS3_ICON_MENU_HERO,
-    tooltip = "Open Job Gauges Settings",
-    onClick = function(handle, active) settingsBox.root.hidden = not active end,
-  })
+     local parent = event.component
 
-  local tabs = settingsBox:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged" }, { height = -20, heightAnchor = 1.0 })
+    settingsView = prettyui.SimpleView.new(parent, {
+        width = parent.width,
+        height = parent.height,
+    })
+
+  local tabs = settingsView:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged" }, { height = -20, heightAnchor = 1.0 })
 
   local generalPage = tabs:GetPage(1)
   local necromancyPage = tabs:GetPage(2)
@@ -1272,6 +1354,7 @@ local CreateUI = function()
             )
         end,
     })
+end)
 
 local function updateGaugeVisibility()
     necromancyGaugeLayer.hidden = true
@@ -1291,6 +1374,11 @@ local function updateGaugeVisibility()
         rangedGaugeLayer.hidden = false
 
     elseif combatStyle == "melee" then
+        meleeGaugeLayer.hidden = false
+    elseif combatStyle == "all" then
+        necromancyGaugeLayer.hidden = false
+        magicGaugeLayer.hidden = false
+        rangedGaugeLayer.hidden = false
         meleeGaugeLayer.hidden = false
     end
 end
@@ -1408,6 +1496,7 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-death-essence"] then 
         deathEssence.layer.hidden = false
+        
         if necromancy.deathEssence.active == 1
             then 
                 deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
@@ -2594,6 +2683,17 @@ settings.Subscribe(
 )
 
 settings.Subscribe(
+    "uiColours.backdropColour",
+    function(colour)
+        BACKDROP_COLOUR = colourToVector4(colour)
+
+        for _, backdrop in ipairs(backdrops) do
+            backdrop.colour = BACKDROP_COLOUR
+        end
+    end
+)
+
+settings.Subscribe(
     "uiColours.shadowColour",
     function(colour)
         ABILITY_SHADOW_COLOUR = colourToVector4(colour)
@@ -2674,13 +2774,6 @@ settings.Subscribe(
 )
 
   return {
-    Destroy = function()
-      if settingsBox then
-        settingsBox:Destroy()
-        settingsBox = nil
-      end
-      itemRibbon:Destroy()
-    end,
   }
 end
 

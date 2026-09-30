@@ -79,7 +79,7 @@ function M.Create(page, options)
         text = settings.Get("generalSettings.spriteReadyText") or "R",
         placeholder = "Ready text",
         maxLength = 5,
-        onSubmit = function(_, text)
+        onChange = function(_, _, text)
             settings.Set("generalSettings.spriteReadyText", text)
         end
     })

@@ -44,6 +44,10 @@ function M.Create(page, options)
         events.playerData.combatStyle = 'ranged'
         settings.Set('playerState.combatStyle', 'ranged')
     end, { inline = true})
+    page:AddSimpleButton(L.Get("general.combatStyleNames.all"), function(self, _)
+        events.playerData.combatStyle = 'all'
+        settings.Set('playerState.combatStyle', 'all')
+    end, { inline = true})
 
     page:AddTitle(L.Get("general.displaySettingsTitle"))
 
@@ -81,7 +85,7 @@ function M.Create(page, options)
         text = settings.Get("generalSettings.readyText") or "Ready",
         placeholder = L.Get("general.readyTextPlaceholder"),
         maxLength = 5,
-        onSubmit = function(_, text)
+        onChange = function(_, _, text)
             settings.Set("generalSettings.readyText", text)
         end
     })
@@ -167,6 +171,31 @@ function M.Create(page, options)
         inline = false,
     })
 
+    page:AddColourPicker({
+        value = settings.Get("uiColours.backdropColour"),
+        alphaSlider = true,
+        inline = true,
+        buttonSize = 26,
+        windowTitle = L.Get("general.abilityBorder.windowtitle"),
+        tooltip = L.Get("general.abilityBorder.tooltip"),
+        acceptText = L.Get("general.abilityBorder.acceptButton"),
+
+        onChange = function(_, colour)
+            settings.Set(
+                "uiColours.backdropColour",
+                string.format("0x%08X", colour)
+            )
+        end,
+    })
+    page:AddText({
+        text = L.Get("general.backdropColour.label"),
+        inline = true
+    })
+
+    page:AddText({
+        text = "",
+        inline = false,
+    })
     
     page:AddColourPicker({
         value = settings.Get("uiColours.shadowColour"),

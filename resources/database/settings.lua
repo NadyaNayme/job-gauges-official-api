@@ -11,12 +11,13 @@ local defaults = {
 
     fontColours = {
         durationText = "0xFFFFFFFF",
-        expiringText = "0xFFFFFFFF",
+        expiringText = "0xF30B0BFF",
         cooldownText = "0xFFFFFFFF",
         readyText = "0xFFFFFFFF",
     },
     uiColours = {
-        shadowColour = "0xFFFFFFFF",
+        backdropColour = "0xFFFFFF00",
+        shadowColour = "0x111111DD",
         runeColours = {
             active = "0x70FF00FF",
             activeShadow = "0x100101FF",
@@ -24,10 +25,10 @@ local defaults = {
             inactiveShadow = "0xC1BDAC89",
         },
         barColours = {
-            bloodTitheBar = "0xFFFA2B4F",
-            inciteFearBar = "0xFFB8E8F3",
-            essenceCorruptionBar = "0xFF70DC3F",
-            bloatBar = "0xFF70DC3F",
+            bloodTitheBar = "0xF30B0BFF",
+            inciteFearBar = "0x16D6E5FF",
+            essenceCorruptionBar = "0x16A127FF",
+            bloatBar = "0x16A1271A",
         }
     },
 
@@ -35,8 +36,8 @@ local defaults = {
         positionLocked = false,
         componentEditing = false,
         automaticSwapping = "mainhand",
-        hideOutOfCombat = "combat-visible",
-        displayTimeAs = "precise-ticks",
+        hideOutOfCombat = "always-visible",
+        displayTimeAs = "nearest-second",
         readyText = "Ready",
         spriteReadyText = "R",
         scale = 1,

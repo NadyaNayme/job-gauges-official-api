@@ -243,7 +243,7 @@ local function isPlantedFeetEquipped()
 end
 
 local function getSunshineDuration()
-    local ULT_GREATER_DURATION = 62
+    local ULT_GREATER_DURATION = 64
     local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterSunshineUnlocked == 1
         or isPlantedFeetEquipped()
@@ -256,7 +256,7 @@ end
 
 -- Redundancy because I try to avoid using parameters as control flow flags
 local function getDeathsSwiftnessDuration()
-    local ULT_GREATER_DURATION = 62
+    local ULT_GREATER_DURATION = 64
     local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterDeathsSwiftnessUnlocked == 1
         or isPlantedFeetEquipped()
@@ -363,16 +363,35 @@ local function handleSoulCrush(event)
     swapGaugeToCombatStyle('necromancy')
 end
 
+local function endDeathEssence(event)
+    if event.newValue == 0 then
+        events.playerData.necromancy.deathEssence.active = 1
+        events.playerData.necromancy.deathEssence.remainingDuration = 0
+    end
+end
+
+local function endSoulCrush(event)
+    if event.newValue == 0 then
+        events.playerData.necromancy.soulCrush.active = 0
+        events.playerData.necromancy.soulCrush.remainingDuration = 0
+    end
+end
+
 local function handleLivingDeath(event)
     if event.oldValue == -1 then
         events.playerData.necromancy.livingDeath.active = 1
         events.playerData.necromancy.livingDeath.remainingDuration = 50
+        events.playerData.necromancy.livingDeath.cooldown = 150
 
         swapGaugeToCombatStyle('necromancy')
     else
         events.playerData.necromancy.livingDeath.active = 0
         events.playerData.necromancy.livingDeath.remainingDuration = 0
-        events.playerData.necromancy.livingDeath.cooldown = 100
+    end
+    -- If the player teleports to War's Retreat while it is active, the game force-ends LD so mimic that here
+    if event.currentValue == -1 then
+        events.playerData.necromancy.livingDeath.active = 0
+        events.playerData.necromancy.livingDeath.remainingDuration = 0
     end
 end
 
@@ -597,6 +616,7 @@ local function handleGcdChecks(event)
     else
         events.playerData.necromancy.incantations.invokeDeath.active = 0
     end
+    
 end
 
 -- Similar to Exsanguinate and Incite Fear, the Roar of Awakening's Essence Corruption stacks stop transmitting at 100
@@ -638,17 +658,40 @@ local function handleBloodlust(event)
 end
 
 local function handleChaosRoar(event)
+
+    local wasStalled = var.VarPlayer["COMBATV2_NEXT_ABILITY"].value == 46279
+
     if event.newValue == 0 then 
         events.playerData.melee.chaosRoar.active = 0
         events.playerData.melee.chaosRoar.remainingDuration = 0
-    else 
+    elseif not wasStalled then
         events.playerData.melee.chaosRoar.active = 1
         events.playerData.melee.chaosRoar.remainingDuration = 10
         events.playerData.melee.chaosRoar.cooldown = 100
 
-    swapGaugeToCombatStyle('melee')
+        swapGaugeToCombatStyle('melee')
     end
 end
+
+local consumingAbilities = {
+    [49531] = true, -- Autoattack
+    [14679] = true, -- Adaptive Strike
+    [52781] = true, -- Rend
+    [40941] = true, -- Greater Fury
+    [14682] = true, -- Backhand
+    [14700] = true, -- Punish
+    [52790] = true, -- Assault
+    [52785] = true, -- Greater Flurry
+    [44244] = true, -- Dismember
+    [52788] = true, -- Slaughter
+    [52789] = true, -- Massacre
+    [14688] = true, -- Meteor Strike
+    [14685] = true, -- Hurricane
+    [14686] = true, -- Overpower
+    [14709] = true, -- Pulverize
+    [28430] = true, -- Weapon Special Ability
+    [11748] = true, -- EoF
+}
 
 local animaChargedAbilities = {
     [45450] = true,
@@ -663,7 +706,17 @@ local function handleLastAbilityUsed(event)
 
     -- Chaos Roar, we check the oldValue because Chaos Roar would be
     -- the ability used **before** the ability that consumes the buff
-    if event.oldValue == 46279 then
+    if event.oldValue == 46279 and consumingAbilities[event.newValue] then
+        events.playerData.melee.chaosRoar.active = 0
+        events.playerData.melee.chaosRoar.remainingDuration = 0
+    end
+
+    -- TODO: COMBATV2_NEXT_ABILITY only ever returns {} when tested here, so this doesn't work yet
+    -- Chaos Roar again, if it was stalled we don't want to set it active until release
+    local chaosRoarStalled = var.VarPlayer["COMBATV2_NEXT_ABILITY"] == 46279
+    log(var.VarPlayer["COMBATV2_NEXT_ABILITY"].value)
+
+    if chaosRoarStalled then
         events.playerData.melee.chaosRoar.active = 0
         events.playerData.melee.chaosRoar.remainingDuration = 0
     end
@@ -741,6 +794,8 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_COOLDOWN_WEAPON_NECRO_UNDERWORLD_ARMGUARD_T70_START = handleDeathGrasp,
     COMBATV2_COOLDOWN_WEAPON_NECRO_RASIAL_ARMGUARD_T95_START = handleDeathEssence,
     COMBATV2_COOLDOWN_WEAPON_NECRO_DEVOURER_ARMGUARD_T95_START = handleSoulCrush,
+    COMBATV2_BUFF_NECROMANCY_DEATH_ESSENCE_ACTIVE = endDeathEssence,
+    COMBATV2_BUFF_NECROMANCY_SOUL_CRUSH_ACTIVE = endSoulCrush,
     COMBATV2_BUFF_NECROMANCY_UNDEAD_INSTINCT_ABILITY_STRUCT = handleLivingDeath,
     COMBATV2_COOLDOWN_MAGIC_CHASTISE_START = handleRunicCharge,
     COMBATV2_COOLDOWN_MAGIC_SUNSHINE_START = handleSunshine,
@@ -842,6 +897,7 @@ local COOLDOWN_RESET_MAP  = {
 
     COMBATV2_COOLDOWN_NECROMANCY_THREADS_OF_FATE_END =
         events.playerData.necromancy.incantations.threadsOfFate,
+
 }
 
 local function handleCooldownReset(event)
