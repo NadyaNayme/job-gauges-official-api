@@ -69,47 +69,47 @@ local defaults = {
         componentPositions = {
             deathGrasp = {
                 x = 0,
-                y = -34,
+                y = 6,
             },
             deathEssence = {
                 x = 40,
-                y = -34,
+                y = 6,
             },
             soulCrush = {
                 x = 80,
-                y = -34,
+                y = 6,
             },
             conjureUndeadArmy = {
                 x = 0,
-                y = 0,
+                y = 40,
             },
             livingDeath = {
                 x = 40,
-                y = 0,
+                y = 40,
             },
             residualSoulsStacks = {
                 x = 2,
-                y = 44,
+                y = 84,
             },
             necrosisStacks = {
                 x = 2,
-                y = 67,
+                y = 107,
             },
             bloat = {
                 x = 2,
-                y = 87,
+                y = 127,
             },
             invokeDeath = {
                 x = 96,
-                y = 0,
+                y = 40,
             },
             threadsOfFate = {
                 x = 84,
-                y = 22,
+                y = 62,
             },
             splitSoul = {
                 x = 108,
-                y = 22,
+                y = 62,
             }
         }
         -- ["hide-native-residual-souls"] = true, -- Haven't found how to do this yet, so hide the setting.
@@ -137,39 +137,39 @@ local defaults = {
         componentPositions = {
             soulfire = {
                 x = 0,
-                y = -34,
+                y = 6,
             },
             instability = {
                 x = 40,
-                y = -34,
+                y = 6,
             },
             activeSpell = {
                 x = 88,
-                y = -24,
+                y = 16,
             },
             runicCharge = {
                 x = 0,
-                y = 0,
+                y = 40,
             },
             tsunami = {
                 x = 40,
-                y = 0,
+                y = 40,
             },
             sunshine = {
                 x = 80,
-                y = 0,
+                y = 40,
             },
             bloodTithe = {
                 x = -55,
-                y = 45,
+                y = 85,
             },
             inciteFear = {
                 x = -55,
-                y = 55,
+                y = 95,
             },
             essenceCorruption = {
                 x = -55,
-                y = 65,
+                y = 95,
             }
         }
     },
@@ -192,35 +192,35 @@ local defaults = {
         componentPositions = {
             crystalRain = {
                 x = 0,
-                y = -34,
+                y = 6,
             },
             splitSoul = {
                 x = 40,
-                y = -34,
+                y = 6,
             },
             equippedAmmo = {
                 x = 80,
-                y = -34,
+                y = 6,
             },
             searingWinds = {
                 x = 0,
-                y = 0,
+                y = 40,
             },
             shadowImbued = {
                 x = 40,
-                y = 0,
+                y = 40,
             },
             deathsSwiftness = {
                 x = 80,
-                y = 0,
+                y = 40,
             },
             perfectEquilibrium = {
                 x = -20,
-                y = 40,
+                y = 80,
             },
             guthixianRunes = {
                 x = 20,
-                y = 50,
+                y = 90,
             },
             RUNE_LAYOUT = {
                 -- LORE
@@ -281,27 +281,27 @@ local defaults = {
         componentPositions = {
             blackhole = {
                 x = 0,
-                y = -34,
+                y = 6,
             },
             igneousShowdown = {
                 x = 40,
-                y = -34,
+                y = 6,
             },
             bloodlust = {
                 x = 88,
-                y = -24,
+                y = 16,
             },
             chaosRoar = {
                 x = 0,
-                y = 0,
+                y = 40,
             },
             meteorStrike = {
                 x = 40,
-                y = 0,
+                y = 40,
             },
             berserk = {
                 x = 80,
-                y = 0,
+                y = 40,
             },
         }
     }

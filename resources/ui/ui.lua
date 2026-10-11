@@ -46,7 +46,9 @@ local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
 local POSITION_LOCKED = settings.Get("generalSettings.positionLocked")
 local COMPONENT_EDITING = settings.Get("generalSettings.componentEditing")
 local isDraggingOverlay = false
+local overlayMouseCapture = nil
 local draggedComponent = nil
+local componentMouseCapture = nil
 local dragOffsetX = 0
 local dragOffsetY = 0
 
@@ -1281,39 +1283,76 @@ local CreateUI = function()
 
     end
 
-    local function getHoveredComponent()
-        if not Mouse.IsAvailable() then
-            return nil
-        end
+local function beginMouseCapture()
+    if mouseCaptureComponent then
+        return true
+    end
 
-        local mousePosition = InterfaceMouse.GetPosition()
-        if not mousePosition then
-            return nil
-        end
-        local combatStyle = events.playerData.combatStyle
+    local gameArea = ui.Interfaces:GetComponent(
+        id.Component.TOPLEVEL_V2__GAME_AREA
+    )
 
-        for _, component in ipairs(GAUGE_COMPONENTS) do
-            if component.style == combatStyle or combatStyle == "all" then
-                local position = component.position
+    if not gameArea then
+        return false
+    end
 
-                local x = position.x + OFFSET_POSITION_X
-                local y = position.y + OFFSET_POSITION_Y
+    InterfaceMouse.BeginScreenCapture(gameArea, 0, 0)
 
-                local width = scaleToFactor(component.width)
-                local height = scaleToFactor(component.height)
+    mouseCaptureComponent = gameArea
 
-                if mousePosition.x >= x
-                    and mousePosition.x <= x + width
-                    and mousePosition.y >= y
-                    and mousePosition.y <= y + height
-                then
-                    return component
-                end
-            end
-        end
+    return true
+end
 
+local function endMouseCapture()
+    if not mouseCaptureComponent then
+        return
+    end
+
+    InterfaceMouse.EndCapture(mouseCaptureComponent)
+    mouseCaptureComponent = nil
+end
+
+local function getMousePosition()
+    if not mouseCaptureComponent then
         return nil
     end
+
+    return InterfaceMouse.GetPosition(
+        mouseCaptureComponent,
+        0,
+        0
+    )
+end
+
+local function getHoveredComponent(mousePosition)
+    if not Mouse.IsAvailable() or not mousePosition then
+        return nil
+    end
+
+    local combatStyle = events.playerData.combatStyle
+
+    for _, component in ipairs(GAUGE_COMPONENTS) do
+        if component.style == combatStyle or combatStyle == "all" then
+            local position = component.position
+
+            local x = position.x + OFFSET_POSITION_X
+            local y = position.y + OFFSET_POSITION_Y
+
+            local width = scaleToFactor(component.width)
+            local height = scaleToFactor(component.height)
+
+            if mousePosition.x >= x
+                and mousePosition.x <= x + width
+                and mousePosition.y >= y
+                and mousePosition.y <= y + height
+            then
+                return component
+            end
+        end
+    end
+
+    return nil
+end
 
 local settingsView
 Event.SettingsLayerReady.Subscribe("openSettingsWindow", function(event)
@@ -2215,6 +2254,7 @@ local function updateOverlays()
     -- Perfect Equilibrium
     if rangedSettings.componentVisibility["show-perfect-equilibrium"] then 
         perfectEquilibrium.layer.hidden = false
+        perfectEquilibriumStacksText.hidden = false
         updateBOLGLetters(
             ranged.perfectEquilibrium.stacks,
             ranged.perfectEquilibrium.active == 1
@@ -2247,6 +2287,7 @@ local function updateOverlays()
             tostring(ranged.perfectEquilibrium.stacks)
     else 
         perfectEquilibrium.layer.hidden = true
+        perfectEquilibriumStacksText.hidden = true
     end
 
     local perfectEquilibriumActive = ranged.perfectEquilibrium.active == 1
@@ -2443,63 +2484,119 @@ local function updateOverlays()
         berserk.layer.hidden = true
     end
 
+    if POSITION_LOCKED or not Mouse.IsAvailable() or not Keyboard.IsAvailable() then
+        isDraggingOverlay = false
+
+        if draggedComponent then
+            draggedComponent = nil
+            dragOffsetX = 0
+            dragOffsetY = 0
+        end
+
+        endMouseCapture()
+    end
+
     -- Allow for repositioning the gauges without clunky X,Y sliders.
     -- TODO: Let users change the keybinds for this? Or change into a button
     -- that is clicked and begins repositioning until you press a keybind to stop it.
     -- But I prefer being able to unlock it and have it be freely movable.
     -- I'll have to see which users prefer.
-    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED and not COMPONENT_EDITING then
+    -- Allow repositioning the entire gauge overlay.
+    if Mouse.IsAvailable()
+        and Keyboard.IsAvailable()
+        and not POSITION_LOCKED
+        and not COMPONENT_EDITING
+    then
         local shiftDown = Keyboard.IsShiftDown()
         local ctrlDown = Keyboard.IsControlDown()
-        
-        if shiftDown and ctrlDown then
-            isDraggingOverlay = true
-            
-            local mousePositionXY = InterfaceMouse.GetPosition()
 
-            if mousePositionXY then
-                OFFSET_POSITION_X = mousePositionXY.x
-                OFFSET_POSITION_Y = mousePositionXY.y
-                updateOverlayPositions()
+        if shiftDown and ctrlDown then
+            if not isDraggingOverlay then
+                if beginMouseCapture() then
+                    isDraggingOverlay = true
+                end
             end
-        else
+
             if isDraggingOverlay then
-                isDraggingOverlay = false
-                
-                settings.Set("generalSettings.offsetPosition.x", OFFSET_POSITION_X)
-                settings.Set("generalSettings.offsetPosition.y", OFFSET_POSITION_Y)
+                local mousePosition = getMousePosition()
+
+                if mousePosition then
+                    OFFSET_POSITION_X = mousePosition.x
+                    OFFSET_POSITION_Y = mousePosition.y
+
+                    updateOverlayPositions()
+                end
             end
+        elseif isDraggingOverlay then
+            isDraggingOverlay = false
+
+            endMouseCapture()
+
+            settings.Set(
+                "generalSettings.offsetPosition.x",
+                OFFSET_POSITION_X
+            )
+
+            settings.Set(
+                "generalSettings.offsetPosition.y",
+                OFFSET_POSITION_Y
+            )
         end
     end
 
-    if Mouse.IsAvailable() and Keyboard.IsAvailable() and not POSITION_LOCKED and COMPONENT_EDITING then
+
+    -- Allow repositioning individual gauge components.
+    if Mouse.IsAvailable()
+        and Keyboard.IsAvailable()
+        and not POSITION_LOCKED
+        and COMPONENT_EDITING
+    then
         local shiftDown = Keyboard.IsShiftDown()
         local ctrlDown = Keyboard.IsControlDown()
         local altDown = Keyboard.IsAltDown()
 
         if shiftDown and ctrlDown then
-            local mousePositionXY = InterfaceMouse.GetPosition()
+            if not mouseCaptureComponent then
+                if not beginMouseCapture() then
+                    return
+                end
+            end
 
-            if mousePositionXY then
+            local mousePosition = getMousePosition()
+
+            if mousePosition then
                 if draggedComponent == nil then
-                    draggedComponent = getHoveredComponent()
+                    draggedComponent = getHoveredComponent(mousePosition)
 
                     if draggedComponent then
                         local position = draggedComponent.position
 
-                        local componentX = position.x + OFFSET_POSITION_X
-                        local componentY = position.y + OFFSET_POSITION_Y
+                        local componentX =
+                            position.x + OFFSET_POSITION_X
 
-                        dragOffsetX = mousePositionXY.x - componentX
-                        dragOffsetY = mousePositionXY.y - componentY
+                        local componentY =
+                            position.y + OFFSET_POSITION_Y
+
+                        dragOffsetX =
+                            mousePosition.x - componentX
+
+                        dragOffsetY =
+                            mousePosition.y - componentY
                     end
                 end
 
                 if draggedComponent then
                     local position = draggedComponent.position
 
-                    local newX = mousePositionXY.x - OFFSET_POSITION_X - dragOffsetX
-                    local newY = mousePositionXY.y - OFFSET_POSITION_Y - dragOffsetY
+                    local newX =
+                        mousePosition.x
+                        - OFFSET_POSITION_X
+                        - dragOffsetX
+
+                    local newY =
+                        mousePosition.y
+                        - OFFSET_POSITION_Y
+                        - dragOffsetY
 
                     if altDown then
                         newX = snapToGrid(newX, 10)
@@ -2512,24 +2609,32 @@ local function updateOverlays()
                     updateOverlayPositions()
                 end
             end
-        elseif draggedComponent then
-            local position = draggedComponent.position
+        else
+            if draggedComponent then
+                local position = draggedComponent.position
 
-            settings.Set(
-                draggedComponent.style .. "Settings.componentPositions." ..
-                draggedComponent.positionKey .. ".x",
-                position.x
-            )
+                settings.Set(
+                    draggedComponent.style
+                        .. "Settings.componentPositions."
+                        .. draggedComponent.positionKey
+                        .. ".x",
+                    position.x
+                )
 
-            settings.Set(
-                draggedComponent.style .. "Settings.componentPositions." ..
-                draggedComponent.positionKey .. ".y",
-                position.y
-            )
+                settings.Set(
+                    draggedComponent.style
+                        .. "Settings.componentPositions."
+                        .. draggedComponent.positionKey
+                        .. ".y",
+                    position.y
+                )
 
-            draggedComponent = nil
-            dragOffsetX = 0
-            dragOffsetY = 0
+                draggedComponent = nil
+                dragOffsetX = 0
+                dragOffsetY = 0
+            end
+
+            endMouseCapture()
         end
     end
 

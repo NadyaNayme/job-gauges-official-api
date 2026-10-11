@@ -1,6 +1,6 @@
 {
   "name": "Job Gauges",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "contactEmailAddress": "job-gauges@aishitei.ru",
   "hasSettingsIcon": true,
   "requiredDependencies": {

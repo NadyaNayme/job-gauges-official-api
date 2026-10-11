@@ -1,6 +1,5 @@
 local settings = require("resources/database/settings")
 local spells = require("resources/data/spells")
-local weapons = require("resources/data/weapons")
 
 -- playerData is nested in events because my mental model
 -- is unlike data that comes from Settings - this is data
@@ -256,7 +255,7 @@ end
 
 -- Redundancy because I try to avoid using parameters as control flow flags
 local function getDeathsSwiftnessDuration()
-    local ULT_GREATER_DURATION = 64
+    local ULT_GREATER_DURATION = 62
     local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterDeathsSwiftnessUnlocked == 1
         or isPlantedFeetEquipped()
@@ -298,18 +297,28 @@ local function swapGaugeToCombatStyle(style)
     end
 end
 
+local MAINHAND_SLOT = 4
+local weaponCombatStyles = {
+    [1] = "magic",
+    [5] = "melee",
+    [6] = "melee",
+    [7] = "barehanded",
+    [8] = "ranged",
+    [9] = "ranged",
+    [10] = "ranged",
+    [37] = "necromancy",
+}
 local function checkEquippedMainhand()
     if settings.Get('generalSettings.automaticSwapping') ~= 'mainhand' then return end
 
-    -- TODO: Use `combatv2_mainhand_style` here instead
     local worn = Inventory.Find(config.Inv.WORN)
-    local wornObj = worn:GetSlot(4)
+    local wornObj = worn:GetSlot(MAINHAND_SLOT)
 
     if wornObj and wornObj.obj then
-        local wornObjCategory = id.Category.FromID(wornObj.obj.category)
-        if wornObjCategory == nil then return end
+        local wornObjStyle = var.VarPlayer["COMBATV2_MAINHAND_STYLE"].value
+        if wornObjStyle == nil then return end
 
-        local combatStyle = weapons[id.Category[wornObjCategory]]
+        local combatStyle = weaponCombatStyles[wornObjStyle]
 
         if combatStyle then
             events.playerData.combatStyle = combatStyle
@@ -464,7 +473,10 @@ local function handleTsunami(event)
     if event.newValue == 1 then
         events.playerData.magic.tsunami.active = 1
         events.playerData.magic.tsunami.remainingDuration = 50
-        events.playerData.magic.tsunami.cooldown = 100 
+
+        if not (tonumber(events.playerData.magic.tsunami.cooldown) > 0) then
+            events.playerData.magic.tsunami.cooldown = 100 
+        end
 
         swapGaugeToCombatStyle('magic')
     end
@@ -498,11 +510,19 @@ end
 -- refactor it without breaking everything. It works and it's very easy to follow.
 
 local function handleSearingWinds(event)
-    events.playerData.ranged.searingWinds.active = 1
-    events.playerData.ranged.searingWinds.remainingDuration = getRemainingTicks("COMBATV2_COOLDOWN_RANGED_GALESHOT_START", "COMBATV2_BUFF_RANGED_SEARING_WINDS_END")
-    events.playerData.ranged.searingWinds.cooldown = 34
+    if event.newValue == 1 then
+        events.playerData.ranged.searingWinds.active = 1
+        events.playerData.ranged.searingWinds.remainingDuration = 10
+        if events.playerData.ranged.searingWinds.remainingDuration < 0 then events.playerData.ranged.searingWinds.remainingDuration = 0 end
 
-    swapGaugeToCombatStyle('ranged')
+        -- If we have an existing cooldown, Galeshot was stalled before release
+        -- and we do not want to restart the cooldown
+        if not (tonumber(events.playerData.ranged.searingWinds.cooldown) > 0) then 
+            events.playerData.ranged.searingWinds.cooldown = 34
+        end
+
+        swapGaugeToCombatStyle('ranged')
+    end
 end
 
 -- Rapid Fire pauses the timer for Searing Winds. To simulate, we remove the time we would decrement from decrementTimers.
@@ -677,17 +697,30 @@ local consumingAbilities = {
     [49531] = true, -- Autoattack
     [14679] = true, -- Adaptive Strike
     [52781] = true, -- Rend
+    [14701] = true, -- Fury
     [40941] = true, -- Greater Fury
     [14682] = true, -- Backhand
     [14700] = true, -- Punish
+    [14704] = true, -- Assault
     [52790] = true, -- Assault
+    [14684] = true, -- Flurry
+    [52782] = true, -- Flurry
+    [52783] = true, -- Flurry
+    [52784] = true, -- Flurry
+    [40936] = true, -- Greater Flurry
+    [12297] = true, -- Greater Flurry
+    [52786] = true, -- Greater Flurry
     [52785] = true, -- Greater Flurry
+    [52445] = true, -- Catalyst Flurry
     [44244] = true, -- Dismember
     [52788] = true, -- Slaughter
     [52789] = true, -- Massacre
     [14688] = true, -- Meteor Strike
     [14685] = true, -- Hurricane
     [14686] = true, -- Overpower
+    [47085] = true, -- Frozen Overpower
+    [984]   = true, -- Occult Overpower
+    [47184] = true, -- Warped Overpower
     [14709] = true, -- Pulverize
     [28430] = true, -- Weapon Special Ability
     [11748] = true, -- EoF
@@ -711,14 +744,12 @@ local function handleLastAbilityUsed(event)
         events.playerData.melee.chaosRoar.remainingDuration = 0
     end
 
-    -- TODO: COMBATV2_NEXT_ABILITY only ever returns {} when tested here, so this doesn't work yet
-    -- Chaos Roar again, if it was stalled we don't want to set it active until release
-    local chaosRoarStalled = var.VarPlayer["COMBATV2_NEXT_ABILITY"] == 46279
-    log(var.VarPlayer["COMBATV2_NEXT_ABILITY"].value)
-
-    if chaosRoarStalled then
-        events.playerData.melee.chaosRoar.active = 0
-        events.playerData.melee.chaosRoar.remainingDuration = 0
+    -- Life Transfer
+    if event.newValue == 48328 then
+        events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration = events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration + 35
+        events.playerData.necromancy.conjures.putridZombie.remainingDuration = events.playerData.necromancy.conjures.putridZombie.remainingDuration + 35
+        events.playerData.necromancy.conjures.vengefulGhost.remainingDuration = events.playerData.necromancy.conjures.vengefulGhost.remainingDuration + 35
+        events.playerData.necromancy.conjures.phantomGuardian.remainingDuration = events.playerData.necromancy.conjures.phantomGuardian.remainingDuration + 35
     end
 
     -- Anima Charged abilities (SW/GSW, CB/GCB, Dragon Breath)
@@ -742,7 +773,12 @@ local function handleMeteorStrike(event)
     else
         events.playerData.melee.meteorStrike.active = 1
         events.playerData.melee.meteorStrike.remainingDuration = 50
-        events.playerData.melee.meteorStrike.cooldown = 100
+
+        -- If Meteor Strike was stalled and released it already has a cooldown,
+        -- so be sure not to override it here
+        if not (tonumber(events.playerData.melee.meteorStrike.cooldown) > 0) then
+            events.playerData.melee.meteorStrike.cooldown = 100
+        end
 
         swapGaugeToCombatStyle('melee')
     end
@@ -788,6 +824,40 @@ local function handleLastCastSpell(event)
     updateActiveSpell(event.newValue)
 end
 
+local STALLED_ABILITY = nil
+local function handleStalledAbility(event)
+    STALLED_ABILITY = event.newValue
+
+    if STALLED_ABILITY == 14735 then -- Tsunami
+        events.playerData.magic.tsunami.active = 0
+        events.playerData.magic.tsunami.remainingDuration = 0
+
+        -- Tsunami needs a guard clause here or else the cooldown resets to 30s
+        -- after the buff wears off after a stall
+        if events.playerData.magic.tsunami.cooldown == 0 then
+            events.playerData.magic.tsunami.cooldown = 100
+        end
+    end
+
+    if STALLED_ABILITY == 46279 then -- Chaos Roar
+        events.playerData.melee.chaosRoar.active = 0
+        events.playerData.melee.chaosRoar.remainingDuration = 0
+        events.playerData.melee.chaosRoar.cooldown = 100
+    end
+
+    if STALLED_ABILITY == 14688 then -- Meteor Strike
+        events.playerData.melee.meteorStrike.active = 0
+        events.playerData.melee.meteorStrike.remainingDuration = 0
+        events.playerData.melee.meteorStrike.cooldown = 100
+    end
+
+    if STALLED_ABILITY == 52799 then -- Galeshot
+        events.playerData.ranged.searingWinds.active = 0
+        events.playerData.ranged.searingWinds.cooldown = 34
+    end
+
+end
+
 -- Dispatchers - the handler functions tell you what the varp being mapped for dispatch helps keep updated.
 local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_GLOBAL_COOLDOWN_START = handleGcdChecks,
@@ -803,7 +873,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_ABILITY_WEAPON_COOLDOWN_INSTABILITY_START = handleInstability,
     COMBATV2_BUFF_MAGIC_CRITICAL_STRIKE_ADRENALINE_EFFECT = handleTsunami,
     COMBATV2_COOLDOWN_RANGED_DEATHS_SWIFTNESS_START = handleDeathsSwiftness,
-    COMBATV2_COOLDOWN_RANGED_GALESHOT_START = handleSearingWinds,
+    COMBATV2_BUFF_RANGED_SEARING_WINDS_ACTIVE = handleSearingWinds,
     COMBATV2_BUFF_RANGED_SEARING_WINDS_END = pauseSearingWinds,
     COMBATV2_BUFF_RANGED_IMBUED_SHADOWS_ACTIVE = handleShadowImbued,
     COMBATV2_COOLDOWN_RANGED_SHADOW_TENDRILS_START = extendShadowImbued,
@@ -826,6 +896,7 @@ local VAR_TRANSMIT_HANDLERS = {
     COMBATV2_JUST_USED_ABILITY = handleLastAbilityUsed,
     COMBATV2_BUFF_NECROMANCY_THREADS_OF_FATE_ACTIVE = handleThreadsOfFate,
     COMBATV2_BUFF_NECROMANCY_SPLIT_SOUL_ACTIVE = handleSplitSoulIncantion,
+    COMBATV2_NEXT_ABILITY = handleStalledAbility,
 
 
     BANK_TEMP = handleBank,
@@ -905,11 +976,21 @@ local function handleCooldownReset(event)
         return
     end
 
-    local ability = COOLDOWN_RESET_MAP [event.var.configName]
+    local ability = COOLDOWN_RESET_MAP[event.var.configName]
 
     if ability then
         ability.cooldown = 0
     end
+
+    if ability == events.playerData.melee.berserk then
+        ability.remainingDuration = 0
+    end
+
+    if ability == events.playerData.ranged.deathsSwiftness then
+        ability.remainingDuration = 0
+    end
+
+
 end
 
 -- I don't think I'm tracking nearly enough things for this
@@ -938,7 +1019,7 @@ end
 -- If the player has a targeted enemy, they are considered to be in, or starting, combat.
 local function updateInCombatState()
     events.playerData.inCombat = 
-        var.VarClient["COMBATV2_TARGET_SIDE_PANEL_HEALTH"].value > 0
+        var.VarPlayer["COMBATV2_PLAYER_IS_IN_COMBAT"].value > 0
 end
 
 local function updateNecromancyResources()
