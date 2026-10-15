@@ -255,7 +255,7 @@ end
 
 -- Redundancy because I try to avoid using parameters as control flow flags
 local function getDeathsSwiftnessDuration()
-    local ULT_GREATER_DURATION = 62
+    local ULT_GREATER_DURATION = 63
     local ULT_NORMAL_DURATION = 50
     if events.playerData.ultimates.greaterDeathsSwiftnessUnlocked == 1
         or isPlantedFeetEquipped()
