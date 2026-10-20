@@ -2318,7 +2318,6 @@ local function updateOverlays()
     -- Perfect Equilibrium
     if rangedSettings.componentVisibility["show-perfect-equilibrium"] then 
         perfectEquilibrium.layer.hidden = false
-        perfectEquilibriumStacksText.hidden = false
         updateBOLGLetters(
             ranged.perfectEquilibrium.stacks,
             ranged.perfectEquilibrium.active == 1
@@ -2346,11 +2345,15 @@ local function updateOverlays()
                 )
                 perfectEquilibrium.text.content = ""
         end
-
-        perfectEquilibriumStacksText.content =
-            tostring(ranged.perfectEquilibrium.stacks)
     else 
         perfectEquilibrium.layer.hidden = true
+    end
+
+    if rangedSettings.componentVisibility["show-perfect-equilibrium-stacks"] then
+        perfectEquilibriumStacksText.hidden = false
+        perfectEquilibriumStacksText.content =
+            tostring(ranged.perfectEquilibrium.stacks)
+    else
         perfectEquilibriumStacksText.hidden = true
     end
 
@@ -2952,9 +2955,12 @@ settings.Subscribe(
     "rangedSettings.componentVisibility.show-guthixian-runes",
     function(value)
         SHOW_RUNES = value
+        updateBOLGLetters(
+            events.playerData.ranged.perfectEquilibrium.stacks,
+            events.playerData.ranged.perfectEquilibrium.active == 1
+        )
     end
 )
-
   return {
     Destroy = function()
       if settingsView then

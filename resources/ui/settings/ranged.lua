@@ -45,6 +45,11 @@ function M.Create(page, options)
             selected = rangedComponentSettings["show-perfect-equilibrium"]
         },
         {
+            text = L.Get("ranged.perfectEquilibriumStacks"),
+            value = "show-perfect-equilibrium-stacks",
+            selected = rangedComponentSettings["show-perfect-equilibrium-stacks"]
+        },
+        {
             text = L.Get("ranged.guthixianRunes"),
             value = "show-guthixian-runes",
             selected = rangedComponentSettings["show-guthixian-runes"]

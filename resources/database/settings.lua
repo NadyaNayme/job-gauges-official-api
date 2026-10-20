@@ -180,6 +180,7 @@ local defaults = {
             ["show-shadow-imbued"] = true,
             ["show-deaths-swiftness"] = true,
             ["show-perfect-equilibrium"] = true,
+            ["show-perfect-equilibrium-stacks"] = true,
             ["show-guthixian-runes"] = true,
         },
         offsetPosition = {
