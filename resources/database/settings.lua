@@ -169,7 +169,7 @@ local defaults = {
             },
             essenceCorruption = {
                 x = -55,
-                y = 95,
+                y = 105,
             }
         }
     },
