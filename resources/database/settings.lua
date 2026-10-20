@@ -124,11 +124,8 @@ local defaults = {
             ["show-tsunami"] = true,
             ["show-sunshine"] = true,
             ["show-blood-tithe"] = true,
-            ["show-blood-tithe-text"] = true,
             ["show-incite-fear"] = true,
-            ["show-incite-fear-text"] = true,
             ["show-essence-corruption"] = true,
-            ["show-essence-corruption-text"] = true,
         },
         offsetPosition = {
             x = 0,

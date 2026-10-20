@@ -39,6 +39,21 @@ function M.Create(page, options)
             value = "show-sunshine",
             selected = magicComponentSettings["show-sunshine"]
         },
+        {
+            text = L.Get("magic.visibilityOptions.bloodeTithe"),
+            value = "show-blood-tithe",
+            selected = magicComponentSettings["show-blood-tithe"]
+        },
+        {
+            text = L.Get("magic.visibilityOptions.glacialEmbrace"),
+            value = "show-incite-fear",
+            selected = magicComponentSettings["show-incite-fear"]
+        },
+        {
+            text = L.Get("magic.visibilityOptions.essenceCorruption"),
+            value = "show-essence-corruption",
+            selected = magicComponentSettings["show-essence-corruption"]
+        },
     }, {
         onChange = function(_, _, changedValue, selected)
             settings.Set(

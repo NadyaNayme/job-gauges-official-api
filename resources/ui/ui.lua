@@ -2052,24 +2052,33 @@ local function updateOverlays()
     end
 
     if magicSettings.componentVisibility["show-blood-tithe"] then
+        bloodTithe.layer.hidden = false
         updateMagicUpkeepIndicator(
             bloodTithe,
             magic.upkeep.blood_tithe
         )
+    else
+        bloodTithe.layer.hidden = true
     end
 
     if magicSettings.componentVisibility["show-incite-fear"] then
+        inciteFear.layer.hidden = false
         updateMagicUpkeepIndicator(
             inciteFear,
             magic.upkeep.incite_fear
         )
+    else
+        inciteFear.layer.hidden = true
     end
 
     if magicSettings.componentVisibility["show-essence-corruption"] then
+        essenceCorruption.layer.hidden = false
         updateMagicUpkeepIndicator(
             essenceCorruption,
-            magic.upkeep.essence_corruption
+        magic.upkeep.essence_corruption
         )
+    else
+        essenceCorruption.layer.hidden = true
     end
 
     -- Ranged Gauge

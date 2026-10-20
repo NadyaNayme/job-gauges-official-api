@@ -96,7 +96,10 @@ local localization = {
                 activeSpell = "Show Active Spell",
                 runicCharge = "Show Runic Charge",
                 tsunami = "Show Tsunami",
-                sunshine = "Show Sunshine"
+                sunshine = "Show Sunshine",
+                bloodeTithe = "Show Blood Tithe (Exsanguinate Stacks)",
+                glacialEmbrace = "Show Glacial Embrace (Incite Fear Stacks)",
+                essenceCorruption = "Show Essence Corruption (Roar of Awakening Passive Stacks)"
             },
             spellTrackingColoursTitle = "Spell Tracking Colours",
             expiringFlash = {
