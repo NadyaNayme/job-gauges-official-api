@@ -1,8 +1,9 @@
 {
   "name": "Job Gauges",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "contactEmailAddress": "job-gauges@aishitei.ru",
   "hasSettingsIcon": true,
+  "hasRibbonIcon" : true,
   "requiredDependencies": {
     "prettyui": 6398181
   },

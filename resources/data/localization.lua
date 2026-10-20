@@ -15,7 +15,6 @@ local localization = {
                 equippedMainhandWeapon = "Equipped Mainhand Weapon",
                 setItMyself = "I'll set it myself"
             },
-            styleButtonsLabel = "If you chose 'I'll set it myself', set your active gauge using the below buttons",
             displaySettingsTitle = "Display Settings",
             hideInCombatLabel = "Hide the gauges while out of combat or banking",
             hideInCombatOptions = {
@@ -64,7 +63,13 @@ local localization = {
             positionSettingsTitle = "Position Settings",
             lockPositionLabel = "Lock Position - Prevents repositioning",
             componentEditingLabel = "Advanced Positioning - Allow moving individual components",
-            lockPositionHelp = "Hold Shift+Ctrl to reposition <br>(While hovering a component if using Advanced Positioning)"
+            lockPositionHelp = "Hold Shift+Ctrl to reposition <br>(While hovering a component if using Advanced Positioning)",
+            restoreDefaultSettings = "Restore Default Settings",
+            restoreDefaultSettingsHelp = "After clicking the below button - disable & re-enable Job Gauges to complete the process.",
+            confirmTitle = "Reset Settings",
+            confirmRestoreDefaultSettings = "After clicking 'Confirm' you will need to disable & re-enable Job Gauges for the reset to be complete.",
+            confirmCancelLabel = "Cancel",
+            confirmConfirmLabel = "Confirm",
         },
         necromancy = {
             gaugeComponentsTitle = "Necromancy Gauge Components",
@@ -161,6 +166,7 @@ local localization = {
                 magic = "Magie",
                 melee = "Nahkampf",
                 ranged = "Fernkampf",
+                all = "Alle",
             },
             gaugeSettingsTitle = "Job-Gauge-Einstellungen",
             dynamicSwappingLabel = "Aktive Stil-Gauge dynamisch wechseln anhand von...",
@@ -169,7 +175,6 @@ local localization = {
                 equippedMainhandWeapon = "Ausgerüstete Haupthandwaffe",
                 setItMyself = "Ich lege sie selbst fest"
             },
-            styleButtonsLabel = "Wenn du „Ich lege sie selbst fest“ gewählt hast, lege deine aktive Gauge mit den folgenden Schaltflächen fest",
             displaySettingsTitle = "Anzeigeeinstellungen",
             hideInCombatLabel = "Gauges außerhalb des Kampfes oder beim Bankieren ausblenden",
             hideInCombatOptions = {
@@ -179,9 +184,11 @@ local localization = {
             displayTimeAsLabel = "Genaue Zeit anzeigen oder auf die nächste Sekunde aufrunden?",
             displayTimeAsOptions = {
                 preciseTime = "Genaue Zeit (16,8)",
-                nearestSecond = "Nächste Sekunde (17)"
+                nearestSecond = "Aufgerundet (17)",
+                preciseTicks = "Spiel-Ticks (28)"
             },
             readyTextLabel = "„Bereit“-Text ändern (leer lassen, um ihn auszublenden)",
+            readyTextPlaceholder = "Bereit-Text",
             colourSettingsTitle = "Farbeinstellungen",
             durationText = {
                 label = "Text für verbleibende Dauer / Stapel",
@@ -207,9 +214,18 @@ local localization = {
                 windowTitle = "Fähigkeitsschatten",
                 acceptButton = "Farbe festlegen",
             },
+            backdropColour = {
+                label = "Hintergrundfarbe",
+                tooltip = "Farbe des Fähigkeits-Hintergrunds auswählen",
+                windowTitle = "Fähigkeitshintergrund",
+                acceptButton = "Farbe festlegen",
+            },
             positionSettingsTitle = "Positionseinstellungen",
             lockPositionLabel = "Position sperren",
-            lockPositionHelp = "Halte Umschalt+Strg gedrückt, während die Position entsperrt ist, um deine Gauges neu zu positionieren"
+            componentEditingLabel = "Erweiterte Positionierung – einzelne Komponenten verschieben",
+            lockPositionHelp = "Halte Umschalt+Strg gedrückt, um die Position neu festzulegen <br>(bei aktivierter erweiterter Positionierung über einer Komponente)",
+            restoreDefaultSettings = "Standardeinstellungen wiederherstellen",
+            restoreDefaultSettingsHelp = "Klicke auf die Schaltfläche unten und deaktiviere und aktiviere Job Gauges erneut, um den Vorgang abzuschließen."
         },
         necromancy = {
             gaugeComponentsTitle = "Komponenten der Nekromantie-Gauge",
@@ -283,6 +299,7 @@ local localization = {
             deathsSwiftness = "Death's Swiftness anzeigen",
             perfectEquilibrium = "Perfect Equilibrium anzeigen",
             guthixianRuneLabel = "Guthixian-Rune für Perfect-Equilibrium-Stapel",
+            guthixianRunes = "Guthixian-Runen anzeigen",
             guthixianRunesColoursTitle = "Farben der Guthixian-Runen",
             activeColours = {
                 label = "Aktive Farbe & aktiver Schatten",
@@ -305,6 +322,7 @@ local localization = {
                 magic = "Magia",
                 melee = "Combate Corpo a Corpo",
                 ranged = "Combate à Distância",
+                all = "Todos",
             },
             gaugeSettingsTitle = "Configurações da Interface de Combate",
             dynamicSwappingLabel = "Alternar dinamicamente a interface de estilo ativa usando...",
@@ -313,7 +331,6 @@ local localization = {
                 equippedMainhandWeapon = "Arma de mão principal equipada",
                 setItMyself = "Vou defini-la manualmente"
             },
-            styleButtonsLabel = "Se você escolheu 'Vou defini-la manualmente', defina sua interface ativa usando os botões abaixo",
             displaySettingsTitle = "Configurações de Exibição",
             hideInCombatLabel = "Ocultar as interfaces fora de combate ou ao usar o banco",
             hideInCombatOptions = {
@@ -323,9 +340,11 @@ local localization = {
             displayTimeAsLabel = "Mostrar o tempo preciso ou arredondar para o segundo mais próximo?",
             displayTimeAsOptions = {
                 preciseTime = "Tempo Preciso (16,8)",
-                nearestSecond = "Segundo Mais Próximo (17)"
+                nearestSecond = "Arredondado (17)",
+                preciseTicks = "Ticks do Jogo (28)"
             },
             readyTextLabel = "Alterar o texto 'Pronto' (deixe em branco para ocultar)",
+            readyTextPlaceholder = "Texto de pronto",
             colourSettingsTitle = "Configurações de Cores",
             durationText = {
                 label = "Texto de Duração Restante / Pilhas",
@@ -351,9 +370,19 @@ local localization = {
                 windowTitle = "Sombra do Recurso",
                 acceptButton = "Definir Cor",
             },
+            backdropColour = {
+                label = "Cor do Fundo",
+                tooltip = "Escolha a cor do fundo dos recursos",
+                windowTitle = "Fundo do Recurso",
+                acceptButton = "Definir Cor",
+            },
             positionSettingsTitle = "Configurações de Posição",
             lockPositionLabel = "Bloquear Posição",
-            lockPositionHelp = "Mantenha Shift+Ctrl pressionado enquanto a posição estiver desbloqueada para reposicionar suas interfaces"
+            componentEditingLabel = "Posicionamento Avançado - Permitir mover componentes individualmente",
+            lockPositionHelp = "Mantenha Shift+Ctrl pressionado para reposicionar <br>(sobre um componente, se o Posicionamento Avançado estiver ativado)",
+            restoreDefaultSettings = "Restaurar configurações padrão",
+            restoreDefaultSettingsHelp = "Após clicar no botão abaixo, desative e reative o Job Gauges para concluir o processo."
+
         },
         necromancy = {
             gaugeComponentsTitle = "Componentes da Interface de Necromancia",
@@ -427,6 +456,7 @@ local localization = {
             deathsSwiftness = "Mostrar Rapidez da Morte",
             perfectEquilibrium = "Mostrar Perfect Equilibrium",
             guthixianRuneLabel = "Runa Guthixian para as Pilhas de Perfect Equilibrium",
+            guthixianRunes = "Mostrar Runas Guthixian",
             guthixianRunesColoursTitle = "Cores das Runas Guthixian",
             activeColours = {
                 label = "Cor Ativa & Sombra Ativa",
@@ -449,6 +479,7 @@ local localization = {
                 magic = "Magie",
                 melee = "Combat rapproché",
                 ranged = "Combat à distance",
+                all = "Toutes",
             },
             gaugeSettingsTitle = "Paramètres de la jauge de combat",
             dynamicSwappingLabel = "Changer dynamiquement de jauge de style active selon...",
@@ -457,7 +488,6 @@ local localization = {
                 equippedMainhandWeapon = "Arme principale équipée",
                 setItMyself = "Je la définirai moi-même"
             },
-            styleButtonsLabel = "Si vous avez choisi « Je la définirai moi-même », définissez votre jauge active à l'aide des boutons ci-dessous",
             displaySettingsTitle = "Paramètres d'affichage",
             hideInCombatLabel = "Masquer les jauges hors combat ou lors de l'utilisation de la banque",
             hideInCombatOptions = {
@@ -467,9 +497,11 @@ local localization = {
             displayTimeAsLabel = "Afficher le temps précis ou arrondir à la seconde la plus proche ?",
             displayTimeAsOptions = {
                 preciseTime = "Temps précis (16,8)",
-                nearestSecond = "Seconde la plus proche (17)"
+                nearestSecond = "Arrondi (17)",
+                preciseTicks = "Ticks de jeu (28)"
             },
             readyTextLabel = "Modifier le texte « Prêt » (laisser vide pour le masquer)",
+            readyTextPlaceholder = "Texte « Prêt »",
             colourSettingsTitle = "Paramètres de couleur",
             durationText = {
                 label = "Texte de durée restante / cumuls",
@@ -495,9 +527,18 @@ local localization = {
                 windowTitle = "Ombre des capacités",
                 acceptButton = "Définir la couleur",
             },
+            backdropColour = {
+                label = "Couleur de l'arrière-plan",
+                tooltip = "Choisissez la couleur de l'arrière-plan des capacités",
+                windowTitle = "Arrière-plan des capacités",
+                acceptButton = "Définir la couleur",
+            },
             positionSettingsTitle = "Paramètres de position",
             lockPositionLabel = "Verrouiller la position",
-            lockPositionHelp = "Maintenez Maj+Ctrl enfoncées lorsque la position est déverrouillée pour repositionner vos jauges"
+            componentEditingLabel = "Positionnement avancé – déplacer les composants individuellement",
+            lockPositionHelp = "Maintenez Maj+Ctrl pour repositionner <br>(en survolant un composant si le positionnement avancé est activé)",
+            restoreDefaultSettings = "Restaurer les paramètres par défaut",
+            restoreDefaultSettingsHelp = "Après avoir cliqué sur le bouton ci-dessous, désactivez puis réactivez Job Gauges pour terminer le processus."
         },
         necromancy = {
             gaugeComponentsTitle = "Composants de la jauge de Nécromancie",
@@ -574,6 +615,7 @@ local localization = {
             deathsSwiftness = "Afficher Death's Swiftness",
             perfectEquilibrium = "Afficher Perfect Equilibrium",
             guthixianRuneLabel = "Rune Guthixian pour les cumuls de Perfect Equilibrium",
+            guthixianRunes = "Afficher les runes Guthixian",
             guthixianRunesColoursTitle = "Couleurs des runes Guthixian",
             activeColours = {
                 label = "Couleur active & ombre active",

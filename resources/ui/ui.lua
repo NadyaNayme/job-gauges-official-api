@@ -21,7 +21,8 @@ local M = {}
 -- Then everything gets individual functions to update their state `update__ComponentName()`.
 -- There is a block to reposition everything at once: `set__ComponentPosition()`.
 
-local function colourToVector4(colour)
+local function colourToVector4(colour, fallback)
+    if colour == nil then colour = fallback end
     local colour = tonumber(colour)
     local r = math.floor(colour / 0x1000000) % 0x100
     local g = math.floor(colour / 0x10000) % 0x100
@@ -75,25 +76,25 @@ local LARGE_FONT = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
 local MEDIUM_FONT = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
 local SMALL_FONT = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
 
-local FONT_COLOUR = colourToVector4(settings.Get("fontColours.durationText"))
-local COOLDOWN_COLOUR = colourToVector4(settings.Get("fontColours.cooldownText"))
-local EXPIRING_COLOUR = colourToVector4(settings.Get("fontColours.expiringText"))
-local READY_COLOUR = colourToVector4(settings.Get("fontColours.readyText"))
+local FONT_COLOUR = colourToVector4(settings.Get("fontColours.durationText"), "0xFFFFFFFF")
+local COOLDOWN_COLOUR = colourToVector4(settings.Get("fontColours.cooldownText"), "0xFFFFFFFF")
+local EXPIRING_COLOUR = colourToVector4(settings.Get("fontColours.expiringText"), "0xF30B0BFF")
+local READY_COLOUR = colourToVector4(settings.Get("fontColours.readyText"), "0xFFFFFFFF")
 
 local SELECTED_GUTHIXIAN_RUNE = settings.Get("rangedSettings.selectedGuthixianRune")
 
 local SHOW_RUNES = settings.Get("rangedSettings.componentVisibility")["show-guthixian-runes"]
-local ACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.active"))
-local ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"))
-local INACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactive"))
-local INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactiveShadow"))
+local ACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.active"), "0x70FF00FF")
+local ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.activeShadow"), "0x100101FF")
+local INACTIVE_RUNE_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactive"), "0x050012FF")
+local INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.runeColours.inactiveShadow"), "0xC1BDAC89")
 
 local RUNE_SHADOW_OFFSET = 1
 
-local BACKDROP_COLOUR = colourToVector4(settings.Get("uiColours.backdropColour"))
-local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"))
-local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"))
-local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"))
+local BACKDROP_COLOUR = colourToVector4(settings.Get("uiColours.backdropColour"), "0xFFFFFF00")
+local BLOOD_TITHE_COLOUR = colourToVector4(settings.Get("uiColours.barColours.bloodTitheBar"), "0xF30B0BFF")
+local INCITE_FEAR_COLOUR = colourToVector4(settings.Get("uiColours.barColours.inciteFearBar"), "0x16D6E5FF")
+local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barColours.essenceCorruptionBar"), "0x16A127FF")
 
 local AMMO_ID = 53 -- Headless Arrow by default if no ammo is detected
 local AMMO_NAME = ''
@@ -142,7 +143,7 @@ end
 
 local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 
-    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__GAME_AREA)
+    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__PLUGIN_BUILD_LAYER_TOP)
     if not gameArea then
     log("Can't find game area")
     return
@@ -250,7 +251,7 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
 end
 
 
-local ABILITY_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.shadowColour"))
+local ABILITY_SHADOW_COLOUR = colourToVector4(settings.Get("uiColours.shadowColour"), "0x111111DD")
 local ABILITY_SHADOW_SIZE = 42
 local ABILITY_SHADOW_OFFSET = -1
 local abilityShadows = {}
@@ -439,7 +440,7 @@ local function createSpriteIndicator(parent, position, width, height)
     text:SetSize(22, 15)
     text:MoveToFront()
     text.content = ""
-    text.font = SMALL_FONT
+    text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     text.colour = FONT_COLOUR
     text.isShadowed = true
     text.alignHorizontal = ui.AlignMode.CENTRE
@@ -489,7 +490,7 @@ local function createObjectSpriteIndicator(parent, position, width, height)
     text:SetSize(22, 15)
     text:MoveToFront()
     text.content = AMMO_DISPLAY_NAME or AMMO_NAME
-    text.font = SMALL_FONT
+    text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     text.colour = FONT_COLOUR
     text.isShadowed = true
     text.alignHorizontal = ui.AlignMode.CENTRE
@@ -576,7 +577,7 @@ local function createMagicUpkeepIndicator(parent, position, name)
     )
     text:SetSize(28, 16)
     text.content = ""
-    text.font = SMALL_FONT
+    text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     text.colour = FONT_COLOUR
     text.isShadowed = true
 
@@ -692,7 +693,7 @@ local function setMagicUpkeepIndicatorPosition(indicator, position)
 end
 
 local CreateUI = function()
-    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__GAME_AREA)
+    local gameArea = ui.Interfaces:GetComponent(id.Component.TOPLEVEL_V2__PLUGIN_BUILD_LAYER_TOP)
     if not gameArea then
     log("Can't find game area")
     return
@@ -966,12 +967,14 @@ local CreateUI = function()
         32,
         32
     )
-    equippedAmmoSprite.style = "ranged"
-    equippedAmmoSprite.position = GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo
-    equippedAmmoSprite.positionKey = "equippedAmmoSprite"
-    equippedAmmoSprite.width = 32
-    equippedAmmoSprite.height = 32
-    table.insert(GAUGE_COMPONENTS, equippedAmmoSprite)
+    if equippedAmmoSprite then
+        equippedAmmoSprite.style = "ranged"
+        equippedAmmoSprite.position = GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo
+        equippedAmmoSprite.positionKey = "equippedAmmoSprite"
+        equippedAmmoSprite.width = 32
+        equippedAmmoSprite.height = 32
+        table.insert(GAUGE_COMPONENTS, equippedAmmoSprite)
+    end
 
     local splitSoul_ecb = createAbilityIndicator(
         rangedGaugeLayer,
@@ -1289,7 +1292,7 @@ local function beginMouseCapture()
     end
 
     local gameArea = ui.Interfaces:GetComponent(
-        id.Component.TOPLEVEL_V2__GAME_AREA
+        id.Component.TOPLEVEL_V2__PLUGIN_BUILD_LAYER_TOP
     )
 
     if not gameArea then
@@ -1366,6 +1369,51 @@ Event.SettingsLayerReady.Subscribe("openSettingsWindow", function(event)
     })
 
   local tabs = settingsView:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged" }, { height = -20, heightAnchor = 1.0 })
+
+  local generalPage = tabs:GetPage(1)
+  local necromancyPage = tabs:GetPage(2)
+  local magicPage = tabs:GetPage(3)
+  local meleePage = tabs:GetPage(4)
+  local rangedPage = tabs:GetPage(5)
+
+  -- Page: General
+    generalSettings.Create(generalPage, {
+        setOffsetX = function(value)
+            OFFSET_POSITION_X = value
+        end,
+
+        setOffsetY = function(value)
+            OFFSET_POSITION_Y = value
+        end,
+
+        updateOverlayPositions = updateOverlayPositions,
+    })
+        
+    necromancySettings.Create(necromancyPage)
+    magicSettings.Create(magicPage)
+    meleeSettings.Create(meleePage)
+    rangedSettings.Create(rangedPage, {
+        setActiveRuneColour = function(colour)
+            updateBOLGLetters(
+                events.playerData.ranged.perfectEquilibrium.stacks,
+                events.playerData.ranged.perfectEquilibrium.active == 1
+            )
+        end,
+    })
+end)
+
+local contentView
+Event.ContentLayerReady.Subscribe("openSettingsContentWindow", function(event)
+     if contentView then contentView:Destroy() end
+
+     local parent = event.component
+
+    contentView = prettyui.SimpleView.new(parent, {
+        width = parent.width,
+        height = parent.height,
+    })
+
+  local tabs = contentView:AddTabs({ "General", "Necromancy", "Magic", "Melee", "Ranged" }, { height = -20, heightAnchor = 1.0 })
 
   local generalPage = tabs:GetPage(1)
   local necromancyPage = tabs:GetPage(2)
@@ -1511,6 +1559,13 @@ local function updateOverlays()
         meleeGaugeLayer.hidden = true
      end
 
+    if playerData.viewingWorldMap == true then
+        necromancyGaugeLayer.hidden = true
+        magicGaugeLayer.hidden = true
+        rangedGaugeLayer.hidden = true
+        meleeGaugeLayer.hidden = true
+     end
+
     if necromancySettings.componentVisibility["show-death-grasp"] then 
         deathGrasp.layer.hidden = false
         if necromancy.deathGrasp.active == 1
@@ -1529,7 +1584,7 @@ local function updateOverlays()
                 deathGrasp.text.colour = COOLDOWN_COLOUR
             else
                 deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.active
-                deathGrasp.text.font = SMALL_FONT
+                deathGrasp.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 deathGrasp.text.content = READY_TEXT
                 deathGrasp.text.colour = READY_COLOUR
         end
@@ -1556,7 +1611,7 @@ local function updateOverlays()
                 deathEssence.text.colour = COOLDOWN_COLOUR
             else
                 deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
-                deathEssence.text.font = SMALL_FONT
+                deathEssence.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 deathEssence.text.content = READY_TEXT
                 deathEssence.text.colour = READY_COLOUR
         end
@@ -1582,7 +1637,7 @@ local function updateOverlays()
                 soulCrush.text.colour = COOLDOWN_COLOUR
             else
                 soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.active
-                soulCrush.text.font = SMALL_FONT
+                soulCrush.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 soulCrush.text.content = READY_TEXT
                 soulCrush.text.colour = READY_COLOUR
         end
@@ -1653,7 +1708,7 @@ local function updateOverlays()
                     overlaySprites.necromancy.living_death.active,
                     overlaySprites.utility.shadow
                 )
-                livingDeath.text.font = SMALL_FONT
+                livingDeath.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 livingDeath.text.content = READY_TEXT
                 livingDeath.text.colour = READY_COLOUR
         end
@@ -1851,7 +1906,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                sunshine.text.font = SMALL_FONT
+                sunshine.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 sunshine.text.content = READY_TEXT
                 sunshine.text.colour = READY_COLOUR
         end
@@ -1890,7 +1945,7 @@ local function updateOverlays()
                     overlaySprites.magic.tsunami.active,
                     overlaySprites.utility.shadow
                 )
-                tsunami.text.font = SMALL_FONT
+                tsunami.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 tsunami.text.content = READY_TEXT
                 tsunami.text.colour = READY_COLOUR
         end
@@ -1929,7 +1984,7 @@ local function updateOverlays()
                     overlaySprites.magic.runicCharge.active,
                     overlaySprites.utility.shadow
                 )
-                runicCharge.text.font = SMALL_FONT
+                runicCharge.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 runicCharge.text.content = READY_TEXT
                 runicCharge.text.colour = READY_COLOUR
         end
@@ -1955,7 +2010,7 @@ local function updateOverlays()
                 soulfire.text.colour = COOLDOWN_COLOUR
             else
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
-                soulfire.text.font = SMALL_FONT
+                soulfire.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 soulfire.text.content = READY_TEXT
                 soulfire.text.colour = READY_COLOUR
         end
@@ -1981,7 +2036,7 @@ local function updateOverlays()
                 instability.text.colour = COOLDOWN_COLOUR
             else
                 instability.sprite.sprite = overlaySprites.magic.instability.active
-                instability.text.font = SMALL_FONT
+                instability.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 instability.text.content = READY_TEXT
                 instability.text.colour = READY_COLOUR
         end
@@ -2037,7 +2092,7 @@ local function updateOverlays()
                 crystalRain.text.colour = COOLDOWN_COLOUR
             else
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
-                crystalRain.text.font = SMALL_FONT
+                crystalRain.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 crystalRain.text.content = READY_TEXT
                 crystalRain.text.colour = READY_COLOUR
         end
@@ -2063,7 +2118,7 @@ local function updateOverlays()
                 splitSoul_ecb.text.colour = COOLDOWN_COLOUR
             else
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.active
-                splitSoul_ecb.text.font = SMALL_FONT
+                splitSoul_ecb.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 splitSoul_ecb.text.content = READY_TEXT
                 splitSoul_ecb.text.colour = READY_COLOUR
         end
@@ -2165,7 +2220,7 @@ local function updateOverlays()
                         overlaySprites.utility.shadow
                     )
                 end
-                deathsSwiftness.text.font = SMALL_FONT
+                deathsSwiftness.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 deathsSwiftness.text.content = READY_TEXT
                 deathsSwiftness.text.colour = READY_COLOUR
         end
@@ -2204,7 +2259,7 @@ local function updateOverlays()
                     overlaySprites.ranged.searing_winds.active,
                     overlaySprites.utility.shadow
                 )
-                searingWinds.text.font = SMALL_FONT
+                searingWinds.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 searingWinds.text.content = READY_TEXT
                 searingWinds.text.colour = READY_COLOUR
         end
@@ -2243,7 +2298,7 @@ local function updateOverlays()
                     overlaySprites.ranged.shadow_imbued.active,
                     overlaySprites.utility.shadow
                 )
-                shadowImbued.text.font = SMALL_FONT
+                shadowImbued.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 shadowImbued.text.content = READY_TEXT
                 shadowImbued.text.colour = READY_COLOUR
         end
@@ -2318,7 +2373,7 @@ local function updateOverlays()
                 blackhole.text.colour = COOLDOWN_COLOUR
             else
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
-                blackhole.text.font = SMALL_FONT
+                blackhole.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 blackhole.text.content = READY_TEXT
                 blackhole.text.colour = READY_COLOUR
         end
@@ -2344,7 +2399,7 @@ local function updateOverlays()
                 igneousShowdown.text.colour = COOLDOWN_COLOUR
             else
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
-                igneousShowdown.text.font = SMALL_FONT
+                igneousShowdown.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 igneousShowdown.text.content = READY_TEXT
                 igneousShowdown.text.colour = READY_COLOUR
         end
@@ -2400,7 +2455,7 @@ local function updateOverlays()
                     overlaySprites.melee.chaos_roar.active,
                     overlaySprites.utility.shadow
                 )
-                chaosRoar.text.font = SMALL_FONT
+                chaosRoar.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 chaosRoar.text.content = READY_TEXT
                 chaosRoar.text.colour = READY_COLOUR
         end
@@ -2438,7 +2493,7 @@ local function updateOverlays()
                     overlaySprites.melee.meteor_strike.active,
                     overlaySprites.utility.shadow
                 )
-                meteorStrike.text.font = SMALL_FONT
+                meteorStrike.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 meteorStrike.text.content = READY_TEXT
                 meteorStrike.text.colour = READY_COLOUR
         end
@@ -2476,7 +2531,7 @@ local function updateOverlays()
                     overlaySprites.melee.berserk.active,
                     overlaySprites.utility.shadow
                 )
-                berserk.text.font = SMALL_FONT
+                berserk.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
                 berserk.text.content = READY_TEXT
                 berserk.text.colour = READY_COLOUR
         end
@@ -2545,98 +2600,97 @@ local function updateOverlays()
     end
 
 
-    -- Allow repositioning individual gauge components.
-    if Mouse.IsAvailable()
-        and Keyboard.IsAvailable()
-        and not POSITION_LOCKED
-        and COMPONENT_EDITING
-    then
-        local shiftDown = Keyboard.IsShiftDown()
-        local ctrlDown = Keyboard.IsControlDown()
-        local altDown = Keyboard.IsAltDown()
+-- Allow repositioning individual gauge components.
+if Mouse.IsAvailable()
+    and Keyboard.IsAvailable()
+    and not POSITION_LOCKED
+    and COMPONENT_EDITING
+then
+    local shiftDown = Keyboard.IsShiftDown()
+    local ctrlDown = Keyboard.IsControlDown()
+    local altDown = Keyboard.IsAltDown()
 
-        if shiftDown and ctrlDown then
-            if not mouseCaptureComponent then
-                if not beginMouseCapture() then
-                    return
-                end
+    if shiftDown and ctrlDown then
+        if not mouseCaptureComponent then
+            if not beginMouseCapture() then
+                return
             end
+        end
 
-            local mousePosition = getMousePosition()
+        -- Must be in the same coordinate system as component positions.
+        local mousePosition = getMousePosition()
 
-            if mousePosition then
-                if draggedComponent == nil then
-                    draggedComponent = getHoveredComponent(mousePosition)
-
-                    if draggedComponent then
-                        local position = draggedComponent.position
-
-                        local componentX =
-                            position.x + OFFSET_POSITION_X
-
-                        local componentY =
-                            position.y + OFFSET_POSITION_Y
-
-                        dragOffsetX =
-                            mousePosition.x - componentX
-
-                        dragOffsetY =
-                            mousePosition.y - componentY
-                    end
-                end
+        if mousePosition then
+            if draggedComponent == nil then
+                draggedComponent = getHoveredComponent(mousePosition)
 
                 if draggedComponent then
                     local position = draggedComponent.position
 
-                    local newX =
+                    dragOffsetX =
                         mousePosition.x
+                        - position.x
                         - OFFSET_POSITION_X
-                        - dragOffsetX
 
-                    local newY =
+                    dragOffsetY =
                         mousePosition.y
+                        - position.y
                         - OFFSET_POSITION_Y
-                        - dragOffsetY
-
-                    if altDown then
-                        newX = snapToGrid(newX, 10)
-                        newY = snapToGrid(newY, 10)
-                    end
-
-                    position.x = newX
-                    position.y = newY
-
-                    updateOverlayPositions()
                 end
             end
-        else
+
             if draggedComponent then
                 local position = draggedComponent.position
 
-                settings.Set(
-                    draggedComponent.style
-                        .. "Settings.componentPositions."
-                        .. draggedComponent.positionKey
-                        .. ".x",
-                    position.x
-                )
+                local newX =
+                    mousePosition.x
+                    - OFFSET_POSITION_X
+                    - dragOffsetX
 
-                settings.Set(
-                    draggedComponent.style
-                        .. "Settings.componentPositions."
-                        .. draggedComponent.positionKey
-                        .. ".y",
-                    position.y
-                )
+                local newY =
+                    mousePosition.y
+                    - OFFSET_POSITION_Y
+                    - dragOffsetY
 
-                draggedComponent = nil
-                dragOffsetX = 0
-                dragOffsetY = 0
+                if altDown then
+                    newX = snapToGrid(newX, 10)
+                    newY = snapToGrid(newY, 10)
+                end
+
+                position.x = newX
+                position.y = newY
+
+                updateOverlayPositions()
             end
-
-            endMouseCapture()
         end
+    else
+        if draggedComponent then
+            local position = draggedComponent.position
+
+            settings.Set(
+                draggedComponent.style
+                    .. "Settings.componentPositions."
+                    .. draggedComponent.positionKey
+                    .. ".x",
+                position.x
+            )
+
+            settings.Set(
+                draggedComponent.style
+                    .. "Settings.componentPositions."
+                    .. draggedComponent.positionKey
+                    .. ".y",
+                position.y
+            )
+
+            draggedComponent = nil
+            dragOffsetX = 0
+            dragOffsetY = 0
+        end
+
+        endMouseCapture()
     end
+end
 
 end
 
@@ -2767,7 +2821,7 @@ settings.Subscribe(
 settings.Subscribe(
     "fontColours.durationText",
     function(colour)
-        FONT_COLOUR = colourToVector4(colour)
+        FONT_COLOUR = colourToVector4(colour, "0xFFFFFFFF")
 
         for _, text in ipairs(fontTexts) do
             text.colour = FONT_COLOUR
@@ -2778,28 +2832,28 @@ settings.Subscribe(
 settings.Subscribe(
     "fontColours.expiringText",
     function(colour)
-        EXPIRING_COLOUR = colourToVector4(colour)
+        EXPIRING_COLOUR = colourToVector4(colour, "0xF30B0BFF")
     end
 )
 
 settings.Subscribe(
     "fontColours.cooldownText",
     function(colour)
-        COOLDOWN_COLOUR = colourToVector4(colour)
+        COOLDOWN_COLOUR = colourToVector4(colour, "0xFFFFFFFF")
     end
 )
 
 settings.Subscribe(
     "fontColours.readyText",
     function(colour)
-        READY_COLOUR = colourToVector4(colour)
+        READY_COLOUR = colourToVector4(colour, "0xFFFFFFFF")
     end
 )
 
 settings.Subscribe(
     "uiColours.backdropColour",
     function(colour)
-        BACKDROP_COLOUR = colourToVector4(colour)
+        BACKDROP_COLOUR = colourToVector4(colour, "0xFFFFFF00")
 
         for _, backdrop in ipairs(backdrops) do
             backdrop.colour = BACKDROP_COLOUR
@@ -2810,7 +2864,7 @@ settings.Subscribe(
 settings.Subscribe(
     "uiColours.shadowColour",
     function(colour)
-        ABILITY_SHADOW_COLOUR = colourToVector4(colour)
+        ABILITY_SHADOW_COLOUR = colourToVector4(colour, "0x111111DD")
 
         for _, shadow in ipairs(abilityShadows) do
             shadow.colour = ABILITY_SHADOW_COLOUR
@@ -2821,25 +2875,30 @@ settings.Subscribe(
 settings.Subscribe(
     "uiColours.barColours.bloodTitheBar",
     function(colour)
-        local vector4Color = colourToVector4(colour)
+        local vector4Color = colourToVector4(colour, "0xF30B0BFF")
         BLOOD_TITHE_COLOUR = vector4Color
         magicUpkeepBars.bloodTithe.sprite.colour = vector4Color
     end
 )
 
 settings.Subscribe(
-    "uiColours.barColours.glacialEmbraceBar",
+    "uiColours.barColours.inciteFearBar",
     function(colour)
-        local vector4Color = colourToVector4(colour)
+
+        local vector4Color = colourToVector4(colour, "0x16D6E5FF")
         INCITE_FEAR_COLOUR = vector4Color
-        magicUpkeepBars.glacialEmbrace.sprite.colour = vector4Color
+
+        local bar = magicUpkeepBars.inciteFear
+        if bar and bar.sprite then
+            bar.sprite.colour = vector4Color
+        end
     end
 )
 
 settings.Subscribe(
     "uiColours.barColours.essenceCorruptionBar",
     function(colour)
-        local vector4Color = colourToVector4(colour)
+        local vector4Color = colourToVector4(colour, "0x16A127FF")
         ESSENCE_CORRUPTION_COLOUR = vector4Color
         magicUpkeepBars.essenceCorruption.sprite.colour = vector4Color
     end
@@ -2848,28 +2907,28 @@ settings.Subscribe(
 settings.Subscribe(
     "uiColours.runeColours.active",
     function(colour)
-        ACTIVE_RUNE_COLOUR = colourToVector4(colour)       
+        ACTIVE_RUNE_COLOUR = colourToVector4(colour, "0x70FF00FF")       
     end
 )
 
 settings.Subscribe(
     "uiColours.runeColours.activeShadow",
     function(colour)
-        ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour)
+        ACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour, "0x100101FF")
     end
 )
 
 settings.Subscribe(
     "uiColours.runeColours.inactive",
     function(colour)
-        INACTIVE_RUNE_COLOUR = colourToVector4(colour)
+        INACTIVE_RUNE_COLOUR = colourToVector4(colour, "0x050012FF")
     end
 )
 
 settings.Subscribe(
     "uiColours.runeColours.inactiveShadow",
     function(colour)
-        INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour)
+        INACTIVE_RUNE_SHADOW_COLOUR = colourToVector4(colour, "0xC1BDAC89")
     end
 )
 
@@ -2892,6 +2951,10 @@ settings.Subscribe(
       if settingsView then
         settingsView:Destroy()
         settingsView = nil
+      end
+      if contentView then
+        contentView:Destroy()
+        contentView = nil
       end
     end,
   }

@@ -25,27 +25,35 @@ function M.Create(page, options)
         end,
     })
 
-    page:AddText(L.Get("general.styleButtonsLabel"))
-
     page:AddText("")
     page:AddSimpleButton(L.Get("general.combatStyleNames.necromancy"), function(self, _)
         events.playerData.combatStyle = 'necromancy'
+        settings.Set("generalSettings.automaticSwapping", "static")
+        options.dynamicGaugeSetting:SetSelectedValue("static")
         settings.Set('playerState.combatStyle', 'necromancy')
     end, { inline = true})
     page:AddSimpleButton(L.Get("general.combatStyleNames.magic"), function(self, _)
         events.playerData.combatStyle = 'magic'
+        settings.Set("generalSettings.automaticSwapping", "static")
+        options.dynamicGaugeSetting:SetSelectedValue("static")
         settings.Set('playerState.combatStyle', 'magic')
     end, { inline = true})
     page:AddSimpleButton(L.Get("general.combatStyleNames.melee"), function(self, _)
         events.playerData.combatStyle = 'melee'
+        settings.Set("generalSettings.automaticSwapping", "static")
+        options.dynamicGaugeSetting:SetSelectedValue("static")
         settings.Set('playerState.combatStyle', 'melee')
     end, { inline = true})
     page:AddSimpleButton(L.Get("general.combatStyleNames.ranged"), function(self, _)
         events.playerData.combatStyle = 'ranged'
+        settings.Set("generalSettings.automaticSwapping", "static")
+        options.dynamicGaugeSetting:SetSelectedValue("static")
         settings.Set('playerState.combatStyle', 'ranged')
     end, { inline = true})
     page:AddSimpleButton(L.Get("general.combatStyleNames.all"), function(self, _)
         events.playerData.combatStyle = 'all'
+        settings.Set("generalSettings.automaticSwapping", "static")
+        options.dynamicGaugeSetting:SetSelectedValue("static")
         settings.Set('playerState.combatStyle', 'all')
     end, { inline = true})
 
@@ -253,10 +261,22 @@ function M.Create(page, options)
     page:AddText(L.Get("general.lockPositionHelp"))
 
     -- TODO: Allow users to reset their settings
-    -- page:AddTitle("Restore Default Settings")
-    -- page:AddSimpleButton(id.Sprite.CHAT_V2_FILTERS_ON_8, function()
-    -- settings.Reset()
-    -- end)
+    page:AddTitle(L.Get("general.restoreDefaultSettings"))
+    page:AddText(L.Get("general.restoreDefaultSettingsHelp"))
+    page:AddSimpleButton(id.Sprite.CHAT_V2_FILTERS_ON_8, function()
+        settings.Reset()
+        -- TODO: Add a confirmation to this when PrettyUI is updated
+        -- Confirm.new({
+        --     title = L.Get("general.confirmTitle"),
+        --     body = L.Get("general.confirmRestoreDefaultSettings"),
+        --     cancelLabel = L.Get("general.confirmCancelLabel"),
+        --     confirmLabel = L.Get("general.confirmConfirmLabel")
+        -- }, {
+        --     onConfirm = function()
+        --         settings.Reset()
+        --     end,
+        -- })
+    end)
 
 end
 

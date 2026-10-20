@@ -10,6 +10,7 @@ local spells = require("resources/data/spells")
 local events = {
     playerData = {
         inCombat = false,
+        viewingWorldMap = false,
         activeAspect = nil,
         combatStyle = nil,
         ultimates = {
@@ -818,6 +819,15 @@ local function handleBank()
     events.playerData.inCombat = false
 end
 
+-- Treats the player as 'Out of Combat' if they open the World Map
+local function handleMap(event)
+    if event.newValue > 0 then
+        events.playerData.viewingWorldMap = true
+    else
+        events.playerData.viewingWorldMap = false
+    end
+end
+
 -- Any time the users updates their LASTCASTSPELL varp, do a lookup and set their
 -- active spell to that spell. Will need to be updated whenever new spells are released.
 local function handleLastCastSpell(event)
@@ -900,6 +910,7 @@ local VAR_TRANSMIT_HANDLERS = {
 
 
     BANK_TEMP = handleBank,
+    WORLDMAP_FOCUS = handleMap,
     LASTCASTSPELL = handleLastCastSpell,
 }
 
