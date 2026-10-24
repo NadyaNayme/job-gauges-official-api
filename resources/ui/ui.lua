@@ -46,8 +46,7 @@ local OFFSET_POSITION_X = settings.Get("generalSettings.offsetPosition.x")
 local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
 local POSITION_LOCKED = settings.Get("generalSettings.positionLocked")
 local COMPONENT_EDITING = settings.Get("generalSettings.componentEditing")
-local RETINA_MONITOR = settings.Get("generalSettings.retinaMonitor")
-if RETINA_MONITOR == 0 then RETINA_MONITOR = 1 end
+local RETINA_MONITOR = settings.Get("generalSettings.retinaMonitor") or 1
 local isDraggingOverlay = false
 local overlayMouseCapture = nil
 local draggedComponent = nil
@@ -72,7 +71,7 @@ local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT"
 local READY_TEXT = tostring(settings.Get("generalSettings.readyText"))
 local SPRITE_READY_TEXT = tostring(settings.Get("generalSettings.spriteReadyText"))
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
-local UI_SCALE = settings.Get("generalSettings.scale")
+local UI_SCALE = settings.Get("generalSettings.scale") or 1
 
 local supportedFonts = {
     ["9pt Outline"] = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE,
@@ -123,6 +122,12 @@ local AMMO_DISPLAY_NAME = nil
 
 local function scaleToFactor(number)
     return math.floor(number * UI_SCALE )
+end
+
+-- Convert captured mouse coordinates to the coordinate system
+-- used by the gauge positions.
+local function mouseToUI(number)
+    return number / RETINA_MONITOR
 end
 
 local function snapToGrid(value, gridSize)
@@ -233,7 +238,7 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             shadow.sprite = runeSprite
             sprite.sprite = runeSprite
 
-            local x = runeLayout.x_offset + position.x + OFFSET_POSITION_X
+            local x = scaleToFactor(runeLayout.x_offset) + position.x + OFFSET_POSITION_X
             local y = position.y + OFFSET_POSITION_Y
 
             shadow:SetPos(
@@ -482,8 +487,8 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     local backdrop = ui.Rectangle.new(layer)
     backdrop:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X),
-        math.floor(position.y + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x) + OFFSET_POSITION_X),
+        math.floor(scaleToFactor(position.y) + OFFSET_POSITION_Y)
     )
     backdrop:SetSize(scaleToFactor(width), scaleToFactor(height))
     backdrop.colour = BACKDROP_COLOUR
@@ -493,8 +498,8 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     local sprite = ui.Sprite.new(layer)   
     sprite:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X + scaleToFactor(5)),
-        math.floor(position.y + OFFSET_POSITION_Y + scaleToFactor(2))
+        math.floor(scaleToFactor(position.x) + OFFSET_POSITION_X + scaleToFactor(5)),
+        math.floor(scaleToFactor(position.y) + OFFSET_POSITION_Y + scaleToFactor(2))
     )
 
     sprite:SetSize(
@@ -505,8 +510,8 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + scaleToFactor(8) + OFFSET_POSITION_X),
-        math.floor(position.y + scaleToFactor(12) + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x) + scaleToFactor(8) + OFFSET_POSITION_X),
+        math.floor(scaleToFactor(position.y) + scaleToFactor(12) + OFFSET_POSITION_Y)
     )
     text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
@@ -521,7 +526,12 @@ local function createObjectSpriteIndicator(parent, position, width, height)
     local wornObj = worn:GetSlot(14)
 
     if not wornObj or not wornObj.obj then
-        return nil
+        return {
+            layer = layer,
+            backdrop = backdrop,
+            sprite = sprite,
+            text = text
+        }
     end
 
     local equipped = wornObj.obj
@@ -559,18 +569,18 @@ end
 local function setObjectSpriteIndicatorPosition(indicator, position)
 
     indicator.backdrop:SetPos(
-        math.floor(scaleToFactor(position.x + OFFSET_POSITION_X)),
-        math.floor(scaleToFactor(position.y + OFFSET_POSITION_Y))
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
     )
 
     indicator.sprite:SetPos(
-        math.floor(scaleToFactor(position.x + OFFSET_POSITION_X)),
-        math.floor(scaleToFactor(position.y + OFFSET_POSITION_Y))
+        math.floor(position.x + OFFSET_POSITION_X),
+        math.floor(position.y + OFFSET_POSITION_Y)
     )
 
     indicator.text:SetPos(
-        math.floor(scaleToFactor(position.x + scaleToFactor(8) + OFFSET_POSITION_X)),
-        math.floor(scaleToFactor(position.y + scaleToFactor(14) + OFFSET_POSITION_Y))
+        math.floor(position.x + scaleToFactor(8) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(14) + OFFSET_POSITION_Y)
     )
 
 end
@@ -985,15 +995,17 @@ local CreateUI = function()
     local equippedAmmoSprite = createObjectSpriteIndicator(
         rangedGaugeLayer,
         GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo,
-        32,
-        32
+        scaleToFactor(32),
+        scaleToFactor(32)
     )
     if equippedAmmoSprite then
         equippedAmmoSprite.style = "ranged"
         equippedAmmoSprite.position = GAUGE_COMPONENT_POSITIONS.ranged.equippedAmmo
+        equippedAmmoSprite.position.x = scaleToFactor(equippedAmmoSprite.position.x)
+        equippedAmmoSprite.position.y = scaleToFactor(equippedAmmoSprite.position.y)
         equippedAmmoSprite.positionKey = "equippedAmmoSprite"
-        equippedAmmoSprite.width = 32
-        equippedAmmoSprite.height = 32
+        equippedAmmoSprite.width = scaleToFactor(32)
+        equippedAmmoSprite.height = scaleToFactor(32)
         table.insert(GAUGE_COMPONENTS, equippedAmmoSprite)
     end
 
@@ -1301,8 +1313,8 @@ local CreateUI = function()
         local layout = getRuneLayout(perfectEquilibriumActive)
 
     perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
+        math.floor(scaleToFactor(layout.stacksText.x) + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
+        math.floor(scaleToFactor(layout.stacksText.y) + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
     )
 
     end
@@ -2382,8 +2394,8 @@ local function updateOverlays()
     local layout = getRuneLayout(perfectEquilibriumActive)
 
     perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
+        math.floor(scaleToFactor(layout.stacksText.x) + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
+        math.floor(scaleToFactor(layout.stacksText.y) + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
     )
 
 
@@ -2609,8 +2621,8 @@ local function updateOverlays()
                 local mousePosition = getMousePosition()
 
                 if mousePosition then
-                    OFFSET_POSITION_X = math.floor(mousePosition.x / RETINA_MONITOR)
-                    OFFSET_POSITION_Y = math.floor(mousePosition.y / RETINA_MONITOR)
+                    OFFSET_POSITION_X = math.floor(mouseToUI(mousePosition.x))
+                    OFFSET_POSITION_Y = math.floor(mouseToUI(mousePosition.y))
 
                     updateOverlayPositions()
                 end
@@ -2690,8 +2702,8 @@ then
                     newY = snapToGrid(newY, 10)
                 end
 
-                position.x = math.floor(newX / RETINA_MONITOR)
-                position.y = math.floor(newY / RETINA_MONITOR)
+                position.x = math.floor(mouseToUI(newX))
+                position.y = math.floor(mouseToUI(newY))
 
                 updateOverlayPositions()
             end
@@ -2705,7 +2717,7 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".x",
-                position.x * RETINA_MONITOR
+                position.x
             )
 
             settings.Set(
@@ -2713,7 +2725,7 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".y",
-                position.y * RETINA_MONITOR
+                position.y
             )
 
             draggedComponent = nil
@@ -2784,14 +2796,15 @@ settings.Subscribe(
 settings.Subscribe(
     "generalSettings.retinaMonitor",
     function(value)
-        RETINA_MONITOR = value
+        RETINA_MONITOR =  tonumber(value) or 1
+        updateOverlayPositions()
     end
 )
 
 settings.Subscribe(
     "generalSettings.scale",
     function(value)
-        UI_SCALE = value
+        UI_SCALE = tonumber(value) or 1
         updateOverlayPositions()
     end
 )
