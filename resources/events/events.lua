@@ -747,10 +747,15 @@ local function handleLastAbilityUsed(event)
 
     -- Life Transfer
     if event.newValue == 48328 then
-        events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration = events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration + 35
-        events.playerData.necromancy.conjures.putridZombie.remainingDuration = events.playerData.necromancy.conjures.putridZombie.remainingDuration + 35
-        events.playerData.necromancy.conjures.vengefulGhost.remainingDuration = events.playerData.necromancy.conjures.vengefulGhost.remainingDuration + 35
-        events.playerData.necromancy.conjures.phantomGuardian.remainingDuration = events.playerData.necromancy.conjures.phantomGuardian.remainingDuration + 35
+        if events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration == 0 then 
+            delayLifeTransfer = true
+        else 
+            delayLifeTransfer = false
+            events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration = events.playerData.necromancy.conjures.skeletonWarrior.remainingDuration + 35
+            events.playerData.necromancy.conjures.putridZombie.remainingDuration = events.playerData.necromancy.conjures.putridZombie.remainingDuration + 35
+            events.playerData.necromancy.conjures.vengefulGhost.remainingDuration = events.playerData.necromancy.conjures.vengefulGhost.remainingDuration + 35
+            events.playerData.necromancy.conjures.phantomGuardian.remainingDuration = events.playerData.necromancy.conjures.phantomGuardian.remainingDuration + 35
+        end
     end
 
     -- Anima Charged abilities (SW/GSW, CB/GCB, Dragon Breath)
@@ -1078,6 +1083,7 @@ local CONJURE_DEFINITIONS = {
     },
 }
 
+local delayLifeTransfer = false
 -- The duration display always shows the conjure with the
 -- least duration remaining (aka: the oldest conjure).
 -- Because when that conjure dies, someone without COA
@@ -1097,6 +1103,11 @@ local function updateConjure(name, definition)
             definition.startVar,
             definition.endVar
         )
+
+        if delayLifeTransfer then 
+            remainingTicks = remainingTicks + 35 
+            delayLifeTransfer = false
+        end
 
         conjure.remainingDuration = math.max(0, remainingTicks)
 
