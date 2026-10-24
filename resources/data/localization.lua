@@ -8,6 +8,12 @@ local localization = {
                 ranged = "Ranged",
                 all = "All",
             },
+            retinaMonitor = {
+                label = "HiDPI / Retina Monitor users may need to select 2x or 4x to compensate for the higher pixel density of their monitors.",
+                oneX = "1x",
+                twoX = "2x",
+                fourX = "4x"
+            },
             gaugeSettingsTitle = "Job Gauge Settings",
             dynamicSwappingLabel = "Dynamically swap active style gauge using...",
             dynamicSwappingOptions = {

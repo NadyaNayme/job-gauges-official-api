@@ -228,6 +228,28 @@ function M.Create(page, options)
 
     page:AddTitle(L.Get("general.positionSettingsTitle"))
 
+    page:AddText({
+        text = L.Get("general.retinaMonitor.label"),
+    })
+
+    page:AddText({
+        text = "",
+        inline = false,
+    })
+
+    options.retinaMonitorSetting = page:AddRadioButton({
+        { text = L.Get("general.retinaMonitor.oneX"), value = "1" },
+        { text = L.Get("general.retinaMonitor.twoX"), value = "2" },
+        { text = L.Get("general.retinaMonitor.fourX"), value = "4" },
+    }, {
+        selectedValue = settings.Get("generalSettings.retinaMonitor"),
+        inline = true,
+
+        onChange = function(_, value)
+            settings.Set("generalSettings.retinaMonitor", value)
+        end,
+    })
+
     page:AddCheckboxButton({
         {
             text = L.Get("general.lockPositionLabel"),

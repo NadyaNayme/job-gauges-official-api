@@ -46,6 +46,8 @@ local OFFSET_POSITION_X = settings.Get("generalSettings.offsetPosition.x")
 local OFFSET_POSITION_Y = settings.Get("generalSettings.offsetPosition.y")
 local POSITION_LOCKED = settings.Get("generalSettings.positionLocked")
 local COMPONENT_EDITING = settings.Get("generalSettings.componentEditing")
+local RETINA_MONITOR = settings.Get("generalSettings.retinaMonitor")
+if RETINA_MONITOR == 0 then RETINA_MONITOR = 1 end
 local isDraggingOverlay = false
 local overlayMouseCapture = nil
 local draggedComponent = nil
@@ -70,7 +72,7 @@ local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT"
 local READY_TEXT = tostring(settings.Get("generalSettings.readyText"))
 local SPRITE_READY_TEXT = tostring(settings.Get("generalSettings.spriteReadyText"))
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
-local UI_SCALE = settings.Get("generalSettings.scale")
+local UI_SCALE = 1.6 --settings.Get("generalSettings.scale")
 
 local LARGE_FONT = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
 local MEDIUM_FONT = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
@@ -99,6 +101,10 @@ local ESSENCE_CORRUPTION_COLOUR = colourToVector4(settings.Get("uiColours.barCol
 local AMMO_ID = 53 -- Headless Arrow by default if no ammo is detected
 local AMMO_NAME = ''
 local AMMO_DISPLAY_NAME = nil
+
+local function scaleToFactor(number)
+    return math.floor(number * UI_SCALE )
+end
 
 local function snapToGrid(value, gridSize)
     return math.floor(value / gridSize + 0.5) * gridSize
@@ -217,8 +223,8 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             )
 
             shadow:SetSize(
-                runeLayout.size.width,
-                runeLayout.size.height
+                scaleToFactor(runeLayout.size.width),
+                scaleToFactor(runeLayout.size.height)
             )
 
             sprite:SetPos(
@@ -227,8 +233,8 @@ local function updateBOLGLetters(stacks, perfectEquilibriumActive)
             )
 
             sprite:SetSize(
-                runeLayout.size.width,
-                runeLayout.size.height
+                scaleToFactor(runeLayout.size.width),
+                scaleToFactor(runeLayout.size.height)
             )
 
             if i <= stacks then
@@ -269,13 +275,9 @@ local function ticksToSeconds(ticks)
     end
 end
 
-local function scaleToFactor(number)
-    return math.floor(number * UI_SCALE )
-end
-
 local function createGaugeLayer(parent)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(600, 600, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(600), scaleToFactor(600), 1.0, 1.0)
     return layer
 end
 
@@ -316,10 +318,10 @@ local function createAbilityIndicator(parent, position)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + 8 + OFFSET_POSITION_X),
-        math.floor(position.y + 14 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(8) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(14) + OFFSET_POSITION_Y)
     )
-    text:SetSize(22, 15)
+    text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
     text.content = ""
     text.font = LARGE_FONT
@@ -376,10 +378,10 @@ local function createAbilitySpriteIndicator(parent, position)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + 16 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x + scaleToFactor(16) + OFFSET_POSITION_X)),
+        math.floor(scaleToFactor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y))
     )
-    text:SetSize(22, 15)
+    text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
     text.content = ""
     text.font = MEDIUM_FONT
@@ -434,10 +436,10 @@ local function createSpriteIndicator(parent, position, width, height)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + 1 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(1) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y)
     )
-    text:SetSize(22, 15)
+    text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
     text.content = ""
     text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
@@ -472,8 +474,8 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     local sprite = ui.Sprite.new(layer)   
     sprite:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X + 5),
-        math.floor(position.y + OFFSET_POSITION_Y + 2)
+        math.floor(position.x + OFFSET_POSITION_X + scaleToFactor(5)),
+        math.floor(position.y + OFFSET_POSITION_Y + scaleToFactor(2))
     )
 
     sprite:SetSize(
@@ -484,10 +486,10 @@ local function createObjectSpriteIndicator(parent, position, width, height)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + 8 + OFFSET_POSITION_X),
-        math.floor(position.y + 12 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(8) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(12) + OFFSET_POSITION_Y)
     )
-    text:SetSize(22, 15)
+    text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
     text.content = AMMO_DISPLAY_NAME or AMMO_NAME
     text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
@@ -538,18 +540,18 @@ end
 local function setObjectSpriteIndicatorPosition(indicator, position)
 
     indicator.backdrop:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X),
-        math.floor(position.y + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x + OFFSET_POSITION_X)),
+        math.floor(scaleToFactor(position.y + OFFSET_POSITION_Y))
     )
 
     indicator.sprite:SetPos(
-        math.floor(position.x + OFFSET_POSITION_X),
-        math.floor(position.y + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x + OFFSET_POSITION_X)),
+        math.floor(scaleToFactor(position.y + OFFSET_POSITION_Y))
     )
 
     indicator.text:SetPos(
-        math.floor(position.x + 8 + OFFSET_POSITION_X),
-        math.floor(position.y + 14 + OFFSET_POSITION_Y)
+        math.floor(scaleToFactor(position.x + scaleToFactor(8) + OFFSET_POSITION_X)),
+        math.floor(scaleToFactor(position.y + scaleToFactor(14) + OFFSET_POSITION_Y))
     )
 
 end
@@ -557,7 +559,7 @@ end
 local magicUpkeepBars = {}
 local function createMagicUpkeepIndicator(parent, position, name)
     local layer = ui.Layer.new(parent)
-    layer:SetSize(90, 24, 1.0, 1.0)
+    layer:SetSize(scaleToFactor(90), scaleToFactor(24), 1.0, 1.0)
 
     local backdrop = ui.Rectangle.new(layer)
     backdrop:SetPos(
@@ -572,10 +574,10 @@ local function createMagicUpkeepIndicator(parent, position, name)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(position.x + 9 + OFFSET_POSITION_X),
-        math.floor(position.y - 4 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(9) + OFFSET_POSITION_X),
+        math.floor(position.y - scaleToFactor(4) + OFFSET_POSITION_Y)
     )
-    text:SetSize(28, 16)
+    text:SetSize(scaleToFactor(28), scaleToFactor(16))
     text.content = ""
     text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     text.colour = FONT_COLOUR
@@ -583,15 +585,15 @@ local function createMagicUpkeepIndicator(parent, position, name)
 
     local shadow = ui.Sprite.new(layer)
     shadow:SetPos(
-        math.floor(position.x + 59 + OFFSET_POSITION_X),
-        math.floor(position.y + 3 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(59) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(3) + OFFSET_POSITION_Y)
     )
     shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
 
     local sprite = ui.Sprite.new(layer)
     sprite:SetPos(
-        math.floor(position.x + 58 + OFFSET_POSITION_X),
-        math.floor(position.y + 2 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(58) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(2) + OFFSET_POSITION_Y)
     )
     sprite:SetSize(scaleToFactor(0), scaleToFactor(6))
 
@@ -625,8 +627,8 @@ local function setAbilityIndicatorPosition(indicator, position)
     )
 
     indicator.text:SetPos(
-        math.floor(position.x + 8 + OFFSET_POSITION_X),
-        math.floor(position.y + 14 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(8) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(14) + OFFSET_POSITION_Y)
     )
 
 end
@@ -648,8 +650,8 @@ local function setAbilitySpriteIndicatorPosition(indicator, position)
     )
 
     indicator.text:SetPos(
-        math.floor(position.x + 16 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(16) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y)
     )
 
 end
@@ -665,8 +667,8 @@ local function setSpriteIndicatorPosition(indicator, position)
         math.floor(position.y + OFFSET_POSITION_Y)
     )
     indicator.text:SetPos(
-        math.floor(position.x + 1 + OFFSET_POSITION_X),
-        math.floor(position.y + 4 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(1) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y)
     )
 end
 
@@ -677,18 +679,18 @@ local function setMagicUpkeepIndicatorPosition(indicator, position)
     )
 
     indicator.text:SetPos(
-        math.floor(position.x + 9 + OFFSET_POSITION_X),
-        math.floor(position.y - 4 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(9) + OFFSET_POSITION_X),
+        math.floor(position.y - scaleToFactor(4) + OFFSET_POSITION_Y)
     )
 
     indicator.sprite:SetPos(
-        math.floor(position.x + 58 + OFFSET_POSITION_X),
-        math.floor(position.y + 2 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(58) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(2) + OFFSET_POSITION_Y)
     )
 
     indicator.shadow:SetPos(
-        math.floor(position.x + 59 + OFFSET_POSITION_X),
-        math.floor(position.y + 3 + OFFSET_POSITION_Y)
+        math.floor(position.x + scaleToFactor(59) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(3) + OFFSET_POSITION_Y)
     )
 end
 
@@ -1029,7 +1031,7 @@ local CreateUI = function()
     table.insert(GAUGE_COMPONENTS, bolgLetters)
 
     local perfectEquilibriumStacksText = ui.Text.new(rangedGaugeLayer)
-    perfectEquilibriumStacksText:SetSize(22, 24)
+    perfectEquilibriumStacksText:SetSize(scaleToFactor(22), scaleToFactor(24))
     perfectEquilibriumStacksText:MoveToFront()
     perfectEquilibriumStacksText.content = "0"
     perfectEquilibriumStacksText.font = LARGE_FONT
@@ -1280,8 +1282,8 @@ local CreateUI = function()
         local layout = getRuneLayout(perfectEquilibriumActive)
 
     perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - 24),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - 50)
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
     )
 
     end
@@ -1493,8 +1495,8 @@ end
 local function updateMagicUpkeepIndicator(indicator, upkeep)
     indicator.shadow.sprite = overlaySprites.utility.bar
     indicator.sprite.sprite = overlaySprites.utility.bar
-    indicator.sprite:SetSize(upkeep.remainingDuration * 2.25, 3)
-    indicator.shadow:SetSize(upkeep.remainingDuration * 2.25, 3)
+    indicator.sprite:SetSize(scaleToFactor(upkeep.remainingDuration * 2.25), scaleToFactor(3))
+    indicator.shadow:SetSize(scaleToFactor(upkeep.remainingDuration * 2.25), scaleToFactor(3))
     indicator.shadow.colour = ABILITY_SHADOW_COLOUR
     if upkeep.name == "Blood Tithe" then
         indicator.sprite.colour = BLOOD_TITHE_COLOUR
@@ -2361,8 +2363,8 @@ local function updateOverlays()
     local layout = getRuneLayout(perfectEquilibriumActive)
 
     perfectEquilibriumStacksText:SetPos(
-        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - 24),
-        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - 50)
+        math.floor(layout.stacksText.x + OFFSET_POSITION_X + bolgLetters.position.x - scaleToFactor(24)),
+        math.floor(layout.stacksText.y + OFFSET_POSITION_Y + bolgLetters.position.y - scaleToFactor(50))
     )
 
 
@@ -2588,8 +2590,8 @@ local function updateOverlays()
                 local mousePosition = getMousePosition()
 
                 if mousePosition then
-                    OFFSET_POSITION_X = mousePosition.x
-                    OFFSET_POSITION_Y = mousePosition.y
+                    OFFSET_POSITION_X = math.floor(mousePosition.x / RETINA_MONITOR)
+                    OFFSET_POSITION_Y = math.floor(mousePosition.y / RETINA_MONITOR)
 
                     updateOverlayPositions()
                 end
@@ -2669,8 +2671,8 @@ then
                     newY = snapToGrid(newY, 10)
                 end
 
-                position.x = newX
-                position.y = newY
+                position.x = math.floor(newX / RETINA_MONITOR)
+                position.y = math.floor(newY / RETINA_MONITOR)
 
                 updateOverlayPositions()
             end
@@ -2684,7 +2686,7 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".x",
-                position.x
+                position.x * RETINA_MONITOR
             )
 
             settings.Set(
@@ -2692,7 +2694,7 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".y",
-                position.y
+                position.y * RETINA_MONITOR
             )
 
             draggedComponent = nil
@@ -2757,6 +2759,13 @@ settings.Subscribe(
     "generalSettings.positionLocked",
     function(value)
         POSITION_LOCKED = value
+    end
+)
+
+settings.Subscribe(
+    "generalSettings.retinaMonitor",
+    function(value)
+        RETINA_MONITOR = value
     end
 )
 

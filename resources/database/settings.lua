@@ -35,6 +35,7 @@ local defaults = {
     generalSettings = {
         positionLocked = false,
         componentEditing = false,
+        retinaMonitor = 1, -- Values: 1:1x ; 2:2x ; 4:4x
         automaticSwapping = "mainhand",
         hideOutOfCombat = "always-visible",
         displayTimeAs = "nearest-second",
