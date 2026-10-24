@@ -72,11 +72,30 @@ local RUNE_LAYOUT = settings.Get("rangedSettings.componentPositions.RUNE_LAYOUT"
 local READY_TEXT = tostring(settings.Get("generalSettings.readyText"))
 local SPRITE_READY_TEXT = tostring(settings.Get("generalSettings.spriteReadyText"))
 local DISPLAY_TIME_AS = settings.Get("generalSettings.displayTimeAs")
-local UI_SCALE = 1.6 --settings.Get("generalSettings.scale")
+local UI_SCALE = settings.Get("generalSettings.scale")
 
-local LARGE_FONT = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
-local MEDIUM_FONT = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
-local SMALL_FONT = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+local supportedFonts = {
+    ["9pt Outline"] = id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE,
+    ["9pt Regular"] = id.Font.NOTO_SANS_09PT_REGULAR_SHADOW,
+    ["11pt Outline"] = id.Font.NOTO_SANS_11PT_BOLD_OUTLINE,
+    ["11pt Shadow"] = id.Font.NOTO_SANS_11PT_BOLD_SHADOW,
+    ["13pt Outline"] = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE,
+    ["21pt Outline"] = id.Font.NOTO_SANS_21PT_BOLD_OUTLINE,
+    ["21pt Shadow"] = id.Font.NOTO_SANS_21PT_BOLD_SHADOW
+}
+
+local smallFontSetting = settings.Get("fontSizes.smallFont")
+local mediumFontSetting = settings.Get("fontSizes.mediumFont")
+local largeFontSetting = settings.Get("fontSizes.largeFont")
+
+local SMALL_FONT = supportedFonts[smallFontSetting]
+    or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+
+local MEDIUM_FONT = supportedFonts[mediumFontSetting]
+    or id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
+
+local LARGE_FONT = supportedFonts[largeFontSetting]
+    or id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
 
 local FONT_COLOUR = colourToVector4(settings.Get("fontColours.durationText"), "0xFFFFFFFF")
 local COOLDOWN_COLOUR = colourToVector4(settings.Get("fontColours.cooldownText"), "0xFFFFFFFF")
@@ -2770,6 +2789,14 @@ settings.Subscribe(
 )
 
 settings.Subscribe(
+    "generalSettings.scale",
+    function(value)
+        UI_SCALE = value
+        updateOverlayPositions()
+    end
+)
+
+settings.Subscribe(
     "generalSettings.componentEditing",
     function(value)
         COMPONENT_EDITING = value
@@ -2793,21 +2820,21 @@ settings.Subscribe(
 settings.Subscribe(
     "fontSizes.largeFont",
     function(value)
-        LARGE_FONT = value
+        largeFontSetting = value
     end
 )
 
 settings.Subscribe(
     "fontSizes.mediumFont",
     function(value)
-        MEDIUM_FONT = value
+        mediumFontSetting = value
     end
 )
 
 settings.Subscribe(
     "fontSizes.smallFont",
     function(value)
-        SMALL_FONT = value
+        smallFontSetting = value
     end
 )
 

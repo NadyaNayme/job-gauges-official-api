@@ -8,6 +8,12 @@ local localization = {
                 ranged = "Ranged",
                 all = "All",
             },
+            fontSizeLabels = {
+                small = "Magic Stacks Font",
+                medium = "Bloodlust Font",
+                large = "Ability Font",
+            },
+            scaleLabel = "Adjust Scale - Requires a disable & re-enable to complete the process<br>You will need to use Advanced Positioning to readjust component positions",
             retinaMonitor = {
                 label = "HiDPI / Retina Monitor users may need to select 2x or 4x to compensate for the higher pixel density of their monitors.",
                 oneX = "1x",
@@ -71,7 +77,7 @@ local localization = {
             componentEditingLabel = "Advanced Positioning - Allow moving individual components",
             lockPositionHelp = "Hold Shift+Ctrl to reposition <br>(While hovering a component if using Advanced Positioning)",
             restoreDefaultSettings = "Restore Default Settings",
-            restoreDefaultSettingsHelp = "After clicking the below button - disable & re-enable Job Gauges to complete the process.",
+            restoreDefaultSettingsHelp = "After clicking the below button - disable & re-enable Job Gauges to complete the process",
             confirmTitle = "Reset Settings",
             confirmRestoreDefaultSettings = "After clicking 'Confirm' you will need to disable & re-enable Job Gauges for the reset to be complete.",
             confirmCancelLabel = "Cancel",

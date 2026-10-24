@@ -98,6 +98,66 @@ function M.Create(page, options)
         end
     })
 
+    page:AddText({
+        text = L.Get("general.fontSizeLabels.small"),
+    })
+    
+    options.retinaMonitorSetting = page:AddRadioButton({
+        { text = L.Get("9pt Outline"), value = "9pt Outline" },
+        { text = L.Get("9pt Regular"), value = "9pt Regular" },
+        { text = L.Get("11pt Outline"), value = "11pt Outline" },
+        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
+        { text = L.Get("13pt Outline"), value = "13pt Outline" },
+        { text = L.Get("21pt Outline"), value = "21pt Outline" },
+        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
+    }, {
+        selectedValue = settings.Get("fontSizes.smallFont"),
+
+        onChange = function(_, value)
+            settings.Set("fontSizes.smallFont", value)
+        end,
+    })
+
+    page:AddText({
+        text = L.Get("general.fontSizeLabels.medium"),
+    })
+
+    options.retinaMonitorSetting = page:AddRadioButton({
+        { text = L.Get("9pt Outline"), value = "9pt Outline" },
+        { text = L.Get("9pt Regular"), value = "9pt Regular" },
+        { text = L.Get("11pt Outline"), value = "11pt Outline" },
+        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
+        { text = L.Get("13pt Outline"), value = "13pt Outline" },
+        { text = L.Get("21pt Outline"), value = "21pt Outline" },
+        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
+    }, {
+        selectedValue = settings.Get("fontSizes.mediumFont"),
+
+        onChange = function(_, value)
+            settings.Set("fontSizes.mediumFont", value)
+        end,
+    })
+
+    page:AddText({
+        text = L.Get("general.fontSizeLabels.large"),
+    })
+
+    options.retinaMonitorSetting = page:AddRadioButton({
+        { text = L.Get("9pt Outline"), value = "9pt Outline" },
+        { text = L.Get("9pt Regular"), value = "9pt Regular" },
+        { text = L.Get("11pt Outline"), value = "11pt Outline" },
+        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
+        { text = L.Get("13pt Outline"), value = "13pt Outline" },
+        { text = L.Get("21pt Outline"), value = "21pt Outline" },
+        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
+    }, {
+        selectedValue = settings.Get("fontSizes.largeFont"),
+
+        onChange = function(_, value)
+            settings.Set("fontSizes.largeFont", value)
+        end,
+    })
+
 
     page:AddTitle(L.Get("general.colourSettingsTitle"))
     page:AddText("")
@@ -247,6 +307,20 @@ function M.Create(page, options)
 
         onChange = function(_, value)
             settings.Set("generalSettings.retinaMonitor", value)
+        end,
+    })
+
+    page:AddText({
+        text = L.Get("general.scaleLabel"),
+    })
+
+    page:AddSlider({
+        min = 1.0,
+        max = 4.0,
+        value = settings.Get("generalSettings.scale") or 1.0,
+        step = 0.5,
+        onChange = function(_, value)
+            settings.Set("generalSettings.scale", value)
         end,
     })
 

@@ -8,7 +8,11 @@ local defaults = {
         combatStyle = nil,
         activeSpell = nil,
     },
-
+    fontSizes = {
+        smallFont = "9pt Outline",
+        mediumFont = "11pt Outline",
+        largeFont = "13pt Outline"
+    },
     fontColours = {
         durationText = "0xFFFFFFFF",
         expiringText = "0xF30B0BFF",
