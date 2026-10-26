@@ -10,8 +10,11 @@ local defaults = {
     },
     fontSizes = {
         smallFont = "9pt Outline",
+        smallFontId = 1,
         mediumFont = "11pt Outline",
-        largeFont = "13pt Outline"
+        mediumFontId = 1,
+        largeFont = "13pt Outline",
+        largeFontId = 1
     },
     fontColours = {
         durationText = "0xFFFFFFFF",

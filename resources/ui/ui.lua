@@ -80,7 +80,9 @@ local supportedFonts = {
     ["11pt Shadow"] = id.Font.NOTO_SANS_11PT_BOLD_SHADOW,
     ["13pt Outline"] = id.Font.NOTO_SANS_13PT_BOLD_OUTLINE,
     ["21pt Outline"] = id.Font.NOTO_SANS_21PT_BOLD_OUTLINE,
-    ["21pt Shadow"] = id.Font.NOTO_SANS_21PT_BOLD_SHADOW
+    ["21pt Shadow"] = id.Font.NOTO_SANS_21PT_BOLD_SHADOW,
+    ["30pt Bold"] = id.Font.NOTOSANS_BOLD_30,
+    ["40pt Bold"] = id.Font.NOTOSANS_BOLD_40
 }
 
 local smallFontSetting = settings.Get("fontSizes.smallFont")
@@ -127,7 +129,7 @@ end
 -- Convert captured mouse coordinates to the coordinate system
 -- used by the gauge positions.
 local function mouseToUI(number)
-    return number / RETINA_MONITOR
+    return math.floor(number / RETINA_MONITOR)
 end
 
 local function snapToGrid(value, gridSize)
@@ -402,8 +404,8 @@ local function createAbilitySpriteIndicator(parent, position)
 
     local text = ui.Text.new(layer)
     text:SetPos(
-        math.floor(scaleToFactor(position.x + scaleToFactor(16) + OFFSET_POSITION_X)),
-        math.floor(scaleToFactor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y))
+        math.floor(position.x + scaleToFactor(16) + OFFSET_POSITION_X),
+        math.floor(position.y + scaleToFactor(4) + OFFSET_POSITION_Y)
     )
     text:SetSize(scaleToFactor(22), scaleToFactor(15))
     text:MoveToFront()
@@ -1539,6 +1541,7 @@ local function updateMagicUpkeepIndicator(indicator, upkeep)
         indicator.sprite.colour = ESSENCE_CORRUPTION_COLOUR
     end
     indicator.text.content = tostring(ticksToSeconds(upkeep.remainingDuration) .. " (" .. tostring(upkeep.stacks) .. ")")
+    indicator.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
     indicator.text.colour = FONT_COLOUR
     if upkeep.remainingDuration <= 16 and math.floor(upkeep.remainingDuration) % 2 == 0 then
         indicator.text.colour = EXPIRING_COLOUR
@@ -1601,6 +1604,10 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-death-grasp"] then 
         deathGrasp.layer.hidden = false
+        deathGrasp.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathGrasp.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathGrasp.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathGrasp.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.deathGrasp.active == 1
             then 
                 deathGrasp.sprite.sprite = overlaySprites.necromancy.death_grasp.active
@@ -1627,7 +1634,10 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-death-essence"] then 
         deathEssence.layer.hidden = false
-        
+        deathEssence.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathEssence.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathEssence.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathEssence.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.deathEssence.active == 1
             then 
                 deathEssence.sprite.sprite = overlaySprites.necromancy.death_essence.active
@@ -1654,6 +1664,10 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-soul-crush"] then 
         soulCrush.layer.hidden = false
+        soulCrush.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        soulCrush.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        soulCrush.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        soulCrush.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.soulCrush.active == 1
             then 
                 soulCrush.sprite.sprite = overlaySprites.necromancy.soul_crush.active
@@ -1681,6 +1695,10 @@ local function updateOverlays()
     -- Conjure Undead Army
     if necromancySettings.componentVisibility["show-conjures"] then 
         conjureUndeadArmy.layer.hidden = false
+        conjureUndeadArmy.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        conjureUndeadArmy.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        conjureUndeadArmy.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        conjureUndeadArmy.text:SetSize(scaleToFactor(22), scaleToFactor(15))
 
         local conjures = necromancy.conjures
         local lowestDuration = getLowestConjureDuration(conjures)
@@ -1716,6 +1734,10 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-living-death"] then 
         livingDeath.layer.hidden = false
+        livingDeath.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        livingDeath.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        livingDeath.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        livingDeath.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.livingDeath.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -1752,6 +1774,7 @@ local function updateOverlays()
     -- Residual Soul Stacks
     if necromancySettings.componentVisibility["show-residual-souls"] then 
         residualSoulsStacks.layer.hidden = false
+        residualSoulsStacks.sprite:SetSize(scaleToFactor(132), scaleToFactor(24))
         if necromancy.residualSoulStacks == 0 then
                 residualSoulsStacks.sprite.sprite = overlaySprites.necromancy.souls.zero
         elseif necromancy.residualSoulStacks == 1 then
@@ -1772,6 +1795,7 @@ local function updateOverlays()
     -- Necrosis Stacks
     if necromancySettings.componentVisibility["show-necrosis-stacks"] then 
         necrosisStacks.layer.hidden = false
+        necrosisStacks.sprite:SetSize(scaleToFactor(132), scaleToFactor(20))
         if necromancy.necrosisStacks == 0 then
                 necrosisStacks.sprite.sprite = overlaySprites.necromancy.necrosis.zero
         elseif necromancy.necrosisStacks == 2 then
@@ -1793,6 +1817,7 @@ local function updateOverlays()
 
     if necromancySettings.componentVisibility["show-bloat"] then
         bloat.layer.hidden = false
+        bloat.sprite:SetSize(scaleToFactor(132), scaleToFactor(24))
 
         if necromancy.bloat.active then
             if necromancy.bloat.remainingDuration < 1 then
@@ -1832,6 +1857,7 @@ local function updateOverlays()
     -- Invoke Death
     if necromancySettings.componentVisibility["show-invoke-death"] then 
         invokeDeath.layer.hidden = false
+        invokeDeath.sprite:SetSize(scaleToFactor(24), scaleToFactor(21))
         if necromancy.incantations.invokeDeath.active == 1 then
             invokeDeath.sprite.sprite = overlaySprites.necromancy.incantations.invokeDeath.active
         else 
@@ -1844,6 +1870,8 @@ local function updateOverlays()
     -- Threads of Fate
     if necromancySettings.componentVisibility["show-threads-of-fate"] then 
         threadsOfFate.layer.hidden = false
+        threadsOfFate.sprite:SetSize(scaleToFactor(24), scaleToFactor(21))
+        threadsOfFate.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.incantations.threadsOfFate.active == 1 then
             threadsOfFate.sprite.sprite = overlaySprites.necromancy.incantations.threadsOfFate.active
             threadsOfFate.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.threadsOfFate.remainingDuration))
@@ -1865,6 +1893,8 @@ local function updateOverlays()
     -- Split Soul
     if necromancySettings.componentVisibility["show-split-soul"] then 
         splitSoul.layer.hidden = false
+        splitSoul.sprite:SetSize(scaleToFactor(24), scaleToFactor(21))
+        splitSoul.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if necromancy.incantations.splitSoul.active == 1 then
             splitSoul.sprite.sprite = overlaySprites.necromancy.incantations.splitSoul.active
             splitSoul.text.content = tostring(ticksToSeconds(events.playerData.necromancy.incantations.splitSoul.remainingDuration))
@@ -1887,6 +1917,9 @@ local function updateOverlays()
     -- Sunshine
     if magicSettings.componentVisibility["show-sunshine"] then 
         sunshine.layer.hidden = false
+        sunshine.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        sunshine.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        sunshine.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if magic.sunshine.active == 1
             then 
                 if ultimates.greaterSunshineUnlocked == 1 then
@@ -1950,6 +1983,9 @@ local function updateOverlays()
     -- Tsunami
     if magicSettings.componentVisibility["show-tsunami"] then 
         tsunami.layer.hidden = false
+        tsunami.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        tsunami.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        tsunami.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if magic.tsunami.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -1989,6 +2025,9 @@ local function updateOverlays()
     -- Runic Charge
     if magicSettings.componentVisibility["show-runic-charge"] then 
         runicCharge.layer.hidden = false
+        runicCharge.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        runicCharge.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        runicCharge.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if magic.runicCharge.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2027,6 +2066,8 @@ local function updateOverlays()
 
     if magicSettings.componentVisibility["show-soulfire"] then 
         soulfire.layer.hidden = false
+        soulfire.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        soulfire.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if magic.soulfire.active == 1
             then 
                 soulfire.sprite.sprite = overlaySprites.magic.soulfire.active
@@ -2053,6 +2094,8 @@ local function updateOverlays()
 
     if magicSettings.componentVisibility["show-instability"] then 
         instability.layer.hidden = false
+        instability.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        instability.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if magic.instability.active == 1
             then 
                 instability.sprite.sprite = overlaySprites.magic.instability.active
@@ -2079,6 +2122,7 @@ local function updateOverlays()
 
     if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
         activeSpellSprite.layer.hidden = false
+        activeSpellSprite.sprite:SetSize(scaleToFactor(24),scaleToFactor(21))
         activeSpellSprite.sprite.sprite = id.Sprite[magic.activeSpell.icon]
     else
         activeSpellSprite.layer.hidden = true
@@ -2118,6 +2162,9 @@ local function updateOverlays()
 
     if rangedSettings.componentVisibility["show-crystal-rain"] then 
         crystalRain.layer.hidden = false
+        crystalRain.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        crystalRain.text:SetSize(scaleToFactor(22), scaleToFactor(15))
+
         if ranged.crystalRain.active == 1
             then 
                 crystalRain.sprite.sprite = overlaySprites.ranged.crystal_rain.active
@@ -2144,6 +2191,8 @@ local function updateOverlays()
 
     if rangedSettings.componentVisibility["show-split-soul"] then 
         splitSoul_ecb.layer.hidden = false
+        splitSoul_ecb.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        splitSoul_ecb.text:SetSize(scaleToFactor(22), scaleToFactor(15))
         if ranged.splitSoul.active == 1
             then 
                 splitSoul_ecb.sprite.sprite = overlaySprites.ranged.split_soul.splitsoul
@@ -2173,6 +2222,7 @@ local function updateOverlays()
     -- and every subsequent check works
     if rangedSettings.componentVisibility["show-equipped-ammo"] then
         equippedAmmoSprite.layer.hidden = false
+        equippedAmmoSprite.sprite:SetSize(scaleToFactor(32), scaleToFactor(32))
         local worn = Inventory.Find(config.Inv.WORN)
         local wornObj = worn:GetSlot(14)
 
@@ -2191,7 +2241,7 @@ local function updateOverlays()
                 -- If we have a quiver equipped, report the currently cycled ammo instead.
                 local QUIVER_AMMO_ID = tonumber(AMMO_ID)
                 if QUIVER_AMMO_ID == nil then return end
-                QUIVER_AMMO_ID = QUIVER_AMMO_ID + 4
+                QUIVER_AMMO_ID = QUIVER_AMMO_ID
                 equippedAmmoSprite.sprite:SetAssociatedObject(QUIVER_AMMO_ID)
                 equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
             end
@@ -2210,6 +2260,9 @@ local function updateOverlays()
     -- Death's Swiftness
     if rangedSettings.componentVisibility["show-deaths-swiftness"] then 
         deathsSwiftness.layer.hidden = false
+        deathsSwiftness.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        deathsSwiftness.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        deathsSwiftness.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if ranged.deathsSwiftness.active == 1
             then 
                 if ultimates.greaterDeathsSwiftnessUnlocked == 1 then
@@ -2273,6 +2326,9 @@ local function updateOverlays()
     -- Searing Winds
     if rangedSettings.componentVisibility["show-searing-winds"] then 
         searingWinds.layer.hidden = false
+        searingWinds.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        searingWinds.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        searingWinds.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if ranged.searingWinds.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2312,6 +2368,9 @@ local function updateOverlays()
     -- Shadow Imbued
     if rangedSettings.componentVisibility["show-shadow-imbued"] then 
         shadowImbued.layer.hidden = false
+        shadowImbued.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        shadowImbued.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        shadowImbued.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if ranged.shadowImbued.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2351,6 +2410,10 @@ local function updateOverlays()
     -- Perfect Equilibrium
     if rangedSettings.componentVisibility["show-perfect-equilibrium"] then 
         perfectEquilibrium.layer.hidden = false
+        perfectEquilibrium.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        perfectEquilibrium.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        perfectEquilibrium.text:SetSize(scaleToFactor(28), scaleToFactor(16))
+        perfectEquilibrium.text.font = LARGE_FONT
         updateBOLGLetters(
             ranged.perfectEquilibrium.stacks,
             ranged.perfectEquilibrium.active == 1
@@ -2402,6 +2465,9 @@ local function updateOverlays()
     -- MELEE COMPONENTS
     if meleeSettings.componentVisibility["show-blackhole"] then 
         blackhole.layer.hidden = false
+        blackhole.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        blackhole.shadow:SetSize(scaleToFactor(0), scaleToFactor(6))
+        blackhole.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if melee.blackhole.active == 1
             then 
                 blackhole.sprite.sprite = overlaySprites.melee.blackhole.active
@@ -2428,6 +2494,8 @@ local function updateOverlays()
 
     if meleeSettings.componentVisibility["show-igneous-showdown"] then 
         igneousShowdown.layer.hidden = false
+        igneousShowdown.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        igneousShowdown.text:SetSize(scaleToFactor(28), scaleToFactor(16))
         if melee.igneousShowdown.active == 1
             then 
                 igneousShowdown.sprite.sprite = overlaySprites.melee.igneous_showdown.active
@@ -2454,6 +2522,8 @@ local function updateOverlays()
 
     if meleeSettings.componentVisibility["show-bloodlust"] then 
         bloodlust.layer.hidden = false
+        bloodlust.sprite:SetSize(scaleToFactor(20), scaleToFactor(20))
+        bloodlust.text.font = MEDIUM_FONT
         if melee.bloodlust.stacks > 3
             then 
                 bloodlust.sprite.sprite = id.Sprite["BUFF_ICON_MELEE_BLOODLUST"]
@@ -2472,6 +2542,11 @@ local function updateOverlays()
 
     if meleeSettings.componentVisibility["show-chaos-roar"] then 
         chaosRoar.layer.hidden = false
+        chaosRoar.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        chaosRoar.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        chaosRoar.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        chaosRoar.text:SetSize(scaleToFactor(28), scaleToFactor(16))
+        chaosRoar.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
         if melee.chaosRoar.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2510,6 +2585,11 @@ local function updateOverlays()
 
     if meleeSettings.componentVisibility["show-meteor-strike"] then 
         meteorStrike.layer.hidden = false
+        meteorStrike.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        meteorStrike.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        meteorStrike.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        meteorStrike.text:SetSize(scaleToFactor(28), scaleToFactor(16))
+        meteorStrike.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
         if melee.meteorStrike.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2548,6 +2628,11 @@ local function updateOverlays()
 
     if meleeSettings.componentVisibility["show-berserk"] then 
         berserk.layer.hidden = false
+        berserk.backdrop:SetSize(scaleToFactor(40), scaleToFactor(40))
+        berserk.sprite:SetSize(scaleToFactor(40), scaleToFactor(40))
+        berserk.shadow:SetSize(scaleToFactor(40), scaleToFactor(40))
+        berserk.text:SetSize(scaleToFactor(28), scaleToFactor(16))
+        berserk.text.font = SMALL_FONT or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
         if melee.berserk.active == 1
             then 
                 setAbilityIndicatorSprite(
@@ -2621,8 +2706,8 @@ local function updateOverlays()
                 local mousePosition = getMousePosition()
 
                 if mousePosition then
-                    OFFSET_POSITION_X = math.floor(mouseToUI(mousePosition.x))
-                    OFFSET_POSITION_Y = math.floor(mouseToUI(mousePosition.y))
+                    OFFSET_POSITION_X = mouseToUI(mousePosition.x)
+                    OFFSET_POSITION_Y = mouseToUI(mousePosition.y)
 
                     updateOverlayPositions()
                 end
@@ -2702,8 +2787,8 @@ then
                     newY = snapToGrid(newY, 10)
                 end
 
-                position.x = math.floor(mouseToUI(newX))
-                position.y = math.floor(mouseToUI(newY))
+                position.x = mouseToUI(newX)
+                position.y = mouseToUI(newY)
 
                 updateOverlayPositions()
             end
@@ -2717,7 +2802,8 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".x",
-                position.x
+                position.x * RETINA_MONITOR
+
             )
 
             settings.Set(
@@ -2725,7 +2811,7 @@ then
                     .. "Settings.componentPositions."
                     .. draggedComponent.positionKey
                     .. ".y",
-                position.y
+                position.y * RETINA_MONITOR
             )
 
             draggedComponent = nil
@@ -2798,6 +2884,7 @@ settings.Subscribe(
     function(value)
         RETINA_MONITOR =  tonumber(value) or 1
         updateOverlayPositions()
+        updateOverlays()
     end
 )
 
@@ -2806,6 +2893,7 @@ settings.Subscribe(
     function(value)
         UI_SCALE = tonumber(value) or 1
         updateOverlayPositions()
+        updateOverlays()
     end
 )
 
@@ -2834,6 +2922,10 @@ settings.Subscribe(
     "fontSizes.largeFont",
     function(value)
         largeFontSetting = value
+        LARGE_FONT = supportedFonts[largeFontSetting]
+            or id.Font.NOTO_SANS_13PT_BOLD_OUTLINE
+        updateOverlayPositions()
+        updateOverlays()
     end
 )
 
@@ -2841,6 +2933,10 @@ settings.Subscribe(
     "fontSizes.mediumFont",
     function(value)
         mediumFontSetting = value
+        MEDIUM_FONT = supportedFonts[mediumFontSetting]
+            or id.Font.NOTO_SANS_11PT_BOLD_OUTLINE
+        updateOverlayPositions()
+        updateOverlays()
     end
 )
 
@@ -2848,6 +2944,10 @@ settings.Subscribe(
     "fontSizes.smallFont",
     function(value)
         smallFontSetting = value
+        SMALL_FONT = supportedFonts[smallFontSetting]
+            or id.Font.NOTO_SANS_09PT_REGULAR_OUTLINE
+        updateOverlayPositions()
+        updateOverlays()
     end
 )
 
@@ -2862,13 +2962,6 @@ settings.Subscribe(
     "generalSettings.spriteReadyText",
     function(value)
         SPRITE_READY_TEXT = value
-    end
-)
-
-settings.Subscribe(
-    "generalSettings.scale",
-    function(value)
-        UI_SCALE = value
     end
 )
 

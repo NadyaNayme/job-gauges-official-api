@@ -102,19 +102,22 @@ function M.Create(page, options)
         text = L.Get("general.fontSizeLabels.small"),
     })
     
-    options.retinaMonitorSetting = page:AddRadioButton({
-        { text = L.Get("9pt Outline"), value = "9pt Outline" },
-        { text = L.Get("9pt Regular"), value = "9pt Regular" },
-        { text = L.Get("11pt Outline"), value = "11pt Outline" },
-        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
-        { text = L.Get("13pt Outline"), value = "13pt Outline" },
-        { text = L.Get("21pt Outline"), value = "21pt Outline" },
-        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
-    }, {
-        selectedValue = settings.Get("fontSizes.smallFont"),
-
-        onChange = function(_, value)
-            settings.Set("fontSizes.smallFont", value)
+    page:AddComboBox({
+        entries = {
+            { label = L.Get("9pt Outline"), id = 1 },
+            { label = L.Get("9pt Regular"), id = 2 },
+            { label = L.Get("11pt Outline"), id = 3 },
+            { label = L.Get("11pt Shadow"), id = 4 },
+            { label = L.Get("13pt Outline"), id = 5 },
+            { label = L.Get("21pt Outline"), id = 6 },
+            { label = L.Get("21pt Shadow"), id = 7 },
+            { label = L.Get("30pt Bold"), id = 8 },
+            { label = L.Get("40pt Bold"), id = 9 },
+        },
+        selectedID = tonumber(settings.Get("fontSizes.smallFontId")) or 1,
+        onChange = function(_, id, label)
+            settings.Set("fontSizes.smallFont", label)
+            settings.Set("fontSizes.smallFontId", id)
         end,
     })
 
@@ -122,19 +125,24 @@ function M.Create(page, options)
         text = L.Get("general.fontSizeLabels.medium"),
     })
 
-    options.retinaMonitorSetting = page:AddRadioButton({
-        { text = L.Get("9pt Outline"), value = "9pt Outline" },
-        { text = L.Get("9pt Regular"), value = "9pt Regular" },
-        { text = L.Get("11pt Outline"), value = "11pt Outline" },
-        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
-        { text = L.Get("13pt Outline"), value = "13pt Outline" },
-        { text = L.Get("21pt Outline"), value = "21pt Outline" },
-        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
-    }, {
-        selectedValue = settings.Get("fontSizes.mediumFont"),
-
-        onChange = function(_, value)
-            settings.Set("fontSizes.mediumFont", value)
+    page:AddComboBox({
+        entries = {
+            { label = L.Get("9pt Outline"), id = 1 },
+            { label = L.Get("9pt Regular"), id = 2 },
+            { label = L.Get("11pt Outline"), id = 3 },
+            { label = L.Get("11pt Shadow"), id = 4 },
+            { label = L.Get("13pt Outline"), id = 5 },
+            { label = L.Get("21pt Outline"), id = 6 },
+            { label = L.Get("21pt Shadow"), id = 7 },
+            { label = L.Get("30pt Bold"), id = 8 },
+            { label = L.Get("40pt Bold"), id = 9 },
+        },
+        selectedID = tonumber(settings.Get("fontSizes.mediumFontId")) or 1,
+        onChange = function(_, id, label)
+            settings.Set("fontSizes.mediumFont", label)
+            settings.Set("fontSizes.mediumFontId", id)
+            log(settings.Get("fontSizes.mediumFontId"))
+            log(settings.Get("fontSizes.mediumFont"))
         end,
     })
 
@@ -142,19 +150,22 @@ function M.Create(page, options)
         text = L.Get("general.fontSizeLabels.large"),
     })
 
-    options.retinaMonitorSetting = page:AddRadioButton({
-        { text = L.Get("9pt Outline"), value = "9pt Outline" },
-        { text = L.Get("9pt Regular"), value = "9pt Regular" },
-        { text = L.Get("11pt Outline"), value = "11pt Outline" },
-        { text = L.Get("11pt Shadow"), value = "11pt Shadow" },
-        { text = L.Get("13pt Outline"), value = "13pt Outline" },
-        { text = L.Get("21pt Outline"), value = "21pt Outline" },
-        { text = L.Get("21pt Shadow"), value = "21pt Shadow" },
-    }, {
-        selectedValue = settings.Get("fontSizes.largeFont"),
-
-        onChange = function(_, value)
-            settings.Set("fontSizes.largeFont", value)
+    page:AddComboBox({
+        entries = {
+            { label = L.Get("9pt Outline"), id = 1 },
+            { label = L.Get("9pt Regular"), id = 2 },
+            { label = L.Get("11pt Outline"), id = 3 },
+            { label = L.Get("11pt Shadow"), id = 4 },
+            { label = L.Get("13pt Outline"), id = 5 },
+            { label = L.Get("21pt Outline"), id = 6 },
+            { label = L.Get("21pt Shadow"), id = 7 },
+            { label = L.Get("30pt Bold"), id = 8 },
+            { label = L.Get("40pt Bold"), id = 9 },
+        },
+        selectedID = tonumber(settings.Get("fontSizes.largeFontId")) or 1,
+        onChange = function(_, id, label)
+            settings.Set("fontSizes.largeFont", label)
+            settings.Set("fontSizes.largeFontId", id)
         end,
     })
 
@@ -318,7 +329,7 @@ function M.Create(page, options)
         min = 1.0,
         max = 4.0,
         value = settings.Get("generalSettings.scale") or 1.0,
-        step = 0.5,
+        step = 0.2,
         onChange = function(_, value)
             settings.Set("generalSettings.scale", value)
         end,

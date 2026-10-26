@@ -9,9 +9,9 @@ local localization = {
                 all = "All",
             },
             fontSizeLabels = {
-                small = "Magic Stacks Font",
-                medium = "Bloodlust Font",
-                large = "Ability Font",
+                small = "Font 1",
+                medium = "Font 2",
+                large = "Font 3",
             },
             scaleLabel = "Adjust Scale - Requires a disable & re-enable to complete the process<br>You will need to use Advanced Positioning to readjust component positions",
             retinaMonitor = {
