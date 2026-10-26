@@ -40,7 +40,7 @@ function M.Create(page, options)
             selected = magicComponentSettings["show-sunshine"]
         },
         {
-            text = L.Get("magic.visibilityOptions.bloodeTithe"),
+            text = L.Get("magic.visibilityOptions.bloodTithe"),
             value = "show-blood-tithe",
             selected = magicComponentSettings["show-blood-tithe"]
         },

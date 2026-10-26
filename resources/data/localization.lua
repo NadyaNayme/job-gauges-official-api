@@ -109,7 +109,7 @@ local localization = {
                 runicCharge = "Show Runic Charge",
                 tsunami = "Show Tsunami",
                 sunshine = "Show Sunshine",
-                bloodeTithe = "Show Blood Tithe (Exsanguinate Stacks)",
+                bloodTithe = "Show Blood Tithe (Exsanguinate Stacks)",
                 glacialEmbrace = "Show Glacial Embrace (Incite Fear Stacks)",
                 essenceCorruption = "Show Essence Corruption (Roar of Awakening Passive Stacks)"
             },
@@ -184,6 +184,18 @@ local localization = {
                 ranged = "Fernkampf",
                 all = "Alle",
             },
+            fontSizeLabels = {
+                small = "Schrift 1",
+                medium = "Schrift 2",
+                large = "Schrift 3",
+            },
+            scaleLabel = "Skalierung anpassen – zum Übernehmen deaktivieren und erneut aktivieren<br>Die Komponentenpositionen müssen anschließend über die erweiterte Positionierung neu angepasst werden",
+            retinaMonitor = {
+                label = "Nutzer von HiDPI-/Retina-Monitoren müssen möglicherweise 2x oder 4x auswählen, um die höhere Pixeldichte auszugleichen.",
+                oneX = "1x",
+                twoX = "2x",
+                fourX = "4x",
+            },
             gaugeSettingsTitle = "Job-Gauge-Einstellungen",
             dynamicSwappingLabel = "Aktive Stil-Gauge dynamisch wechseln anhand von...",
             dynamicSwappingOptions = {
@@ -241,7 +253,11 @@ local localization = {
             componentEditingLabel = "Erweiterte Positionierung – einzelne Komponenten verschieben",
             lockPositionHelp = "Halte Umschalt+Strg gedrückt, um die Position neu festzulegen <br>(bei aktivierter erweiterter Positionierung über einer Komponente)",
             restoreDefaultSettings = "Standardeinstellungen wiederherstellen",
-            restoreDefaultSettingsHelp = "Klicke auf die Schaltfläche unten und deaktiviere und aktiviere Job Gauges erneut, um den Vorgang abzuschließen."
+            restoreDefaultSettingsHelp = "Klicke auf die Schaltfläche unten und deaktiviere und aktiviere Job Gauges erneut, um den Vorgang abzuschließen.",
+            confirmTitle = "Einstellungen zurücksetzen",
+            confirmRestoreDefaultSettings = "Nach einem Klick auf „Bestätigen“ musst du Job Gauges deaktivieren und erneut aktivieren, damit das Zurücksetzen abgeschlossen wird.",
+            confirmCancelLabel = "Abbrechen",
+            confirmConfirmLabel = "Bestätigen",
         },
         necromancy = {
             gaugeComponentsTitle = "Komponenten der Nekromantie-Gauge",
@@ -344,6 +360,18 @@ local localization = {
                 ranged = "Combate à Distância",
                 all = "Todos",
             },
+            fontSizeLabels = {
+                small = "Fonte 1",
+                medium = "Fonte 2",
+                large = "Fonte 3",
+            },
+            scaleLabel = "Ajustar escala – é necessário desativar e reativar para concluir o processo<br>Será necessário reajustar as posições dos componentes usando o Posicionamento Avançado",
+            retinaMonitor = {
+                label = "Usuários de monitores HiDPI / Retina talvez precisem selecionar 2x ou 4x para compensar a maior densidade de pixels do monitor.",
+                oneX = "1x",
+                twoX = "2x",
+                fourX = "4x",
+            },
             gaugeSettingsTitle = "Configurações da Interface de Combate",
             dynamicSwappingLabel = "Alternar dinamicamente a interface de estilo ativa usando...",
             dynamicSwappingOptions = {
@@ -401,7 +429,11 @@ local localization = {
             componentEditingLabel = "Posicionamento Avançado - Permitir mover componentes individualmente",
             lockPositionHelp = "Mantenha Shift+Ctrl pressionado para reposicionar <br>(sobre um componente, se o Posicionamento Avançado estiver ativado)",
             restoreDefaultSettings = "Restaurar configurações padrão",
-            restoreDefaultSettingsHelp = "Após clicar no botão abaixo, desative e reative o Job Gauges para concluir o processo."
+            restoreDefaultSettingsHelp = "Após clicar no botão abaixo, desative e reative o Job Gauges para concluir o processo.",
+            confirmTitle = "Redefinir configurações",
+            confirmRestoreDefaultSettings = "Após clicar em “Confirmar”, será necessário desativar e reativar o Job Gauges para concluir a redefinição.",
+            confirmCancelLabel = "Cancelar",
+            confirmConfirmLabel = "Confirmar",
 
         },
         necromancy = {
@@ -505,6 +537,18 @@ local localization = {
                 ranged = "Combat à distance",
                 all = "Toutes",
             },
+            fontSizeLabels = {
+                small = "Police 1",
+                medium = "Police 2",
+                large = "Police 3",
+            },
+            scaleLabel = "Ajuster l’échelle – désactivez puis réactivez pour terminer le processus<br>Vous devrez réajuster la position des composants à l’aide du positionnement avancé",
+            retinaMonitor = {
+                label = "Les utilisateurs d’un écran HiDPI / Retina devront peut-être sélectionner 2x ou 4x pour compenser la densité de pixels plus élevée de leur écran.",
+                oneX = "1x",
+                twoX = "2x",
+                fourX = "4x",
+            },
             gaugeSettingsTitle = "Paramètres de la jauge de combat",
             dynamicSwappingLabel = "Changer dynamiquement de jauge de style active selon...",
             dynamicSwappingOptions = {
@@ -562,7 +606,11 @@ local localization = {
             componentEditingLabel = "Positionnement avancé – déplacer les composants individuellement",
             lockPositionHelp = "Maintenez Maj+Ctrl pour repositionner <br>(en survolant un composant si le positionnement avancé est activé)",
             restoreDefaultSettings = "Restaurer les paramètres par défaut",
-            restoreDefaultSettingsHelp = "Après avoir cliqué sur le bouton ci-dessous, désactivez puis réactivez Job Gauges pour terminer le processus."
+            restoreDefaultSettingsHelp = "Après avoir cliqué sur le bouton ci-dessous, désactivez puis réactivez Job Gauges pour terminer le processus.",
+            confirmTitle = "Réinitialiser les paramètres",
+            confirmRestoreDefaultSettings = "Après avoir cliqué sur « Confirmer », désactivez puis réactivez Job Gauges pour terminer la réinitialisation.",
+            confirmCancelLabel = "Annuler",
+            confirmConfirmLabel = "Confirmer",
         },
         necromancy = {
             gaugeComponentsTitle = "Composants de la jauge de Nécromancie",
