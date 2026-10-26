@@ -554,7 +554,7 @@ local function createObjectSpriteIndicator(parent, position, width, height)
         if wornObj.obj.configName:find("ARROW", 1, true) then
             sprite:SetAssociatedObject(events.playerData.ranged.activeAmmo.id + 4)
         elseif wornObj.obj.configName:find("BOLT", 1, true) then
-            sprite:SetAssociatedObject(events.playerData.ranged.activeAmmo.id + 0)
+            sprite:SetAssociatedObject(events.playerData.ranged.activeAmmo.id)
         elseif wornObj.obj.configName:find("QUIVER", 1, true) then
             sprite:SetAssociatedObject(events.playerData.ranged.quiverAmmo.id)
         end
@@ -1256,10 +1256,12 @@ local CreateUI = function()
             positions.ranged.splitSoul
         )
 
-        setObjectSpriteIndicatorPosition(
-            equippedAmmoSprite,
-            positions.ranged.equippedAmmo
-        )
+        if equippedAmmoSprite then
+            setObjectSpriteIndicatorPosition(
+                equippedAmmoSprite,
+                positions.ranged.equippedAmmo
+            )
+        end
 
         setAbilityIndicatorPosition(
             deathsSwiftness,
@@ -2221,6 +2223,7 @@ local function updateOverlays()
     -- but rather, updates on the first game tick. So the first check returns
     -- and every subsequent check works
     if rangedSettings.componentVisibility["show-equipped-ammo"] then
+        if equippedAmmoSprite == nil then return end
         equippedAmmoSprite.layer.hidden = false
         equippedAmmoSprite.sprite:SetSize(scaleToFactor(32), scaleToFactor(32))
         local worn = Inventory.Find(config.Inv.WORN)
