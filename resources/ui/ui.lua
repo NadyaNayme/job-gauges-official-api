@@ -2222,35 +2222,36 @@ local function updateOverlays()
     -- The nil checks are necessary as the ammo does not update immediately
     -- but rather, updates on the first game tick. So the first check returns
     -- and every subsequent check works
-    if rangedSettings.componentVisibility["show-equipped-ammo"] then
-        if equippedAmmoSprite == nil then return end
-        equippedAmmoSprite.layer.hidden = false
-        equippedAmmoSprite.sprite:SetSize(scaleToFactor(32), scaleToFactor(32))
-        local worn = Inventory.Find(config.Inv.WORN)
-        local wornObj = worn:GetSlot(14)
+    if equippedAmmoSprite then
+        if rangedSettings.componentVisibility["show-equipped-ammo"] then
+            equippedAmmoSprite.layer.hidden = false
+            equippedAmmoSprite.sprite:SetSize(scaleToFactor(32), scaleToFactor(32))
+            local worn = Inventory.Find(config.Inv.WORN)
+            local wornObj = worn:GetSlot(14)
 
-        if wornObj and wornObj.obj then
-            if wornObj.obj.configName:find("ARROW", 1, true) then
-                -- Every stack of 5 is packed for arrows, at least that I saw
-                local AMMO_STACK_ID = tonumber(AMMO_ID) + 4
-                equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
-                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
-            elseif wornObj.obj.configName:find("BOLT", 1, true) then 
-                -- The same is not true of Bolts.
-                local AMMO_STACK_ID = tonumber(AMMO_ID)
-                equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
-                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
-            elseif wornObj.obj.configName:find("QUIVER", 1, true) then
-                -- If we have a quiver equipped, report the currently cycled ammo instead.
-                local QUIVER_AMMO_ID = tonumber(AMMO_ID)
-                if QUIVER_AMMO_ID == nil then return end
-                QUIVER_AMMO_ID = QUIVER_AMMO_ID
-                equippedAmmoSprite.sprite:SetAssociatedObject(QUIVER_AMMO_ID)
-                equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+            if wornObj and wornObj.obj then
+                if wornObj.obj.configName:find("ARROW", 1, true) then
+                    -- Every stack of 5 is packed for arrows, at least that I saw
+                    local AMMO_STACK_ID = tonumber(AMMO_ID) + 4
+                    equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
+                    equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+                elseif wornObj.obj.configName:find("BOLT", 1, true) then 
+                    -- The same is not true of Bolts.
+                    local AMMO_STACK_ID = tonumber(AMMO_ID)
+                    equippedAmmoSprite.sprite:SetAssociatedObject(AMMO_STACK_ID)
+                    equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+                elseif wornObj.obj.configName:find("QUIVER", 1, true) then
+                    -- If we have a quiver equipped, report the currently cycled ammo instead.
+                    local QUIVER_AMMO_ID = tonumber(AMMO_ID)
+                    if QUIVER_AMMO_ID == nil then return end
+                    QUIVER_AMMO_ID = QUIVER_AMMO_ID
+                    equippedAmmoSprite.sprite:SetAssociatedObject(QUIVER_AMMO_ID)
+                    equippedAmmoSprite.text.content = AMMO_DISPLAY_NAME or string.sub(AMMO_NAME, 1, 3)
+                end
             end
+        else
+            equippedAmmoSprite.layer.hidden = true
         end
-    else
-        equippedAmmoSprite.layer.hidden = true
     end
 
     if magicSettings.componentVisibility["show-active-spell"] and magic.activeSpell and magic.activeSpell.icon then
